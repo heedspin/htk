@@ -1,0 +1,24 @@
+
+<h2>Party <%= @party.name %></h2>
+
+<table>
+	<thead>
+		<tr>
+			<th>Date</th>
+			<th>From</th>
+			<th>To</th>
+			<th>Subject</th>
+			<th>Body</th>
+		</tr>
+	</thead>
+	<tbody>
+		<% @messages.each do |message| %>
+		<tr>
+			<td><%= message.date %></td>
+			<td><%= message.from_addresses.join(', ') %></td>
+			<td><%= (message.to_addresses + message.cc_addresses).sort.join(', ') %></td>
+			<td><%= message.subject %></td>
+			<td><%= limit_string message.text_body, 255 %></td>
+		</tr>
+		<% end %>
+	</tbody>

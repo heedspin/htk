@@ -1,0 +1,23 @@
+<p>
+  <b>Username:</b>
+  <%= @email_account.username %>
+</p>
+
+<p>
+  <b>Authentication string:</b>
+  <%= @email_account.authentication_string %>
+</p>
+
+<p>
+  <b>Server:</b>
+  <%= @email_account.server %>
+</p>
+
+<p>
+  <b>Port:</b>
+  <%= @email_account.port %>
+</p>
+
+
+<%= link_to 'Edit', edit_email_account_path(@email_account) %> |
+<%= link_to 'Back', email_accounts_path %>
