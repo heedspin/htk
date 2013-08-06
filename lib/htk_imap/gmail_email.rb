@@ -19,7 +19,7 @@ class HtkImap::GmailEmail < HtkImap::Email
 		end
 		if data
 			@mail = Mail.new(data.attr['RFC822'])
-			@guid = data.attr['X-GM-MSGID']
+			@guid = data.attr['X-GM-MSGID'].try(:to_s)
 			@email_conversation_id = data.attr['X-GM-THRID'].try(:to_s)
 			@folder = args[:folder]
 		end
@@ -27,10 +27,6 @@ class HtkImap::GmailEmail < HtkImap::Email
 
 	def valid?
 		@mail.present?
-	end
-
-	def equals_eam?(m)
-		m.email_guid == self.guid
 	end
 
 end

@@ -19,6 +19,7 @@ class Party < ApplicationModel
 	has_many :users, through: :party_users
 	validates :name, presence: true
 	has_many :messages, through: :conversations
+	has_many :email_account_conversations
 	def to_s
 		"#{name}:#{id}"
 	end
@@ -26,5 +27,11 @@ class Party < ApplicationModel
 	def self.user(user, party_role)
 		user_id = user.is_a?(User) ? user.id : user
 		joins(:party_users).where(party_users: { user_id: user_id, party_role_id: party_role.same_or_better })
+	end
+
+	def update_import!(args={})
+		self.email_account_conversations.each do |eac|
+			eac.update_import!(args)
+		end
 	end
 end

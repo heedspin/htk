@@ -53,6 +53,16 @@ class EmailAccountConversation < ApplicationModel
 		return false
 	end
 
+	def update_import!(args={})
+		asynchronous = args[:asynchronous]
+		import = ConversationImport.new(email_account_conversation: self, process_pending_imports: args[:process_pending_imports])
+		if asynchronous
+			import.run_in_background!
+		else
+			import.run_report
+		end
+	end
+
 	protected
 
 		validates :email_conversation_id, uniqueness: {scope: :conversation_id}

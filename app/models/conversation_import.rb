@@ -76,7 +76,7 @@ class ConversationImport < ApplicationModel
 			self.email_account_conversation.find_conversation_from_messages(self.conversation_messages)
 		end
 		if self.email_account_conversation.email_conversation_id
-			self.add_to_party
+			self.import_conversation
 			self.email_account_conversation.status = LifeStatus.active
 		else
 			self.email_account_conversation.status = LifeStatus.deleted
@@ -123,15 +123,15 @@ class ConversationImport < ApplicationModel
 		eac
 	end
 
-	def add_to_party
-		log "Adding #{self.email_account.username} to party #{self.party}"
+	def import_conversation
+		log "Importing emails from  #{self.email_account.username} to party #{self.party}"
 		# self.email_account_conversation.status = LifeStatus.importing # save?
 		email_receipts = self.email_account_conversation.email_receipts.all
 		self.email_account_conversation.fetch_emails.each do |email|
 			email.participants.each do |email_address|
 				self.add_participant(email_address, email.envelope_message_id) 
 			end
-			if receipt = email_receipts.detect { |m| email.equals_eam?(m) }
+			if receipt = email_receipts.detect { |r| email.equals_receipt?(r) }
 				# TODO: Update?
 			else
 				receipt = self.email_account_conversation.email_receipts.build(

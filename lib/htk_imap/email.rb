@@ -41,4 +41,9 @@ class HtkImap::Email
 	def body_identity_hash
 		@body_identity_hash ||= Digest::MD5.hexdigest(self.encoded_body)
 	end
+
+	def equals_receipt?(r)
+		r.email_guid == self.guid
+	end
+
 end
