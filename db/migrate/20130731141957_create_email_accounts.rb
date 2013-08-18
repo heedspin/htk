@@ -7,7 +7,6 @@ class CreateEmailAccounts < ActiveRecord::Migration
       t.string :authentication_string
       t.string :server
       t.integer :port
-      t.string :last_uid
       t.timestamps
     end
     add_index :email_accounts, :username, unique: true

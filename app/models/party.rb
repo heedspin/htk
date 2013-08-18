@@ -24,7 +24,7 @@ class Party < ApplicationModel
 		"#{name}:#{id}"
 	end
 
-	def self.user(user, party_role)
+	def self.user(user, party_role=PartyRole.read_only)
 		user_id = user.is_a?(User) ? user.id : user
 		joins(:party_users).where(party_users: { user_id: user_id, party_role_id: party_role.same_or_better })
 	end

@@ -126,15 +126,15 @@ class ConversationImport < ApplicationModel
 	def import_conversation
 		log "Importing emails from  #{self.email_account.username} to party #{self.party}"
 		# self.email_account_conversation.status = LifeStatus.importing # save?
-		email_receipts = self.email_account_conversation.email_receipts.all
+		message_receipts = self.email_account_conversation.message_receipts.all
 		self.email_account_conversation.fetch_emails.each do |email|
 			email.participants.each do |email_address|
 				self.add_participant(email_address, email.envelope_message_id) 
 			end
-			if receipt = email_receipts.detect { |r| email.equals_receipt?(r) }
+			if receipt = message_receipts.detect { |r| email.equals_receipt?(r) }
 				# TODO: Update?
 			else
-				receipt = self.email_account_conversation.email_receipts.build(
+				receipt = self.email_account_conversation.message_receipts.build(
 					status_id: LifeStatus.active, 
 					email_folder: email.folder, 
 					email_uid: email.uid, 

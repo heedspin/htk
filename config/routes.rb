@@ -4,8 +4,11 @@ Htk::Application.routes.draw do
   resources :email_accounts do
     resources :emails, :controller => 'email_accounts/emails'
   end
+  resources :emails, :controller => 'email_accounts/emails'
 
   resources :parties
+  resources :messages, :only => [:index, :show]
+  resources :users, :only => [:show]
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

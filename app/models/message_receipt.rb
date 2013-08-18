@@ -1,6 +1,6 @@
 # == Schema Information
 #
-# Table name: email_receipts
+# Table name: message_receipts
 #
 #  id                            :integer          not null, primary key
 #  status_id                     :integer
@@ -13,7 +13,7 @@
 #  created_at                    :datetime
 #
 
-class EmailReceipt < ApplicationModel
+class MessageReceipt < ApplicationModel
 	attr_accessible :status_id, :email_uid, :email_conversation_id, :email, :email_folder, :email_guid
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :email_account_conversation
@@ -33,7 +33,7 @@ class EmailReceipt < ApplicationModel
 
 	def destroy
 		if self.message
-			if EmailReceipt.message(self.message).count == 1
+			if MessageReceipt.message(self.message).count == 1
 				self.message.destroy
 			end
 		end

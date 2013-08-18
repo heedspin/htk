@@ -1,0 +1,21 @@
+<div class="row">
+	<div class="small-12 columns">
+		<h3>Emails for {{email_account.username}}</h3>
+		<ul>
+			{{#each email in controller}}
+				<li>{{from_now email.date}} - {{email.subject}}</li>
+			{{/each}}
+		</ul>
+		<p>
+			{{#if hasPreviousPage}}
+			<button {{action 'previousPage'}}>&lt;&lt;Previous Page</button>
+			{{/if}}
+			{{#if hasNextPage}}
+			<button {{action 'nextPage'}}>Next Page&gt;&gt;</button>
+			{{/if}}
+		</p>
+	</div>
+  <div class="small-12 columns">
+  	{{outlet}}
+	</div>
+</div>

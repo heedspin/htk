@@ -17,8 +17,12 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
+gem 'json'
 gem 'jquery-rails'
-
+# gem "ember-rails" #, "~> 0.13.0"
+gem 'ember-rails', git: 'git://github.com/emberjs/ember-rails.git'
+gem 'ember-source', '~> 1.0.0.rc7'
+gem 'handlebars-source'#, '1.0.0.rc3'
 gem 'active_hash'
 
 if File.exists?('../plutolib')
@@ -32,6 +36,7 @@ gem 'devise'
 
 group :development do
   gem 'annotate', :git => 'https://github.com/ctran/annotate_models.git'
+	gem 'quiet_assets', :group => :development
 end
 
 # To use ActiveModel has_secure_password

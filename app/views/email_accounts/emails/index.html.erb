@@ -9,7 +9,7 @@
 	<tbody>
 		<% @emails.each do |email| %>
 		<tr>
-			<td><%= email.to.map(&:to_s).join(', ') %></td>
+			<td><%= email.to_addresses.map(&:to_s).join(', ') %></td>
 			<td><%= email.subject %></td>
 			<td><%= email.date %></td>
 		</tr>

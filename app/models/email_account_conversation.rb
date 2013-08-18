@@ -21,7 +21,7 @@ class EmailAccountConversation < ApplicationModel
 	belongs_to :conversation
 	belongs_to :email_account
 	validates_uniqueness_of :email_conversation_id, scope: :party_id
-	has_many :email_receipts, :dependent => :destroy
+	has_many :message_receipts, :dependent => :destroy
 	has_one :conversation_import, :dependent => :destroy
 	def self.email_conversation_id(email_conversation_id)
 		where(:email_conversation_id => email_conversation_id.to_s)

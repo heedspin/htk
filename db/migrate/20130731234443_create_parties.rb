@@ -45,7 +45,7 @@ class CreateParties < ActiveRecord::Migration
   		t.datetime :created_at
   	end
 
-  	create_table :email_receipts do |t|
+  	create_table :message_receipts do |t|
       t.references :status
   		t.references :email_account_conversation
   		t.references :message

@@ -1,13 +1,20 @@
 require 'digest/md5'
 
 class HtkImap::Email
+	include ActiveModel::Serializers::JSON
 	attr_accessor :mail, :email_conversation_id, :uid, :guid, :mail, :folder
+
+  attr_accessor :attributes
+  def initialize
+    @attributes = { 'id' => nil, 'date' => nil, 'subject' => nil }
+  end
 
 	# delegate :from, to: :mail
 	# delegate :to, to: :mail
 	# delegate :cc, to: :mail
 	delegate :subject, to: :mail
 	delegate :date, to: :mail
+	alias_method :id, :uid
 
 	def mail=(m)
 		# Strip attachments

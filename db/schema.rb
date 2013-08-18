@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130731234443) do
+ActiveRecord::Schema.define(:version => 20130817143155) do
 
   create_table "conversation_imports", :force => true do |t|
     t.integer  "status_id"
@@ -48,14 +48,25 @@ ActiveRecord::Schema.define(:version => 20130731234443) do
     t.string   "authentication_string"
     t.string   "server"
     t.integer  "port"
-    t.string   "last_uid"
     t.datetime "created_at",            :null => false
     t.datetime "updated_at",            :null => false
   end
 
   add_index "email_accounts", ["username"], :name => "index_email_accounts_on_username", :unique => true
 
-  create_table "email_receipts", :force => true do |t|
+  create_table "emails", :force => true do |t|
+    t.integer  "email_account_id"
+    t.string   "conversation_id"
+    t.string   "folder"
+    t.datetime "date"
+    t.string   "uid"
+    t.string   "guid"
+    t.string   "subject"
+    t.text     "encoded_mail"
+    t.datetime "created_at"
+  end
+
+  create_table "message_receipts", :force => true do |t|
     t.integer  "status_id"
     t.integer  "email_account_conversation_id"
     t.integer  "message_id"

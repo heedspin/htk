@@ -9,7 +9,6 @@
 #  authentication_string :string(255)
 #  server                :string(255)
 #  port                  :integer
-#  last_uid              :string(255)
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
 #

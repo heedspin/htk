@@ -16,9 +16,11 @@
 #
 
 require 'plutolib/serialized_attributes'
+require 'htk_imap/mail_utils'
 require 'mail'
 
 class Message < ApplicationModel
+	include HtkImap::MailUtils
 	attr_accessible :status, :conversation_id, :conversation, :date, :envelope_message_id, :email
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :conversation
@@ -27,6 +29,11 @@ class Message < ApplicationModel
 	serialized_attribute :to_addresses
 	serialized_attribute :from_addresses
 	serialized_attribute :cc_addresses
+
+	def self.user(user, party_role=PartyRole.read_only)
+		user_id = user.is_a?(User) ? user.id : user
+		joins(conversation: {party: :party_users}).where(party_users: { user_id: user_id, party_role_id: party_role.same_or_better })
+	end
 
 	def participants
 		@participants ||= (to_addresses + from_addresses + cc_addresses).uniq
@@ -41,7 +48,7 @@ class Message < ApplicationModel
 		end
 		# @mail = @email.mail
 		self.body_boundary = @email.mail.body.boundary
-		self.encoded_body = @email.encoded_body
+		self.encoded_body = strip_attachments(@email.mail.body).encoded_body
     self.identity_hash = @email.body_identity_hash
     self.from_addresses = @email.from_addresses
     self.to_addresses = @email.to_addresses
