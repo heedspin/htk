@@ -1,5 +1,6 @@
 DS.RESTAdapter.configure("plurals",
-  party: "parties"
+  party: "parties",
+  email_summary: "email_summaries"
 )
 
 Htk.Store = DS.Store.extend

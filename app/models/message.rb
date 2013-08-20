@@ -69,7 +69,7 @@ class Message < ApplicationModel
 	end
 
 	def text_body
-		@text_body ||= self.mail_body.parts.detect { |p| p.content_type.include?('text/plain') }.try(:body).try(:to_s)
+		@text_body ||= self.find_content_type(self.mail_body, 'text/plain')
 	end
 
 	# Mail obj

@@ -1,3 +1,3 @@
 Htk.EmailAccount = DS.Model.extend
   username: DS.attr('string')
-  emails: DS.hasMany('Htk.Email')
+  email_summaries: DS.hasMany('Htk.EmailSummary')

@@ -3,7 +3,7 @@
 		<h3>Emails for {{email_account.username}}</h3>
 		<ul>
 			{{#each email in controller}}
-				<li>{{from_now email.date}} - {{email.subject}}</li>
+				<li>{{#linkTo 'email' page email.id}}{{from_now email.date}} - {{email.subject}}{{/linkTo}}</li>
 			{{/each}}
 		</ul>
 		<p>

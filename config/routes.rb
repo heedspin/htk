@@ -4,7 +4,8 @@ Htk::Application.routes.draw do
   resources :email_accounts do
     resources :emails, :controller => 'email_accounts/emails'
   end
-  resources :emails, :controller => 'email_accounts/emails'
+  resources :emails, :controller => 'email_accounts/emails', :only => :show
+  resources :email_summaries, :controller => 'email_accounts/email_summaries', :only => :index
 
   resources :parties
   resources :messages, :only => [:index, :show]
