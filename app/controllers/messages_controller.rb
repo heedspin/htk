@@ -1,7 +1,7 @@
 class MessagesController < ApplicationController
   def index
     @party = parent_object
-    @messages = @party.messages.order(:date)
+    @messages = @party.messages
 
     respond_to do |format|
       format.html

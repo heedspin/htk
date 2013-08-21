@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130817143155) do
+ActiveRecord::Schema.define(:version => 20130820153000) do
 
   create_table "conversation_imports", :force => true do |t|
     t.integer  "status_id"
@@ -37,7 +37,7 @@ ActiveRecord::Schema.define(:version => 20130817143155) do
     t.integer  "party_id"
     t.integer  "conversation_id"
     t.integer  "email_account_id"
-    t.string   "email_conversation_id"
+    t.string   "thread_id"
     t.datetime "created_at"
   end
 
@@ -56,7 +56,7 @@ ActiveRecord::Schema.define(:version => 20130817143155) do
 
   create_table "emails", :force => true do |t|
     t.integer  "email_account_id"
-    t.string   "conversation_id"
+    t.string   "thread_id"
     t.string   "folder"
     t.datetime "date"
     t.string   "uid"
@@ -66,27 +66,11 @@ ActiveRecord::Schema.define(:version => 20130817143155) do
     t.datetime "created_at"
   end
 
-  create_table "message_receipts", :force => true do |t|
-    t.integer  "status_id"
-    t.integer  "email_account_conversation_id"
-    t.integer  "message_id"
-    t.string   "email_folder"
-    t.string   "email_uid"
-    t.string   "email_guid"
-    t.text     "encoded_header"
-    t.datetime "created_at"
-  end
-
   create_table "messages", :force => true do |t|
     t.integer  "status_id"
     t.integer  "conversation_id"
-    t.datetime "date"
-    t.text     "data"
     t.string   "envelope_message_id"
-    t.string   "identity_hash"
-    t.string   "body_boundary"
-    t.text     "encoded_body"
-    t.string   "subject",             :limit => 1000
+    t.integer  "source_email_id"
     t.datetime "created_at"
   end
 

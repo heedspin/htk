@@ -28,31 +28,15 @@ class CreateParties < ActiveRecord::Migration
       t.references :party
   		t.references :conversation
   		t.references :email_account
-  		t.string :email_conversation_id
+  		t.string :thread_id
   		t.datetime :created_at
   	end
 
   	create_table :messages do |t|
       t.references :status
   		t.references :conversation
-  		t.datetime :date
-      t.text :data
   		t.string :envelope_message_id
-      t.string :identity_hash
-      t.string :body_boundary
-  		t.text :encoded_body
-      t.string :subject, limit: 1000
-  		t.datetime :created_at
-  	end
-
-  	create_table :message_receipts do |t|
-      t.references :status
-  		t.references :email_account_conversation
-  		t.references :message
-      t.string :email_folder
-  		t.string :email_uid
-      t.string :email_guid
-      t.text :encoded_header
+  		t.references :source_email
   		t.datetime :created_at
   	end
 

@@ -1,4 +1,4 @@
-class HtkImap::GmailEmail < HtkImap::Email
+class HtkImap::GmailEmail < HtkImap::RawEmail
 	def self.fetch_since(args, &block)
 		imap = args[:imap]
 		since_uid = args[:since_uid]
@@ -28,10 +28,10 @@ class HtkImap::GmailEmail < HtkImap::Email
 		# result
 	end
 
-	def self.fetch_for_conversation(args, &block)
+	def self.fetch_for_thread(args, &block)
 		imap = args[:imap]
-		email_conversation_id = args[:email_conversation_id]
-    uids = imap.uid_search(['X-GM-THRID', email_conversation_id])
+		thread_id = args[:thread_id]
+    uids = imap.uid_search(['X-GM-THRID', thread_id])
     fetch_uids(imap, uids, args[:current_folder])
     # message_ids.map do |uid|
     #   HtkImap::GmailEmail.new(imap: imap, uid: uid, folder: current_folder)
@@ -66,7 +66,7 @@ class HtkImap::GmailEmail < HtkImap::Email
 			@mail = Mail.new(data.attr['RFC822'])
 			@uid = data.attr['UID'].try(:to_s)
 			@guid = data.attr['X-GM-MSGID'].try(:to_s)
-			@email_conversation_id = data.attr['X-GM-THRID'].try(:to_s)
+			@thread_id = data.attr['X-GM-THRID'].try(:to_s)
 			@folder = args[:folder]
 		end
 	end

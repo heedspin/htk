@@ -1,2 +1,5 @@
 Ember.Handlebars.helper 'from_now', (value, options) ->
-	return moment(value).formatTimeToday()
+	if Ember.isEmpty(value)
+		return ''
+	else
+		return moment(value).formatTimeToday()

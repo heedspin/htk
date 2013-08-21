@@ -35,7 +35,7 @@ module HtkImap
 end
 
 require 'mail'
-require 'htk_imap/email'
+require 'htk_imap/raw_email'
 require 'htk_imap/gmail_imap'
 require 'htk_imap/gmail_email'
 require 'htk_imap/mail_utils'

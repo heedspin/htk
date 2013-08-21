@@ -27,29 +27,20 @@ class ConversationImport < ApplicationModel
 	has_one :party, :through => :email_account_conversation
 	validates :email_account_conversation, presence: true
 
-	def self.create_from_email_conversation_id!(args={})
+	def self.create_from_thread!(args={})
 		party = args[:party] || (raise 'party required')
 		email_account = args[:email_account] || (raise 'email_account required')
-		email_conversation_id = args[:email_conversation_id] || (raise 'email_conversation_id required')
+		thread_id = args[:thread_id] || (raise 'thread_id required')
 		conversation = Conversation.create(status: LifeStatus.active, party: party)
 		eac = email_account.email_account_conversations.create(status: LifeStatus.importing, 
 			party: party,
 			conversation: conversation, 
-			email_conversation_id: email_conversation_id)
+			thread_id: thread_id)
 		new(status: LifeStatus.active, email_account_conversation: eac, process_pending_imports: args[:process_pending_imports])
 	end
 
 	def email_account
 		self.email_account_conversation.email_account
-	end
-
-	def should_import?
-		!@imported && self.import_authorized? && self.email_conversation_id
-	end
-
-	def import_authorized?
-		# TODO: authorization
-		self.email_account.present?
 	end
 
 	def conversation_messages
@@ -71,11 +62,10 @@ class ConversationImport < ApplicationModel
 	end
 
 	def run_report
-		# return unless self.should_import?
-		unless self.email_account_conversation.email_conversation_id
+		unless self.email_account_conversation.thread_id
 			self.email_account_conversation.find_conversation_from_messages(self.conversation_messages)
 		end
-		if self.email_account_conversation.email_conversation_id
+		if self.email_account_conversation.thread_id
 			self.import_conversation
 			self.email_account_conversation.status = LifeStatus.active
 		else
@@ -125,31 +115,19 @@ class ConversationImport < ApplicationModel
 
 	def import_conversation
 		log "Importing emails from  #{self.email_account.username} to party #{self.party}"
-		# self.email_account_conversation.status = LifeStatus.importing # save?
-		message_receipts = self.email_account_conversation.message_receipts.all
-		self.email_account_conversation.fetch_emails.each do |email|
+		self.email_account_conversation.reload_emails.each do |email|
 			email.participants.each do |email_address|
 				self.add_participant(email_address, email.envelope_message_id) 
 			end
-			if receipt = message_receipts.detect { |r| email.equals_receipt?(r) }
-				# TODO: Update?
-			else
-				receipt = self.email_account_conversation.message_receipts.build(
-					status_id: LifeStatus.active, 
-					email_folder: email.folder, 
-					email_uid: email.uid, 
-					email_guid: email.guid,
-					email: email)
-				receipt.transaction do
-					unless message = self.conversation_messages.detect { |m| m.equals_email?(email) }
-						message = Message.create!(
-							status: LifeStatus.active, 
-							conversation: self.conversation,
-							email: email)
-						self.conversation_messages.push message
-					end
-					receipt.message = message
-					receipt.save!
+			email.transaction do
+				email.save! if email.changed?
+				unless message = self.conversation_messages.detect { |m| m.equals_email?(email) }
+					message = Message.create!(
+						status: LifeStatus.active, 
+						conversation: self.conversation,
+						envelope_message_id: email.envelope_message_id,
+						source_email_id: email.id)
+					self.conversation_messages.push message
 				end
 			end
 		end

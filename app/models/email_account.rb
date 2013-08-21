@@ -47,7 +47,7 @@ class EmailAccount < ApplicationModel
     HtkImap::GmailImap.imap_connect(self)
   end
 
-  def fetch_emails(args={}, &block)
+  def fetch_raw_emails(args={}, &block)
     HtkImap::GmailImap.imap_connect(self) do |imap|
       current_folder = '[Gmail]/All Mail'
       imap.examine(current_folder)
@@ -58,14 +58,15 @@ class EmailAccount < ApplicationModel
         return HtkImap::GmailEmail.new(imap: imap, uid: uid, folder: current_folder)
       elsif args.member?(:since_uid)
         return HtkImap::GmailEmail.fetch_since(args, &block)
-      elsif message_id = args[:message_id]
-        if uid = imap.uid_search(['HEADER', 'MESSAGE-ID', message_id]).first
+      elsif envelope_message_id = args[:envelope_message_id]
+        email = if (uid = imap.uid_search(['HEADER', 'MESSAGE-ID', envelope_message_id]).first)
           HtkImap::GmailEmail.new(imap: imap, uid: uid, folder: current_folder)
         else
           nil
         end
-      elsif email_conversation_id = args[:email_conversation_id]
-        HtkImap::GmailEmail.fetch_for_conversation(args, &block)
+        return email
+      elsif thread_id = args[:thread_id]
+        return HtkImap::GmailEmail.fetch_for_thread(args, &block)
       else
         args[:offset] ||= 0
         args[:limit] ||= 100
@@ -73,23 +74,16 @@ class EmailAccount < ApplicationModel
       end
     end
   end
-  alias_method :fetch_email, :fetch_emails
 
   def import_emails
     last_email = self.emails.by_uid.last
-    proc = Proc.new do |email|
-      self.emails.create!(
-        folder: email.folder, 
-        date: email.date,
-        uid: email.uid, 
-        guid: email.guid,
-        subject: email.subject,
-        mail: email.mail)
+    proc = Proc.new do |raw_email|
+      self.emails.create!(raw_email: raw_email)
     end
     emails = if last_email
-      self.fetch_emails({since_uid: last_email.try(:uid)}, &proc)
+      self.fetch_raw_emails({since_uid: last_email.try(:uid)}, &proc)
     else
-      self.fetch_emails({limit: 50}, &proc)
+      self.fetch_raw_emails({limit: 50}, &proc)
     end
     deleted_emails = 0
     if last_email = self.emails.order('emails.uid desc').offset(500).first
