@@ -12,7 +12,7 @@ class EmailAccounts::EmailSummariesController < ApplicationController
 		if page != 1
 			@emails = @emails.offset((page.to_i-1) * limit)
 		end
-		@emails.includes(email_account_conversations: :party)
+		Party.attach_to_emails(@emails)
     respond_to do |format|
       format.html
       format.json { render json: @emails, each_serializer: EmailSummarySerializer, root: 'email_summaries' }

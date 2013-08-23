@@ -34,4 +34,19 @@ class Party < ApplicationModel
 			eac.update_import!(args)
 		end
 	end
+
+	def self.attach_to_emails(emails)
+		emails = [emails] if emails.is_a?(Email)
+		ea_conversations = EmailAccountConversation.where(:email_account_id => emails.map(&:email_account_id).uniq).
+			where(:thread_id => emails.map(&:thread_id)).
+			includes(:party).all
+		emails.each do |email|
+			ea_conversations.each do |eac|
+				if (email.thread_id == eac.thread_id) and (email.email_account_id == eac.email_account_id)
+					email.parties.push(eac.party)
+				end
+			end
+		end
+		emails
+	end
 end

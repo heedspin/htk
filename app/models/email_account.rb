@@ -89,7 +89,12 @@ class EmailAccount < ApplicationModel
     if last_email = self.emails.order('emails.uid desc').offset(500).first
       delete_conditions = ['emails.uid > ?', last_email.uid]
       deleted_emails = self.emails.where(delete_conditions).count
-      self.emails.where(delete_conditions).delete
+      # Delete all emails that are not in a conversation.
+      self.emails.where(delete_conditions).includes(:email_account_conversations).each do |email|
+        if email.email_account_conversations.all.size > 0
+          email.destroy
+        end
+      end
     end
     log "Imported #{emails.count} and deleted #{deleted_emails} emails from #{self.username}"
     emails
