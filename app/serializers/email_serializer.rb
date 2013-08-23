@@ -1,5 +1,7 @@
 class EmailSerializer < ActiveModel::Serializer
+	embed :ids, include: true
   attributes :id, :date, :subject, :html_body
+  has_many :parties
 
   def html_body
   	text = object.html_body

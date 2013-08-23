@@ -5,9 +5,9 @@
 		    <!-- Right Nav Section -->
 		    <ul class="right">
 		      <li class="divider hide-for-small"></li>
-		      <li>
-		        <a href="#">Party</a>
-		      </li>
+		      {{#each party in this.parties}}
+		      <li>{{#linkTo 'party' party}}{{party.name}}{{/linkTo}}</li>
+		      {{/each}}
 		    </ul>
 		  </section>
 		</nav>

@@ -1,11 +1,19 @@
 <div class="row">
 	<div class="small-12 columns">
 		<h3>Emails for {{email_account.username}}</h3>
-		<ul>
+		<table>
 			{{#each email in controller}}
-				<li>{{#linkTo 'email' page email.id}}{{from_now email.date}} - {{email.subject}}{{/linkTo}}</li>
+				<tr>
+					<td>
+			      {{#each party in email.parties}}
+			      {{#linkTo 'party' party}}{{party.name}}{{/linkTo}}
+			      {{/each}}
+					</td>
+					<td>{{#linkTo 'email' page email.id}}{{email.subject}}{{/linkTo}}</td>
+					<td>{{from_now email.date}}</td>
+				</tr>
 			{{/each}}
-		</ul>
+		</table>
 		<p>
 			{{#if hasPreviousPage}}
 			<button {{action 'previousPage'}}>&lt;&lt;Previous Page</button>

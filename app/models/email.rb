@@ -21,6 +21,9 @@ class Email < ApplicationModel
 	include ActionView::Helpers::TextHelper
 	attr_accessible :folder, :date, :uid, :guid, :subject, :mail, :thread_id, :raw_email
 	belongs_to :email_account
+	has_many :email_account_conversations, through: :email_account,
+		conditions: proc { ['email_account_conversations.thread_id = ?', self.thread_id ] }
+	has_many :parties, through: :email_account_conversations
 
 	scope :by_uid, order(:uid)
 	scope :uid_desc, order('emails.uid desc')
