@@ -28,6 +28,9 @@ class Party < ApplicationModel
 		user_id = user.is_a?(User) ? user.id : user
 		joins(:party_users).where(party_users: { user_id: user_id, party_role_id: party_role.same_or_better })
 	end
+	def self.party_name(text)
+		where(name: text)
+	end
 
 	def update_import!(args={})
 		self.email_account_conversations.each do |eac|

@@ -27,15 +27,16 @@ class ConversationImport < ApplicationModel
 	has_one :party, :through => :email_account_conversation
 	validates :email_account_conversation, presence: true
 
-	def self.create_from_thread!(args={})
+	def self.create_from_email!(args={})
 		party = args[:party] || (raise 'party required')
-		email_account = args[:email_account] || (raise 'email_account required')
-		thread_id = args[:thread_id] || (raise 'thread_id required')
+		email = args[:email] || (raise 'email required')
+		# email_account = args[:email_account] || (raise 'email_account required')
+		# thread_id = args[:thread_id] || (raise 'thread_id required')
 		conversation = Conversation.create(status: LifeStatus.active, party: party)
-		eac = email_account.email_account_conversations.create(status: LifeStatus.importing, 
+		eac = email.email_account.email_account_conversations.create(status: LifeStatus.importing, 
 			party: party,
 			conversation: conversation, 
-			thread_id: thread_id)
+			thread_id: email.thread_id)
 		new(status: LifeStatus.active, email_account_conversation: eac, process_pending_imports: args[:process_pending_imports])
 	end
 
