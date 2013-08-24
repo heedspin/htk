@@ -2,6 +2,8 @@ class MessagesController < ApplicationController
   def index
     @party = parent_object
     @messages = @party.messages
+    Email.attach_to(@messages)
+    EmailAccount.attach_to(@messages)
 
     respond_to do |format|
       format.html

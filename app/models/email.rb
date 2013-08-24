@@ -48,18 +48,42 @@ class Email < ApplicationModel
 		@participants ||= (to_addresses + from_addresses + cc_addresses).uniq
 	end
 
+	# def email_address_id
+	# 	@email_address_id ||= 0
+	# 	@email_address_id += 1
+	# end
+
 	def to_addresses
-		self.mail.to_addrs.uniq.map(&:downcase)
+		self.mail.to_addrs.uniq#.map { |a| EmailAddress.new(self.email_address_id, a) }
 	end
 	def from_addresses
-		self.mail.from_addrs.uniq.map(&:downcase)
+		self.mail.from_addrs.uniq#.map { |a| EmailAddress.new(self.email_address_id, a) }
 	end
 	def cc_addresses
-		self.mail.cc_addrs.uniq.map(&:downcase)
+		self.mail.cc_addrs.uniq#.map { |a| EmailAddress.new(self.email_address_id, a) }
 	end
 
   def envelope_message_id
   	self.mail.message_id
+	end
+
+	# truncate subject
+	def subject=(text)
+		if text.present?
+			super(text[0..253])
+		else
+			super(text)
+		end
+	end
+
+	def self.attach_to(messages)
+		Email.where(:id => messages.map(&:source_email_id)).each do |email|
+			messages.each do |message|
+				if message.source_email_id == email.id
+					message.source_email = email
+				end
+			end
+		end
 	end
 
 	attr_accessor :mail

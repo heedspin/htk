@@ -6,7 +6,7 @@
 				<tr>
 					<td>
 			      {{#each party in email.parties}}
-			      {{#linkTo 'party' party}}{{party.name}}{{/linkTo}}
+			      {{#linkTo 'messages' party}}{{party.name}}{{/linkTo}}
 			      {{/each}}
 					</td>
 					<td>{{#linkTo 'email' page email.id}}{{email.subject}}{{/linkTo}}</td>

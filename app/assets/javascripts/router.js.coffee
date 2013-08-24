@@ -2,6 +2,7 @@ Htk.Router.map ->
 	this.resource 'parties', ->
 		this.resource 'party', { path: ':party_id' }, ->
 			this.resource 'messages', ->
+				this.resource 'message', { path: ':message_id' }
 
 	this.resource 'email_accounts', ->
 		this.resource 'email_account', { path: ':email_account_id'}, ->
@@ -16,7 +17,7 @@ Htk.PartiesIndexRoute = Ember.Route.extend
 # Htk.PartyIndexRoute = Ember.Route.extend
 # 	model: (params) -> Htk.Party.find(params.party_id)
 
-Htk.MessagesIndexRoute = Ember.Route.extend
+Htk.MessagesRoute = Ember.Route.extend
 	setupController: (controller, model) ->
 		party = @modelFor('party')
 		controller.set('model', Htk.Message.find(party_id: party.id))

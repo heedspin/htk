@@ -1,0 +1,26 @@
+<div class="row">
+	<div class="small-12 columns">
+		<h3>Messages for {{party.name}}</h3>
+		<table>
+			<thead>
+				<tr>
+					<th>From</th>
+					<th>To</th>
+					<th>Subject</th>
+					<th>Date</th>
+				</tr>
+			</thead>
+			{{#each message in controller}}
+			<tr>
+				<td>{{render 'messages.email_addresses' message.from_email_accounts}}</td>
+				<td>{{render 'messages.email_addresses' message.destination_email_accounts}}</td>
+				<td>{{#linkTo 'message' message}}{{message.subject}}{{/linkTo}}</td>
+				<td>{{from_now message.date}}</td>		
+			</tr>
+			{{/each}}
+		</table>
+	</div>
+  <div class="small-12 columns">
+  	{{outlet}}
+	</div>
+</div>

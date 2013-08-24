@@ -85,18 +85,39 @@ class EmailAccount < ApplicationModel
     else
       self.fetch_raw_emails({limit: 50}, &proc)
     end
+    deleted_emails = self.purge_emails
+    log "Imported #{emails.count} and deleted #{deleted_emails} emails from #{self.username}"
+    emails
+  end
+
+  def purge_emails
     deleted_emails = 0
     if last_email = self.emails.order('emails.uid desc').offset(500).first
       delete_conditions = ['emails.uid > ?', last_email.uid]
       deleted_emails = self.emails.where(delete_conditions).count
+      do_not_delete = self.emails.in_party.where(delete_conditions)
       # Delete all emails that are not in a conversation.
-      self.emails.where(delete_conditions).includes(:email_account_conversations).each do |email|
-        if email.email_account_conversations.all.size > 0
-          email.destroy
-        end
+      to_delete = self.emails.where(delete_conditions).where(['emails.id not in (?)', do_not_delete])
+      to_delete.each do |email|
+        deleted_emails += 1
+        email.destroy
       end
     end
-    log "Imported #{emails.count} and deleted #{deleted_emails} emails from #{self.username}"
-    emails
+    deleted_emails
+  end
+
+  def self.attach_to(messages)
+    all_participants = messages.map(&:participants).flatten.uniq
+    email_accounts = EmailAccount.where(username: all_participants)
+    email_account_cache = {}
+    email_accounts.each { |ea| email_account_cache[ea.username] = ea }
+    all_participants.each do |email_address|
+      unless email_account_cache.member?(email_address)
+        email_account_cache[email_address] = nil
+      end
+    end
+    messages.each do |message|
+      message.email_account_cache = email_account_cache
+    end
   end
 end
