@@ -12,9 +12,9 @@
 			</thead>
 			{{#each message in controller}}
 			<tr>
-				<td>{{render 'messages.email_addresses' message.from_email_accounts}}</td>
-				<td>{{render 'messages.email_addresses' message.destination_email_accounts}}</td>
-				<td>{{#linkTo 'message' message}}{{message.subject}}{{/linkTo}}</td>
+				<td>{{emailAddresses message.from_email_accounts max_length=24}}</td>
+				<td>{{emailAddresses message.destination_email_accounts max_length=24}}</td>
+				<td>{{#linkTo 'message' message.id}}{{message.subject}}{{/linkTo}}</td>
 				<td>{{from_now message.date}}</td>		
 			</tr>
 			{{/each}}

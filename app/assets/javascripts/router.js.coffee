@@ -20,8 +20,13 @@ Htk.PartiesIndexRoute = Ember.Route.extend
 Htk.MessagesRoute = Ember.Route.extend
 	setupController: (controller, model) ->
 		party = @modelFor('party')
-		controller.set('model', Htk.Message.find(party_id: party.id))
+		controller.set('model', Htk.MessageSummary.find(party_id: party.id))
 		controller.set('party', party)
+
+Htk.MessageRoute = Ember.Route.extend
+	model: (params) -> 
+		Htk.Message.find(params.message_id)
+
 
 	# model: (params) -> Htk.Message.find(party_id: @modelFor('party').id)
 		# @controllerFor('party').get('messages')

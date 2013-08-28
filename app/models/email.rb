@@ -111,7 +111,20 @@ class Email < ApplicationModel
 	end
 
 	def html_body
-		# TODO: Get simple_format text_body if there is no html body.
-		@html_body ||= self.find_content_type(self.mail.body, 'text/html') || simple_format(self.text_body || '')
+		if @html_body.nil?
+			if @html_body = self.find_content_type(self.mail.body, 'text/html')			  	
+		  	if @html_body.include?('</head>')
+			  	@html_body = @html_body.slice(@html_body.index('</head>')+7..-1)
+			  end
+			  @html_body.sub!('</html>', '')
+			  @html_body.sub!('<body', '<div')
+			  @html_body.sub!('</body>', '</div>')
+			  @html_body.gsub!(/<base href="x-msg:\/\/\d+\/">/, '')
+			  @html_body.gsub!(/src="cid:[^"]+"/, 'src="#"')
+			else
+				@html_body = simple_format(self.text_body || '')
+			end
+	  end
+	  @html_body
 	end
 end

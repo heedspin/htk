@@ -9,6 +9,7 @@ Htk::Application.routes.draw do
 
   resources :parties
   resources :messages, :only => [:index, :show]
+  resources :message_summaries, :only => :index
   resources :users, :only => [:show]
 
   # The priority is based upon order of creation:
