@@ -78,7 +78,11 @@ class EmailAccount < ApplicationModel
   def import_emails
     last_email = self.emails.by_uid.last
     proc = Proc.new do |raw_email|
-      self.emails.create!(raw_email: raw_email)
+      begin
+        self.emails.create!(raw_email: raw_email)
+      rescue ActiveRecord::StatementInvalid
+        log_error "Failed to save email:", $!
+      end
     end
     emails = if last_email
       self.fetch_raw_emails({since_uid: last_email.try(:uid)}, &proc)
@@ -107,10 +111,10 @@ class EmailAccount < ApplicationModel
   end
 
   def self.attach_to(messages)
-    all_participants = messages.map(&:participants).flatten.uniq
+    all_participants = messages.map(&:participants).flatten.map(&:downcase).uniq
     email_accounts = EmailAccount.where(username: all_participants)
     email_account_cache = {}
-    email_accounts.each { |ea| email_account_cache[ea.username] = ea }
+    email_accounts.each { |ea| email_account_cache[ea.username.downcase] = ea }
     all_participants.each do |email_address|
       unless email_account_cache.member?(email_address)
         email_account_cache[email_address] = nil

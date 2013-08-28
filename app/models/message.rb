@@ -39,7 +39,8 @@ class Message < ApplicationModel
 				if @#{key}_email_accounts.nil?
 					@#{key}_email_accounts = []
 					self.#{key}_addresses.each do |address|
-						if email_account_cache and email_account_cache.member?(address)
+						address = address.downcase
+						if self.email_account_cache and self.email_account_cache.member?(address)
 							if ea = email_account_cache[address]
 								@#{key}_email_accounts.push ea
 							end

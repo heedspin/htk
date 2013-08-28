@@ -6,5 +6,5 @@ Htk.MessagesController = Ember.ArrayController.extend
 			{name: 'Party: ' + this.get('party').get('name'), route: 'party'}
 		]
 	).property()
-	
-	
+	sortProperties: ['date']
+	sortAscending: false
