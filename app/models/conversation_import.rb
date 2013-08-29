@@ -88,7 +88,7 @@ class ConversationImport < ApplicationModel
 		if @participants.nil?
 			@participants = {}
 			self.conversation.email_account_conversations.includes(:email_account).each do |eac|
-				@participants[eac.email_account.username.downcase] = eac
+				@participants[eac.email_account.username] = eac
 			end
 		end
 		@participants

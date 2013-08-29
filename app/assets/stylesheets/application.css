@@ -12,3 +12,8 @@
  *= require foundation_and_overrides
  *= require_tree .
  */
+
+.messages {
+	overflow:scroll;
+	height:20em;
+}

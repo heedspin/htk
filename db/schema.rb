@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130820153000) do
+ActiveRecord::Schema.define(:version => 20130828233427) do
 
   create_table "conversation_imports", :force => true do |t|
     t.integer  "status_id"
@@ -64,6 +64,7 @@ ActiveRecord::Schema.define(:version => 20130820153000) do
     t.string   "subject"
     t.text     "encoded_mail"
     t.datetime "created_at"
+    t.text     "data"
   end
 
   create_table "messages", :force => true do |t|

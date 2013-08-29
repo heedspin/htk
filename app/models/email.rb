@@ -12,6 +12,7 @@
 #  subject          :string(255)
 #  encoded_mail     :text
 #  created_at       :datetime
+#  data             :text
 #
 
 require 'htk_imap/htk_imap'
@@ -45,23 +46,13 @@ class Email < ApplicationModel
 	end
 
 	def participants
-		@participants ||= (to_addresses + from_addresses + cc_addresses).uniq
+		@participants ||= ((to_addresses || []) + (from_addresses || []) + cc_addresses || []).uniq
 	end
 
 	# def email_address_id
 	# 	@email_address_id ||= 0
 	# 	@email_address_id += 1
 	# end
-
-	def to_addresses
-		self.mail.to_addrs.uniq#.map { |a| EmailAddress.new(self.email_address_id, a) }
-	end
-	def from_addresses
-		self.mail.from_addrs.uniq#.map { |a| EmailAddress.new(self.email_address_id, a) }
-	end
-	def cc_addresses
-		self.mail.cc_addrs.uniq#.map { |a| EmailAddress.new(self.email_address_id, a) }
-	end
 
   def envelope_message_id
   	self.mail.message_id
@@ -86,12 +77,19 @@ class Email < ApplicationModel
 		end
 	end
 
+	serialized_attribute :to_addresses, default: '[]'
+	serialized_attribute :from_addresses, default: '[]'
+	serialized_attribute :cc_addresses, default: '[]'
+
 	attr_accessor :mail
 	def mail=(m)
 		self.date = m.date
 		self.subject = m.subject
 		strip_attachments(m)
 		self.encoded_mail = m.encoded
+		self.from_addresses = m.from_addrs.uniq.map(&:downcase)
+		self.to_addresses = m.to_addrs.uniq.map(&:downcase)
+		self.cc_addresses = m.cc_addrs.uniq.map(&:downcase)
 		@mail = m
 	end
 	def mail

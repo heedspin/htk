@@ -46,7 +46,7 @@ class EmailAccountConversation < ApplicationModel
 
 	def find_conversation_from_messages(messages)
 		envelope_message_ids = messages.select do |m| 
-			m.participants.include?(self.email_account.username.downcase) 
+			m.participants.include?(self.email_account.username) 
 		end.map(&:envelope_message_id)
 		envelope_message_ids.each do |envelope_message_id|
 			log "#{self.email_account.username}: Searching for envelope_message_id #{envelope_message_id}"

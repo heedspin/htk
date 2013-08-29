@@ -28,9 +28,13 @@ class EmailAccount < ApplicationModel
   has_many :emails
 
   def self.username(txt)
-    where ['lower(email_accounts.username) = ?', txt.downcase]
+    where username: txt.downcase
   end
   scope :active, :conditions => { :status_id => EmailAccountStatus.active.id }
+
+  def username=(txt)
+    super txt.try(:downcase)
+  end
 
   before_save :set_default_port
   def set_default_port
@@ -111,10 +115,10 @@ class EmailAccount < ApplicationModel
   end
 
   def self.attach_to(messages)
-    all_participants = messages.map(&:participants).flatten.map(&:downcase).uniq
+    all_participants = messages.map(&:participants).flatten.uniq
     email_accounts = EmailAccount.where(username: all_participants)
     email_account_cache = {}
-    email_accounts.each { |ea| email_account_cache[ea.username.downcase] = ea }
+    email_accounts.each { |ea| email_account_cache[ea.username] = ea }
     all_participants.each do |email_address|
       unless email_account_cache.member?(email_address)
         email_account_cache[email_address] = nil
