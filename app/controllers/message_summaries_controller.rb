@@ -11,4 +11,14 @@ class MessageSummariesController < ApplicationController
       }
     end
 	end
+
+  def show
+    @message = Message.user(current_user).find(params[:id])
+
+    respond_to do |format|
+      format.html
+      format.json { render json: @message, serializer: MessageSummarySerializer, root: 'message_summary' }
+    end
+  end
+
 end

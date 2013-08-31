@@ -4,6 +4,7 @@ Htk.MessageSummary = DS.Model.extend
   from_email_accounts: DS.hasMany('Htk.EmailAccount')
   to_email_accounts: DS.hasMany('Htk.EmailAccount')
   cc_email_accounts: DS.hasMany('Htk.EmailAccount')
+  hidden: DS.attr('boolean')
 
   destination_email_accounts: (->
     this.get('to_email_accounts').toArray().concat this.get('cc_email_accounts').toArray()

@@ -5,7 +5,7 @@
 			<table>
 				<tbody>
 					{{#each message in controller}}
-					<tr>
+					<tr {{bind-attr class="message.hidden"}}>
 						<td>{{emailAddresses message.from_email_accounts max_length=24}}</td>
 						<td>{{emailAddresses message.destination_email_accounts max_length=24}}</td>
 						<td>{{#linkTo 'message' message.id}}{{message.subject}}{{/linkTo}}</td>

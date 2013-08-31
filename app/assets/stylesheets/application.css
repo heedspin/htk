@@ -17,3 +17,7 @@
 	overflow:scroll;
 	height:20em;
 }
+
+.messages table tbody tr.hidden {
+	background-color: #aaaaaa;
+}

@@ -8,10 +8,11 @@
 #  envelope_message_id :string(255)
 #  source_email_id     :integer
 #  created_at          :datetime
+#  data                :text
 #
 
 class Message < ApplicationModel
-	attr_accessible :status, :conversation_id, :conversation, :envelope_message_id, :source_email_id
+	attr_accessible :status_id, :date, :hidden, :status, :conversation_id, :conversation, :envelope_message_id, :source_email_id
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :conversation
 	has_many :emails
@@ -21,6 +22,8 @@ class Message < ApplicationModel
 		user_id = user.is_a?(User) ? user.id : user
 		joins(conversation: {party: :party_users}).where(party_users: { user_id: user_id, party_role_id: party_role.same_or_better })
 	end
+
+	serialized_attribute :hidden, default: 'false'
 
 	delegate :text_body, to: :source_email
 	delegate :html_body, to: :source_email
@@ -56,5 +59,4 @@ class Message < ApplicationModel
 	def equals_email?(email)
 		email.envelope_message_id == self.envelope_message_id
 	end
-
 end

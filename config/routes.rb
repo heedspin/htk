@@ -8,8 +8,8 @@ Htk::Application.routes.draw do
   resources :email_summaries, :controller => 'email_accounts/email_summaries', :only => :index
 
   resources :parties
-  resources :messages, :only => [:index, :show]
-  resources :message_summaries, :only => :index
+  resources :messages, :only => [:index, :show, :update, :destroy]
+  resources :message_summaries, :only => [:index, :show]
   resources :users, :only => [:show]
 
   # The priority is based upon order of creation:

@@ -80,7 +80,7 @@ GEM
       warden (~> 1.2.3)
     ember-data-source (0.13)
       ember-source
-    ember-source (1.0.0.rc7)
+    ember-source (1.0.0.rc8)
       handlebars-source (= 1.0.12)
     erubis (2.7.0)
     execjs (1.4.0)
@@ -161,7 +161,7 @@ DEPENDENCIES
   coffee-rails (~> 3.2.1)
   devise
   ember-rails!
-  ember-source (~> 1.0.0.rc7)
+  ember-source (~> 1.0.0.rc8)
   handlebars-source
   jquery-rails
   json
