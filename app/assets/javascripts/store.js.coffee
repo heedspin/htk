@@ -1,7 +1,7 @@
 DS.RESTAdapter.configure "plurals",
   party: "parties"
   email_summary: "email_summaries"
-  message_summary: "message_summaries"
+  message_body: "message_bodies"
 
 DS.RESTAdapter.registerTransform 'array',
   serialize: (value) -> return ['hello', 'world']

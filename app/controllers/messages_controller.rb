@@ -1,15 +1,16 @@
 class MessagesController < ApplicationController
-  # def index
-  #   @party = parent_object
-  #   @messages = @party.messages.order(:id).includes(:source_email)
-  #   Email.attach_to(@messages)
-  #   EmailAccount.attach_to(@messages)
-
-  #   respond_to do |format|
-  #     format.html
-  #     format.json { render json: @messages }
-  #   end
-  # end
+  def index
+    @party = Party.user(current_user).find(params[:party_id])
+    @messages = @party.messages.order(:id)
+    Email.attach_to(@messages)
+    EmailAccount.attach_to(@messages)
+    respond_to do |format|
+      format.html
+      format.json { 
+        render json: @messages 
+      }
+    end
+  end
 
   def show
     @message = current_object

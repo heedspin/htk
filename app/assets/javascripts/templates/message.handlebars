@@ -10,6 +10,7 @@
     </nav>
   </div>
 </div>
+{{#with message}}
 <div class="row">
   <div class="small-5 columns">
     From: {{emailAddresses from_email_accounts max_length=24}}
@@ -22,6 +23,7 @@
     {{date}}
   </div>
 </div>
+{{/with}}
 
 <div class="row">
 	<div class="small-12 columns">
