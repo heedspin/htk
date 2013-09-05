@@ -1,9 +1,7 @@
 class MessageBodySerializer < ActiveModel::Serializer
-  embed :ids, include: true
-  attributes :id, :html_body
-  has_one :message
+  attributes :id, :html_body, :message
 
   def message
-  	object
+  	object.id
   end
 end

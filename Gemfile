@@ -21,7 +21,7 @@ gem 'json'
 gem 'jquery-rails'
 # gem "ember-rails" #, "~> 0.13.0"
 gem 'ember-rails', git: 'git://github.com/emberjs/ember-rails.git'
-gem 'ember-source', '~> 1.0.0.rc8'
+gem 'ember-source', '1.0.0'
 gem 'handlebars-source'#, '1.0.0.rc3'
 gem 'active_hash'
 

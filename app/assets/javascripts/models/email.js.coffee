@@ -1,6 +1,6 @@
 Htk.Email = DS.Model.extend
 	date: DS.attr('date')
 	subject: DS.attr('string')
-	email_account: DS.belongsTo('Htk.EmailAccount')
+	email_account: DS.belongsTo('emailAccount')
 	html_body: DS.attr('string')
-	parties: DS.hasMany('Htk.Party')
+	parties: DS.hasMany('party')

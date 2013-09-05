@@ -2,10 +2,10 @@ Htk.Message = DS.Model.extend
   date: DS.attr('date')
   subject: DS.attr('string')
   html_body: DS.attr('string')
-  party: DS.belongsTo('Htk.Party')
-  from_email_accounts: DS.hasMany('Htk.EmailAccount')
-  to_email_accounts: DS.hasMany('Htk.EmailAccount')
-  cc_email_accounts: DS.hasMany('Htk.EmailAccount')
+  party: DS.belongsTo('party')
+  from_email_accounts: DS.hasMany('emailAccount')
+  to_email_accounts: DS.hasMany('emailAccount')
+  cc_email_accounts: DS.hasMany('emailAccount')
   hidden: DS.attr('boolean')
 
   destination_email_accounts: (->

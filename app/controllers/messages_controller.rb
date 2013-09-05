@@ -24,7 +24,7 @@ class MessagesController < ApplicationController
   def update
     @message = current_object
     message_params = params[:message] || {}
-    %w(date subject html_body party_id).each { |a| message_params.delete(a) }
+    %w(date subject html_body party_id from_email_accounts to_email_accounts cc_email_accounts).each { |a| message_params.delete(a) }
     respond_to do |format|
       format.json do
         if @message.update_attributes(message_params)

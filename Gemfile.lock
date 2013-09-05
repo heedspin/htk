@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/emberjs/ember-rails.git
-  revision: 82c637b1357efd47f50309781025900e9656b47e
+  revision: 37f7d1269f873ad25b8d2423ee001ffa6c7a43d4
   specs:
     ember-rails (0.13.0)
       active_model_serializers
@@ -80,11 +80,10 @@ GEM
       warden (~> 1.2.3)
     ember-data-source (0.13)
       ember-source
-    ember-source (1.0.0.rc8)
+    ember-source (1.0.0)
       handlebars-source (= 1.0.12)
     erubis (2.7.0)
-    execjs (1.4.0)
-      multi_json (~> 1.0)
+    execjs (2.0.1)
     handlebars-source (1.0.12)
     hike (1.2.3)
     i18n (0.6.1)
@@ -161,7 +160,7 @@ DEPENDENCIES
   coffee-rails (~> 3.2.1)
   devise
   ember-rails!
-  ember-source (~> 1.0.0.rc8)
+  ember-source (= 1.0.0)
   handlebars-source
   jquery-rails
   json

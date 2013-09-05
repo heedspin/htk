@@ -3,13 +3,15 @@ Htk.MessageController = Ember.ObjectController.extend
 
 	# http://jsfiddle.net/pangratz666/ZTdPF/
 	showHideText: (->
-		if @get('message').get('hidden') then 'Show' else 'Hide'
+		if @get('message.hidden') then 'Show' else 'Hide'
 	).property('message.hidden')
 
 	actions:
 		toggleVisibility: ->
-			@toggleProperty('message.hidden')
+			message = @get('message')
+			message.toggleProperty('hidden')
+			message.save()
+
 			# messages = this.get("controllers.messages")
 			# message = messages.findBy('id', @get('message').get('id'))
 			# message.set('hidden', @get('hidden'))
-			@get('store').commit()

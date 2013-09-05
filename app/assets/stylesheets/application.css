@@ -21,3 +21,8 @@
 .messages table tbody tr.hidden {
 	background-color: #aaaaaa;
 }
+
+.messages table tbody tr.hidden td {
+	height: 2px;
+	padding: 0;
+}
