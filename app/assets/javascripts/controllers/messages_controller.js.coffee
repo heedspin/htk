@@ -11,7 +11,7 @@ Htk.MessagesController = Ember.ArrayController.extend
 	showHidden: false
 	toggleShowHidden: (->
 		if @get('showHidden')
-			$(".messages table tbody tr.hidden").show()#.css("display", "inline");
+			$(".messages table tbody tr.hidden").show()
 		else
-			$(".messages table tbody tr.hidden").hide()#css("display", "none");
+			$(".messages table tbody tr.hidden").hide()
 	).observes('showHidden')

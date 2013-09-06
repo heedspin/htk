@@ -1,4 +1,4 @@
 //= require lib/moment
 //= require lib/moment_plugins
 
-//= require lib/fullproof-all
+//= require lib/fullproof-all-debug
