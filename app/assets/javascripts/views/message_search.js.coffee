@@ -1,5 +1,6 @@
-Htk.MessageSearchView = Ember.TextField.extend
+Htk.MessageSearch = Ember.View.extend
 	didInsertElement: ->
+		console.log "Hello MessageSearch"
 		marioData= [
 			{name: "Mario", type: "Protagonist"},
 			{name: "Luigi", type: "Protagonist"},
@@ -51,12 +52,15 @@ Htk.MessageSearchView = Ember.TextField.extend
 			fullproof.make_callback(engineReady, false))
 		@set('marioSearchEngine', marioSearchEngine)
 		@set('marioData', marioData)
+		sayHello = ->
+			console.log "Hello!!!!!!!!!!!"
+		Ember.run.later sayHello, 5000
 
 	marioSearchEngine: null
 	marioData: null
 
-	change: (evt) ->
-		value = @get('value')
+	input: ->
+		value = @get('searchInput')
 		marioSearchEngine = @get('marioSearchEngine')
 		marioData = @get('marioData')
 		marioSearchEngine.lookup value, (resultset) ->

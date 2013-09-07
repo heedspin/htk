@@ -38,3 +38,6 @@ Htk.EmailsRoute = Ember.Route.extend
 
 Htk.EmailRoute = Ember.Route.extend
 	model: (params) -> this.store.find('email', params.email_id)
+
+Htk.LoadingRoute = Ember.Route.extend({})
+

@@ -8,10 +8,3 @@ Htk.MessagesController = Ember.ArrayController.extend
 	).property()
 	sortProperties: ['date']
 	sortAscending: false
-	showHidden: false
-	toggleShowHidden: (->
-		if @get('showHidden')
-			$(".messages table tbody tr.hidden").show()
-		else
-			$(".messages table tbody tr.hidden").hide()
-	).observes('showHidden')

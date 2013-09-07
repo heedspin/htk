@@ -5,7 +5,9 @@
 			{{view Ember.Checkbox checkedBinding="controller.showHidden"}}
 			Show Hidden
 		</label>
-		{{view Htk.MessageSearchView}}
+		{{#view Htk.MessageSearch}}
+			{{input type="text" value=view.searchInput}}
+		{{/view}}
 		<div class="messages">
 			<table>
 				<tbody>
