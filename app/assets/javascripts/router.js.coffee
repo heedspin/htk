@@ -15,7 +15,7 @@ Htk.PartiesIndexRoute = Ember.Route.extend
 Htk.MessagesRoute = Ember.Route.extend
 	setupController: (controller, model) ->
 		party = @modelFor('party')
-		controller.set('model', this.store.find('message', party_id: party.id))
+		controller.set('model', this.store.find('message', party_id: party.id, limit: 5))
 		controller.set('party', party)
 
 Htk.MessageRoute = Ember.Route.extend

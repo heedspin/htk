@@ -1,7 +1,10 @@
 class MessagesController < ApplicationController
   def index
+    limit = params[:limit]
+    offset = params[:offset]
     @party = Party.user(current_user).find(params[:party_id])
     @messages = @party.messages.order(:id)
+    @messages = @messages.limit(limit).offset(offset || 0) if limit
     Email.attach_to(@messages)
     EmailAccount.attach_to(@messages)
     respond_to do |format|
