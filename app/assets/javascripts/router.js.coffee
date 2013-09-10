@@ -13,13 +13,29 @@ Htk.PartiesIndexRoute = Ember.Route.extend
 	model: -> this.store.find 'party'
 
 Htk.MessagesRoute = Ember.Route.extend
+	enter: ->
+		console.log "Entering messages route"
+	exit: ->
+		console.log "Exiting messages route"		
 	setupController: (controller, model) ->
+		console.log "Setting up Messages Controller"
 		party = @modelFor('party')
-		controller.set('model', this.store.find('message', party_id: party.id, limit: 5))
-		controller.set('party', party)
+		controller.setup(party)
+		route = this
+		loader = ->
+			offset = controller.get('totalPartyMessages')
+			route.store.find('message', party_id: party.id, limit: 5, offset: offset).then (result) ->
+				messages = result.toArray()
+				# console.log "Loaded " + messages.length + " - " + (messages.map (msg) -> msg.id).join(', ')
+				controller.addMessages(messages)
+				if messages.length >= 5
+					Ember.run.later(loader, 0)
+				else
+					controller.setMessagesLoaded()
+		Ember.run.later(loader, 0)
 
-Htk.MessageRoute = Ember.Route.extend
-	model: (params) -> this.store.find('message_body', params.message_id)
+# Htk.MessageRoute = Ember.Route.extend
+	# model: (params) -> this.store.find('message', params.message_id)
 
 Htk.EmailAccountsIndexRoute = Ember.Route.extend
 	model: -> this.store.find 'email_account'

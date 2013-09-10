@@ -7,8 +7,10 @@ Htk.Message = DS.Model.extend
   to_email_accounts: DS.hasMany('emailAccount')
   cc_email_accounts: DS.hasMany('emailAccount')
   hidden: DS.attr('boolean')
+  searchable_text: DS.attr('string')
 
   destination_email_accounts: (->
     this.get('to_email_accounts').toArray().concat this.get('cc_email_accounts').toArray()
   ).property('to_email_accounts', 'cc_email_accounts')
-  	
+  
+  matchesSearch: true

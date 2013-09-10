@@ -26,6 +26,7 @@ class Message < ApplicationModel
 	serialized_attribute :hidden, default: 'false'
 
 	delegate :text_body, to: :source_email
+	delegate :searchable_text, to: :source_email
 	delegate :html_body, to: :source_email
 	delegate :participants, to: :source_email
 	delegate :subject, to: :source_email

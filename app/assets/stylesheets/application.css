@@ -18,6 +18,10 @@
 	height:20em;
 }
 
+.messages table {
+	width: 100%;
+}
+
 .messages table tbody tr.hidden {
 	background-color: #aaaaaa;
 	display: none;

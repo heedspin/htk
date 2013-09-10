@@ -104,6 +104,10 @@ class Email < ApplicationModel
 		raw_email
 	end
 
+	def searchable_text
+		@searchable_text ||= (self.subject + ' ' + self.text_body)
+	end
+
 	def text_body
 		@text_body ||= self.find_content_type(self.mail.body, 'text/plain')
 	end

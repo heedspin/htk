@@ -1,17 +1,36 @@
 <div class="row">
 	<div class="small-12 columns">
 		<h3>{{party.name}} Messages</h3>
+	</div>
+</div>
+<div class="row">
+	<div class="small-8 columns">
+		{{#if messagesLoaded}}
+			{{#if searchEngineReady}}
+				{{#view Htk.MessageSearchInput}}
+					{{input type="text" value=view.searchInput}}
+				{{/view}}
+			{{else}}
+				<span>Indexing...</span>
+			{{/if}}
+		{{else}}
+			<span {{bind-attr class="partyMessagesLoading::hidden"}}>Loading messages...</span>
+		{{/if}}
+	</div>
+	<div class="small-4 columns">
+		Showing {{shownMessages.length}} of {{totalPartyMessages}} Messages
 		<label>
 			{{view Ember.Checkbox checkedBinding="controller.showHidden"}}
 			Show Hidden
 		</label>
-		{{#view Htk.MessageSearch}}
-			{{input type="text" value=view.searchInput}}
-		{{/view}}
+	</div>
+</div>
+<div class="row">
+	<div class="small-12 columns">
 		<div class="messages">
 			<table>
 				<tbody>
-					{{#each message in controller}}
+					{{#each message in shownMessages}}
 					<tr {{bind-attr class="message.hidden"}}>
 						<td>{{emailAddresses message.from_email_accounts max_length=24}}</td>
 						<td>{{emailAddresses message.destination_email_accounts max_length=24}}</td>
@@ -21,7 +40,6 @@
 					{{/each}}
 				</tbody>
 			</table>
-			<button {{action loadMore}}>More</button>
 		</div>
 	</div>
   <div class="small-12 columns">
