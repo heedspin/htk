@@ -11,7 +11,10 @@
 #  data                :text
 #
 
+require 'email_account_cache'
+
 class Message < ApplicationModel
+	include EmailAccountCache	
 	attr_accessible :status_id, :date, :hidden, :status, :conversation_id, :conversation, :envelope_message_id, :source_email_id
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :conversation
@@ -35,27 +38,6 @@ class Message < ApplicationModel
 	delegate :to_addresses, to: :source_email
 	delegate :cc_addresses, to: :source_email
 	delegate :participants, to: :source_email
-	
-	attr_accessor :email_account_cache
-	%w(from to cc).each do |key|
-		self.class_eval <<-RUBY
-			def #{key}_email_accounts
-				if @#{key}_email_accounts.nil?
-					@#{key}_email_accounts = []
-					self.#{key}_addresses.each do |address|
-						if self.email_account_cache and self.email_account_cache.member?(address)
-							if ea = email_account_cache[address]
-								@#{key}_email_accounts.push ea
-							end
-						elsif ea = EmailAccount.username(address).first
-							@#{key}_email_accounts.push ea
-						end
-					end
-				end
-				@#{key}_email_accounts
-			end
-		RUBY
-	end
 
 	def equals_email?(email)
 		email.envelope_message_id == self.envelope_message_id

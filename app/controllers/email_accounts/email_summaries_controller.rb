@@ -9,6 +9,7 @@ class EmailAccounts::EmailSummariesController < ApplicationController
 		end
 		@email_account = EmailAccount.user(current_user).find(params[:email_account_id])
 		@emails = @email_account.emails.uid_desc.limit(limit)
+    EmailAccount.attach_to(@emails)
 		if page != 1
 			@emails = @emails.offset((page.to_i-1) * limit)
 		end

@@ -114,8 +114,8 @@ class EmailAccount < ApplicationModel
     deleted_emails
   end
 
-  def self.attach_to(messages)
-    all_participants = messages.map(&:participants).flatten.uniq
+  def self.attach_to(objects)
+    all_participants = objects.map(&:participants).flatten.uniq
     email_accounts = EmailAccount.where(username: all_participants)
     email_account_cache = {}
     email_accounts.each { |ea| email_account_cache[ea.username] = ea }
@@ -124,8 +124,8 @@ class EmailAccount < ApplicationModel
         email_account_cache[email_address] = nil
       end
     end
-    messages.each do |message|
-      message.email_account_cache = email_account_cache
+    objects.each do |obj|
+      obj.email_account_cache = email_account_cache
     end
   end
 end

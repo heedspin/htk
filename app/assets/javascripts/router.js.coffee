@@ -53,7 +53,19 @@ Htk.EmailsRoute = Ember.Route.extend
 		controller.set('model', model)
 
 Htk.EmailRoute = Ember.Route.extend
-	model: (params) -> this.store.find('email', params.email_id)
+	model: (params) -> 
+		email_summaries = this.modelFor('emails')
+		if Ember.isEmpty(email_summaries) or Ember.isEmpty(email_summaries.content)
+			console.log "EmailRoute does not have access to email summaries!"
+		else
+			for es in email_summaries.content
+				if es.get('id') == params.email_id
+					es.set 'isSelected', true
+					console.log "Email summary is selected " + es.get('id')
+				else
+					es.set 'isSelected', false
+
+		this.store.find('email', params.email_id)
 
 Htk.LoadingRoute = Ember.Route.extend({})
 

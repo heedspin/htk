@@ -1,19 +1,22 @@
+		{{#view Htk.ArrowKeyView target=view}}
 <div class="row">
-	<div class="small-12 columns">
+	<div class="small-12 columns emails">
 		<h3>Emails for {{email_account.username}}</h3>
-		<table>
-			{{#each email in controller}}
-				<tr>
-					<td>
-			      {{#each party in email.parties}}
-			      {{#linkTo 'messages' party}}{{party.name}}{{/linkTo}}
-			      {{/each}}
-					</td>
-					<td>{{#linkTo 'email' page email.id}}{{email.subject}}{{/linkTo}}</td>
-					<td>{{from_now email.date}}</td>
-				</tr>
-			{{/each}}
-		</table>
+			<table>
+				{{#each email in controller}}
+					<tr {{bind-attr class="email.isSelected"}} {{action selectEmail email}}>
+						<td>
+				      {{#each party in email.parties}}
+				      {{#linkTo 'messages' party}}{{party.name}}{{/linkTo}}
+				      {{/each}}
+						</td>
+						<td>{{emailAddresses email.from_email_accounts max_length=24}}</td>
+						<td>{{emailAddresses email.destination_email_accounts max_length=24}}</td>
+						<td>{{email.subject}}</td>
+						<td>{{from_now email.date}}</td>
+					</tr>
+				{{/each}}
+			</table>
 		<p>
 			{{#if hasPreviousPage}}
 			<button {{action 'previousPage'}}>&lt;&lt;Previous Page</button>
@@ -27,3 +30,4 @@
   	{{outlet}}
 	</div>
 </div>
+		{{/view}}

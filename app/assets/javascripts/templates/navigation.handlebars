@@ -14,9 +14,9 @@
       <li class="divider"></li>
       <li class="has-dropdown">{{#linkTo 'email_accounts'}}Email Accounts{{/linkTo}}
         <ul class="dropdown">
-          {{#each email_account in currentUser.email_accounts}}
-          <li>{{#linkTo 'emails' email_account 'top'}}{{email_account.username}}{{/linkTo}}</li>
-          {{/each}}
+          {{!#each email_account in currentUser.email_accounts}}
+          {{! add the <li> #linkTo 'emails' email_account 'top'}}{{!email_account.username}}{{!/linkTo}}
+          {{!/each}}
         </ul>
       </li>
       <li class="divider"></li>

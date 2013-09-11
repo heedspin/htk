@@ -16,8 +16,10 @@
 #
 
 require 'htk_imap/htk_imap'
+require 'email_account_cache'
 
 class Email < ApplicationModel
+	include EmailAccountCache	
 	include HtkImap::MailUtils
 	include ActionView::Helpers::TextHelper
 	attr_accessible :folder, :date, :uid, :guid, :subject, :mail, :thread_id, :raw_email

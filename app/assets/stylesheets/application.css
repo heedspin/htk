@@ -26,3 +26,7 @@
 	background-color: #aaaaaa;
 	display: none;
 }
+
+.messages table tbody tr.is-selected, .emails table tbody tr.is-selected {
+	background-color: #99f099
+}
