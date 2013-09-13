@@ -13,6 +13,11 @@
  *= require_tree .
  */
 
+/* hide outline for keypress events */
+div.emails > div {
+	outline: none;
+}
+
 .messages {
 	overflow:scroll;
 	height:20em;

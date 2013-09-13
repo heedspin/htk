@@ -64,8 +64,15 @@ Htk.EmailRoute = Ember.Route.extend
 					console.log "Email summary is selected " + es.get('id')
 				else
 					es.set 'isSelected', false
-
-		this.store.find('email', params.email_id)
+		email_id = null
+		if params.email_id == 'first'
+			email_id = email_summaries.get('firstObject').get('id')
+		else
+			if params.email_id == 'last'
+				email_id = email_summaries.get('lastObject').get('id')
+			else
+				email_id = params.email_id
+		this.store.find('email', email_id)
 
 Htk.LoadingRoute = Ember.Route.extend({})
 

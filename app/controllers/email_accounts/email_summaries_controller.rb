@@ -2,11 +2,7 @@ class EmailAccounts::EmailSummariesController < ApplicationController
 	def index
 		limit = (params[:limit] || 30).to_i
 		offset = (params[:offset] || 0).to_i
-		if (page = (params[:page] || 'top')) == 'top'
-			page = 1
-		else
-			page = page.to_i
-		end
+		page = (params[:page] || 1).to_i
 		@email_account = EmailAccount.user(current_user).find(params[:email_account_id])
 		@emails = @email_account.emails.uid_desc.limit(limit)
     EmailAccount.attach_to(@emails)

@@ -2,7 +2,7 @@
 <ul>
 	{{#each email_account in controller}}
 	<li>
-		{{#linkTo 'emails' email_account 'top'}}{{email_account.username}}{{/linkTo}}
+		{{#linkTo 'emails' email_account 1}}{{email_account.username}}{{/linkTo}}
 	</li>
 	{{/each}}
 </ul>

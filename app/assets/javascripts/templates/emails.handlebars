@@ -1,7 +1,7 @@
-		{{#view Htk.ArrowKeyView target=view}}
 <div class="row">
 	<div class="small-12 columns emails">
 		<h3>Emails for {{email_account.username}}</h3>
+		{{#view Htk.ArrowKeyView}}
 			<table>
 				{{#each email in controller}}
 					<tr {{bind-attr class="email.isSelected"}} {{action selectEmail email}}>
@@ -16,6 +16,7 @@
 						<td>{{from_now email.date}}</td>
 					</tr>
 				{{/each}}
+			{{/view}}
 			</table>
 		<p>
 			{{#if hasPreviousPage}}
@@ -30,4 +31,3 @@
   	{{outlet}}
 	</div>
 </div>
-		{{/view}}
