@@ -32,19 +32,22 @@ Htk.MessagesRoute = Ember.Route.extend
 					Ember.run.later(loader, 0)
 				else
 					controller.setMessagesLoaded()
-		Ember.run.later(loader, 0)
+		loader.call()
+		# Ember.run.later(loader, 0)
 
 Htk.MessageRoute = Ember.Route.extend
+	observerSet: false
 	setupController: (controller, model) ->
 		console.log "MessageRoute.setupController called"
 		controller.set 'model', model
-		message_id = model.get('id')
-		messages_controller = this.controllerFor('messages')
-		messages_controller.addObserver 'sortedPartyMessages', ->
-			console.log "sortedPartyMessages loading......"
+		setupTime = new Date().getTime()
+		selectCurrent = ->
+			messages_controller = this.controllerFor('messages')
+			messages = messages_controller.get('sortedPartyMessages')
+			message_id = this.modelFor('message').get('id')
+			console.log setupTime + " selectCurrent running for message " + message_id
 			to_select = null
 			any_set = false
-			messages = messages_controller.get('sortedPartyMessages')
 			messages.forEach (m) ->
 				if m.get 'isSelected'
 					any_set = true
@@ -52,6 +55,13 @@ Htk.MessageRoute = Ember.Route.extend
 					to_select = m
 			if !any_set and to_select
 				to_select.set 'isSelected', true
+				this.set 'observerSet', false
+				# messages_controller.removeObserver 'sortedPartyMessages', this, selectCurrent
+		unless this.get('observerSet')
+			messages_controller = this.controllerFor('messages')
+			this.set 'observerSet', true
+			messages_controller.addObserver 'sortedPartyMessages', this, selectCurrent
+
 	model: (params) -> 
 		console.log "MessageRoute.model called"
 		message_id = params.message_id

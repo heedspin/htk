@@ -38,7 +38,7 @@ Htk.MessagesController = Ember.Controller.extend
 			@incrementProperty('totalPartyMessages')
 			if !message.get('hidden')
 				shownMessages.addObject message
-		console.log "MessagesController totalPartyMessages = " + this.get('totalPartyMessages') + " shownMessages = " + shownMessages.length
+		console.log "MessagesController.addMessages totalPartyMessages = " + this.get('totalPartyMessages') + " shownMessages = " + shownMessages.length
 		this.propertyDidChange('sortedPartyMessages')
 		true
 
@@ -102,10 +102,9 @@ Htk.MessagesController = Ember.Controller.extend
 					selected = message
 					if (message == first_message)
 						transitionToMessage = last_message
-						true
 					else
 						transitionToMessage = previous
-						true
+					true
 				else
 					previous = message
 					false
