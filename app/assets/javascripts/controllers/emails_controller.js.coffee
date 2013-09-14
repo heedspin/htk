@@ -44,8 +44,8 @@ Htk.EmailsController = Ember.ArrayController.extend
 			# this.set('content', Htk.Email.find(email_account_id: this.get('email_account').get('id'), page: newPage))
 			# this.set('page', newPage)
 		selectEmail: (email) ->
-			# @setEach 'isSelected', false
-			# email.set 'isSelected', true
+			@setEach 'isSelected', false
+			email.set 'isSelected', true
 			this.transitionToRoute('email', this.get('page'), email.id)
 
 		moveDown: (event) ->    
@@ -63,12 +63,12 @@ Htk.EmailsController = Ember.ArrayController.extend
 					true
 				else
 					if email.get("isSelected")
+						selected_email = email
 						if email == last_email
 							transitionToEmail = 'first'
 							transitionToPage = parseInt(currentPage) + 1
 							true
 						else
-							selected_email = email
 							false
 			transitionToEmail ||= first_email
 			if selected_email

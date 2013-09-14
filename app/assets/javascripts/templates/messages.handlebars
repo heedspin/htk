@@ -28,18 +28,20 @@
 <div class="row">
 	<div class="small-12 columns">
 		<div class="messages">
+			{{#view Htk.ArrowKeyView}}
 			<table>
 				<tbody>
 					{{#each message in shownMessages}}
-					<tr {{bind-attr class="message.hidden"}}>
+					<tr {{bind-attr class="message.isSelected message.hidden"}} {{action selectMessage message}}>
 						<td>{{emailAddresses message.from_email_accounts max_length=24}}</td>
 						<td>{{emailAddresses message.destination_email_accounts max_length=24}}</td>
-						<td>{{#linkTo 'message' message.id}}{{message.subject}}{{/linkTo}}</td>
+						<td>{{message.subject}}</td>
 						<td>{{from_now message.date}}</td>		
 					</tr>
 					{{/each}}
 				</tbody>
 			</table>
+			{{/view}}
 		</div>
 	</div>
   <div class="small-12 columns">

@@ -14,3 +14,4 @@ Htk.Message = DS.Model.extend
   ).property('to_email_accounts', 'cc_email_accounts')
   
   matchesSearch: true
+  isSelected: false

@@ -1,5 +1,6 @@
 Htk.MessageController = Ember.ObjectController.extend
 	needs: ['messages']
+	sortedMessages: null
 
 	# http://jsfiddle.net/pangratz666/ZTdPF/
 	showHideText: (->

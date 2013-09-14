@@ -18,7 +18,7 @@ Htk.MessagesRoute = Ember.Route.extend
 	exit: ->
 		console.log "Exiting messages route"		
 	setupController: (controller, model) ->
-		console.log "Setting up Messages Controller"
+		console.log "MessagesRoute.setupController called"
 		party = @modelFor('party')
 		controller.setup(party)
 		route = this
@@ -34,8 +34,28 @@ Htk.MessagesRoute = Ember.Route.extend
 					controller.setMessagesLoaded()
 		Ember.run.later(loader, 0)
 
-# Htk.MessageRoute = Ember.Route.extend
-	# model: (params) -> this.store.find('message', params.message_id)
+Htk.MessageRoute = Ember.Route.extend
+	setupController: (controller, model) ->
+		console.log "MessageRoute.setupController called"
+		controller.set 'model', model
+		message_id = model.get('id')
+		messages_controller = this.controllerFor('messages')
+		messages_controller.addObserver 'sortedPartyMessages', ->
+			console.log "sortedPartyMessages loading......"
+			to_select = null
+			any_set = false
+			messages = messages_controller.get('sortedPartyMessages')
+			messages.forEach (m) ->
+				if m.get 'isSelected'
+					any_set = true
+				if m.get('id') == message_id
+					to_select = m
+			if !any_set and to_select
+				to_select.set 'isSelected', true
+	model: (params) -> 
+		console.log "MessageRoute.model called"
+		message_id = params.message_id
+		this.store.find('message', params.message_id)
 
 Htk.EmailAccountsIndexRoute = Ember.Route.extend
 	model: -> this.store.find 'email_account'
@@ -66,12 +86,15 @@ Htk.EmailRoute = Ember.Route.extend
 					email_id = email_summaries.get('lastObject').get('id')
 				else
 					email_id = params.email_id
+			to_load = null
+			any_set = false
 			email_summaries.forEach (es) ->
+				if es.get 'isSelected'
+					any_set = true
 				if es.get('id') == email_id
-					es.set 'isSelected', true
-					console.log "Email summary is selected " + email_id
-				else
-					es.set 'isSelected', false
+					to_load = es
+			if !any_set and to_load
+				to_load.set 'isSelected', true
 		this.store.find('email', email_id)
 
 Htk.LoadingRoute = Ember.Route.extend({})

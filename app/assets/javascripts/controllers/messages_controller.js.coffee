@@ -28,16 +28,18 @@ Htk.MessagesController = Ember.Controller.extend
 		console.log "MessagesController setup"
 
 	addMessages: (messages) ->
+		this.propertyWillChange('sortedPartyMessages')
 		partyMessages = this.get 'partyMessages'
 		shownMessages = this.get 'shownMessages'
 		sortedPartyMessages = this.get 'sortedPartyMessages'
 		for message in messages
 			partyMessages[message.get('id')] = message
-			sortedPartyMessages.push message
+			sortedPartyMessages.addObject message
 			@incrementProperty('totalPartyMessages')
 			if !message.get('hidden')
 				shownMessages.addObject message
 		console.log "MessagesController totalPartyMessages = " + this.get('totalPartyMessages') + " shownMessages = " + shownMessages.length
+		this.propertyDidChange('sortedPartyMessages')
 		true
 
 	setMessagesLoaded: ->
@@ -54,6 +56,65 @@ Htk.MessagesController = Ember.Controller.extend
 	).observes('showHidden')
 
 	actions:
+
+		selectMessage: (message) ->
+			this.get('sortedPartyMessages').forEach (msg) ->
+				msg.set 'isSelected', false
+			message.set 'isSelected', true
+			this.transitionToRoute('message', message.id)
+
+		moveDown: (event) ->    
+			console.log "Messages Controller Move Down"
+			all_messages = this.get('shownMessages')
+			first_message = all_messages.get('firstObject')
+			last_message = all_messages.get('lastObject')
+			selected = null
+			transitionToMessage = null
+			all_messages.toArray().some (message, index, array) ->
+				if selected
+					transitionToMessage = message
+					true
+				else
+					if message.get("isSelected")
+						selected = message
+						if message == last_message
+							transitionToMessage = first_message
+							true
+						else
+							false
+			transitionToMessage ||= first_message
+			if selected
+				selected.set("isSelected", false)
+			transitionToMessage.set("isSelected", true)
+			this.transitionToRoute('message', transitionToMessage)
+			false
+
+		moveUp: (event) ->    
+			console.log "Messages Controller Move Up"
+			all_messages = this.get('shownMessages')
+			first_message = all_messages.get('firstObject')
+			last_message = all_messages.get('lastObject')
+			previous = null
+			selected = null
+			transitionToMessage = null
+			all_messages.toArray().some (message, index, array) ->
+				if message.get("isSelected")
+					selected = message
+					if (message == first_message)
+						transitionToMessage = last_message
+						true
+					else
+						transitionToMessage = previous
+						true
+				else
+					previous = message
+					false
+			if transitionToMessage
+				selected.set("isSelected", false) if selected
+				transitionToMessage.set('isSelected', true)
+				this.transitionToRoute('message', transitionToMessage)
+			false
+
 		search: (text) ->
 			if Ember.isEmpty?(text) || Ember.isEmpty?(text.trim())
 				this.set('shownMessages', this.get('sortedPartyMessages'))
