@@ -6,7 +6,8 @@ Htk.ArrowKeyView = Ember.View.extend
 	didInsertElement: ->
 		this.$().attr({ tabindex: 1 })
 		this.$().focus()
-	keyDown: (evt) ->
-		event = this.KEY_BINDINGS[evt.keyCode]
-		unless event == undefined
-			this.get("controller").send(event)
+	keyDown: (event) ->
+		key = this.KEY_BINDINGS[event.keyCode]
+		unless key == undefined
+			unless this.get("controller").send(key, event)
+				event.preventDefault()

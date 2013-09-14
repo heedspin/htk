@@ -12,6 +12,22 @@ Htk.EmailsController = Ember.ArrayController.extend
 	hasNextPage: ( ->
 		return this.get('content').get('length') == this.get('pageSize')
 	).property('content.@each')
+
+	timerId: null
+	delayedSelectEmail: (page, email_id) ->
+		_this = this
+		if timerId = this.get('timerId')
+			_this.set("timerId", null)
+			Ember.run.cancel timerId
+			console.log "Cancelling timer " + timerId
+		f = ->
+			console.log "Timer fired!"
+			_this.set("timerId", null)
+			_this.transitionToRoute('email', page, email_id)
+		# debugger
+		timerId = Ember.run.later f, 500
+		this.set 'timerId', timerId
+
 	actions:
 		previousPage: ->
 			currentPage = parseInt(this.get('page'))
@@ -31,19 +47,19 @@ Htk.EmailsController = Ember.ArrayController.extend
 			# @setEach 'isSelected', false
 			# email.set 'isSelected', true
 			this.transitionToRoute('email', this.get('page'), email.id)
-		moveDown: ->    
+
+		moveDown: (event) ->    
 			console.log "Emails Controller Move Down"
 			currentPage = this.get('page')
 			all_emails = this.get('content')
 			first_email = all_emails.get('firstObject')
 			last_email = all_emails.get('lastObject')
 			selected_email = null
-			transitionToPage = null
+			transitionToPage = currentPage
 			transitionToEmail = null
 			all_emails.toArray().some (email, index, array) ->
 				if selected_email
-					transitionToEmail = email.id
-					transitionToPage = currentPage
+					transitionToEmail = email
 					true
 				else
 					if email.get("isSelected")
@@ -54,22 +70,27 @@ Htk.EmailsController = Ember.ArrayController.extend
 						else
 							selected_email = email
 							false
-			if transitionToEmail
-				this.transitionToRoute('email', transitionToPage, transitionToEmail)
-			else
-				this.transitionToRoute('email', currentPage, first_email.get('id'))
-			event.preventDefault()
+			transitionToEmail ||= first_email
+			if selected_email
+				selected_email.set("isSelected", false)
+			unless transitionToEmail == 'first'
+				transitionToEmail.set("isSelected", true)
+				transitionToEmail = transitionToEmail.get('id')
+			this.delayedSelectEmail(transitionToPage, transitionToEmail)
+			false
 
-		moveUp: ->    
+		moveUp: (event) ->    
 			console.log "Emails Controller Move Up"
 			currentPage = this.get('page')
 			all_emails = this.get('content')
 			first_email = all_emails.get('firstObject')
 			previous_email = null
-			transitionToPage = null
+			selected_email = null
+			transitionToPage = currentPage
 			transitionToEmail = null
 			all_emails.toArray().some (email, index, array) ->
 				if email.get("isSelected")
+					selected_email = email
 					if (email == first_email)
 						if currentPage == 1
 							true
@@ -78,12 +99,15 @@ Htk.EmailsController = Ember.ArrayController.extend
 							transitionToEmail = 'last'
 							true
 					else
-						transitionToPage = currentPage
-						transitionToEmail = previous_email.id
+						transitionToEmail = previous_email
 						true
 				else
 					previous_email = email
 					false
 			if transitionToEmail
-				this.transitionToRoute('email', transitionToPage, transitionToEmail)
-			event.preventDefault()
+				selected_email.set("isSelected", false) if selected_email
+				transitionToEmail.set('isSelected', true)
+				transitionToEmail = transitionToEmail.get('id') unless transitionToEmail == 'last'
+				this.delayedSelectEmail(transitionToPage, transitionToEmail)
+			false
+
