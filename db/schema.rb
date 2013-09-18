@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130830155056) do
+ActiveRecord::Schema.define(:version => 20130915231138) do
 
   create_table "conversation_imports", :force => true do |t|
     t.integer  "status_id"
@@ -81,8 +81,9 @@ ActiveRecord::Schema.define(:version => 20130830155056) do
     t.string   "name"
     t.text     "description"
     t.integer  "creator_id"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+    t.datetime "index_timestamp"
   end
 
   create_table "party_users", :force => true do |t|

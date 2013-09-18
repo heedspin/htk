@@ -36,6 +36,9 @@ class Email < ApplicationModel
 	scope :uid_desc, order('emails.uid desc')
 	scope :in_party, joins(email_account: :email_account_conversations).where('email_account_conversations.thread_id = emails.thread_id')
 
+	delegate :message_id, to: :mail
+	delegate :in_reply_to, to: :mail
+
 	def self.user(user)
 		user_id = user.is_a?(User) ? user.id : user
 		joins(:email_account).where(email_accounts: { user_id: user_id })
@@ -104,10 +107,6 @@ class Email < ApplicationModel
 			self.send("#{key}=", raw_email.send(key))
 		end
 		raw_email
-	end
-
-	def searchable_text
-		@searchable_text ||= (self.subject + ' ' + self.text_body)
 	end
 
 	def text_body

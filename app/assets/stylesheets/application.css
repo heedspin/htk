@@ -14,7 +14,7 @@
  */
 
 /* hide outline for keypress events */
-div.emails > div {
+div.emails > div, div.messages > div {
 	outline: none;
 }
 

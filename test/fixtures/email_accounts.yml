@@ -16,13 +16,13 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
 
 one:
-  username: MyString
+  username: email_account1@example-gmail.com
   authentication_string: MyString
   server: MyString
   port: 1
 
 two:
-  username: MyString
+  username: email_account2@example-gmail.com
   authentication_string: MyString
   server: MyString
   port: 1

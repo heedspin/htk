@@ -4,3 +4,10 @@ development:
   database: htk_development
   pool: 5
   username: ubuntu
+
+test:
+  adapter: postgresql
+  encoding: unicode
+  database: htk_test
+  pool: 5
+  username: ubuntu

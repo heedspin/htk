@@ -1,3 +1,3 @@
 class PartySerializer < ActiveModel::Serializer
-  attributes :id, :name
+  attributes :id, :name, :index_timestamp
 end

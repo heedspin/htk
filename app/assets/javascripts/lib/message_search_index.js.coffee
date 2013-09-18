@@ -2,15 +2,15 @@ Htk.MessageSearchIndex = Ember.Object.extend
 	searchEngine: null
 	searchEngineReady: false
 
-	index: (party_id, messages)->
+	search: (text, callback) ->
+		searchEngine = @get('searchEngine')
+		searchEngine.lookup text, callback
+
+	index: (party, messages)->
 		console.log "MessageSearch Indexing"
-		dbName = "messageDB-" + party_id
+		dbName = "PartyIndex-" + party.get('id')
 		searchEngine = new fullproof.BooleanEngine()
 		@set 'searchEngine', searchEngine
-		_this = this
-		engineReady = (success) ->
-			_this.set 'searchEngineReady', true
-			console.log "Engine Ready! success = " + success
 		progressCallback = (percentageComplete) ->
 			console.log "Index percentageComplete = " + percentageComplete
 		initializer = (injector, callback) ->
@@ -18,8 +18,6 @@ Htk.MessageSearchIndex = Ember.Object.extend
 			textArray = messages.map (m) -> m.get('searchable_text')
 			valueArray = messages.map (m) -> m.get('id')
 			injector.injectBulk	textArray, valueArray, callback,	progressCallback
-			# for message in messages
-			# 	injector.inject(message.get('searchable_text'), message.id, synchro)
 		index1 =
 			name: "normalindex"
 			analyzer: new fullproof.StandardAnalyzer(fullproof.normalizer.to_lowercase_nomark, fullproof.normalizer.remove_duplicate_letters)
@@ -30,8 +28,21 @@ Htk.MessageSearchIndex = Ember.Object.extend
 			analyzer: new fullproof.StandardAnalyzer(fullproof.normalizer.to_lowercase_nomark, fullproof.english.metaphone)
 			capabilities: new fullproof.Capabilities().setUseScores(false).setDbName(dbName)
 			initializer: initializer
+		_this = this
+		engineReady = (success) ->
+			latest_index_timestamp = party.get('index_timestamp')
+			local_timestsamp_key = dbName + '_timestamp'
+			if cached_index_timestamp = localStorage.getItem(local_timestsamp_key)
+				cached_index_timestamp = new Date(cached_index_timestamp)
+			console.log "Engine Ready Callback, success = " + success + " latest_index_timestamp = " + latest_index_timestamp + " cached_index_timestamp = " + cached_index_timestamp
+			if cached_index_timestamp and (cached_index_timestamp < latest_index_timestamp)
+				console.log "Cached index timestamp is < latest index timestamp.  Rebuilding."
+				localStorage.removeItem local_timestsamp_key
+				searchEngine.clear ->
+					console.log dbName + ' search index cleared.  Rebuilding...'
+					searchEngine.open([index1, index2],	fullproof.make_callback(engineReady, true), fullproof.make_callback(engineReady, false))
+			else
+				console.log "Search Engine Ready"
+				localStorage.setItem local_timestsamp_key, latest_index_timestamp.toJSON()
+				_this.set 'searchEngineReady', true
 		searchEngine.open([index1, index2],	fullproof.make_callback(engineReady, true), fullproof.make_callback(engineReady, false))
-
-	search: (text, callback) ->
-		searchEngine = @get('searchEngine')
-		searchEngine.lookup text, callback

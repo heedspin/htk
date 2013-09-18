@@ -12,9 +12,11 @@
 #
 
 require 'email_account_cache'
+require 'extract_email_reply'
 
 class Message < ApplicationModel
 	include EmailAccountCache	
+	include ExtractEmailReply
 	attr_accessible :status_id, :date, :hidden, :status, :conversation_id, :conversation, :envelope_message_id, :source_email_id
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :conversation
@@ -27,8 +29,10 @@ class Message < ApplicationModel
 	end
 
 	serialized_attribute :hidden, default: 'false'
+	serialized_attribute :cached_searchable_text
 
 	delegate :text_body, to: :source_email
+	delegate :text_body_without_reply, to: :source_email
 	delegate :searchable_text, to: :source_email
 	delegate :html_body, to: :source_email
 	delegate :participants, to: :source_email
@@ -38,8 +42,33 @@ class Message < ApplicationModel
 	delegate :to_addresses, to: :source_email
 	delegate :cc_addresses, to: :source_email
 	delegate :participants, to: :source_email
+	delegate :message_id, to: :source_email
+	delegate :in_reply_to, to: :source_email
 
 	def equals_email?(email)
 		email.envelope_message_id == self.envelope_message_id
 	end
+
+	def parent_message
+		if (parent_message_id = self.in_reply_to) and 
+			(parent_message = self.conversation.messages.detect { |p| p.message_id == parent_message_id } )
+			parent_message
+		else
+			nil
+		end
+	end
+
+	def searchable_text
+		self.subject + ' ' + self.text_body_without_reply
+		# if self.cached_searchable_text
+		# 	self.cached_searchable_text
+		# else
+		# 	self.subject + ' ' + self.text_body_without_reply
+		# end
+	end
+
+	def text_body_without_reply
+		self.extract_email_reply self.text_body
+	end
+
 end

@@ -44,7 +44,7 @@ Htk.MessagesController = Ember.Controller.extend
 
 	setMessagesLoaded: ->
 		this.set('messagesLoaded', true)
-		this.get('searchIndex').index(this.get('party').get('id'), this.get('sortedPartyMessages'))
+		this.get('searchIndex').index(this.get('party'), this.get('sortedPartyMessages'))
 		console.log "Messages done loading"
 
 	showHidden: false

@@ -2,13 +2,14 @@
 #
 # Table name: parties
 #
-#  id          :integer          not null, primary key
-#  status_id   :integer
-#  name        :string(255)
-#  description :text
-#  creator_id  :integer
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
+#  id              :integer          not null, primary key
+#  status_id       :integer
+#  name            :string(255)
+#  description     :text
+#  creator_id      :integer
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  index_timestamp :datetime
 #
 
 class Party < ApplicationModel
