@@ -9,7 +9,7 @@ class PartiesController < ApplicationController
   end
 
   def show
-    @party = Party.user(current_user, PartyRole.read_only).find(params[:id])
+    @party = current_object
     @messages = @party.messages.order(:date)
 
     respond_to do |format|
@@ -78,4 +78,19 @@ class PartiesController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  protected
+
+    def current_object
+      if @current_object.nil?
+        @current_object = Party.user(current_user, PartyRole.read_only)
+        if (id = params[:id]) and (id.to_i.to_s == id)
+          @current_object = @current_object.find(id)
+        else
+          @current_object = @current_object.luid(id).first
+        end
+        not_found unless @current_object
+      end
+      @current_object
+    end
 end

@@ -20,7 +20,6 @@ class Message < ApplicationModel
 	attr_accessible :status_id, :date, :hidden, :status, :conversation_id, :conversation, :envelope_message_id, :source_email_id
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :conversation
-	has_many :emails
 	belongs_to :source_email, :class_name => 'Email'
 
 	def self.user(user, party_role=PartyRole.read_only)

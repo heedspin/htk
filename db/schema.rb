@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130915231138) do
+ActiveRecord::Schema.define(:version => 20131201232417) do
 
   create_table "conversation_imports", :force => true do |t|
     t.integer  "status_id"
@@ -84,6 +84,7 @@ ActiveRecord::Schema.define(:version => 20130915231138) do
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
     t.datetime "index_timestamp"
+    t.string   "luid"
   end
 
   create_table "party_users", :force => true do |t|

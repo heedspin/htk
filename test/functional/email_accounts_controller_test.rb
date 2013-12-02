@@ -1,8 +1,9 @@
 require 'test_helper'
 
-class EmailAccountsControllerTest < ActionController::TestCase
+class EmailAccountsControllerTest < HtkControllerTest
   setup do
-    @email_account = email_accounts(:one)
+    @email_account = email_accounts(:user1_account1)
+    sign_in User.first
   end
 
   test "should get index" do
@@ -18,7 +19,7 @@ class EmailAccountsControllerTest < ActionController::TestCase
 
   test "should create email_account" do
     assert_difference('EmailAccount.count') do
-      post :create, email_account: { authentication_string: @email_account.authentication_string, port: @email_account.port, server: @email_account.server, username: @email_account.username }
+      post :create, email_account: { authentication_string: 'anything', port: '1234', server: 'server', username: 'username' }
     end
 
     assert_redirected_to email_account_path(assigns(:email_account))
@@ -41,7 +42,7 @@ class EmailAccountsControllerTest < ActionController::TestCase
 
   test "should destroy email_account" do
     assert_difference('EmailAccount.count', -1) do
-      delete :destroy, id: @email_account
+      delete :destroy, id: @email_account.id
     end
 
     assert_redirected_to email_accounts_path

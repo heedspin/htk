@@ -10,6 +10,7 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  index_timestamp :datetime
+#  luid            :string(255)
 #
 
 class Party < ApplicationModel
@@ -31,6 +32,9 @@ class Party < ApplicationModel
 	end
 	def self.party_name(text)
 		where(name: text)
+	end
+	def self.luid(text)
+		where(luid: text)
 	end
 
 	def update_import!(args={})
