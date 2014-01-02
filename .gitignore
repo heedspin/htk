@@ -16,3 +16,4 @@
 
 script/server/server.yml
 config/local_config.yml
+config/database.yml
