@@ -19,10 +19,10 @@ require 'plutolib/logger_utils'
 class EmailAccount < ApplicationModel
   include Plutolib::LoggerUtils
   attr_accessible :authentication_string, :port, :server, :username, :status
-  attr_protected :user_Id
+  attr_protected :user_id
   belongs_to :user
   belongs_to_active_hash :status, :class_name => 'EmailAccountStatus'
-  validates_uniqueness_of :username, :case_sensitive => false
+  validates_uniqueness_of :username, :case_sensitive => false, :scope => :user_id
   has_many :email_account_conversations
   has_many :message_receipts, :through => :email_account_conversations
   has_many :emails

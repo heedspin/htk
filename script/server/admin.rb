@@ -25,9 +25,9 @@ class Ec2Instance
 end
 
 class Blues
-	def initialize
+	def initialize(server_name)
     yaml_config = YAML::load(IO.read(File.join(File.dirname(__FILE__), 'server.yml')))
-    @config = yaml_config['blues']
+    @config = yaml_config[server_name] || (raise "No server config for #{server_name}")
 		@instance_id = @config['instance_id']
 		@ip_address = @config['ip_address']
 	end
@@ -69,4 +69,4 @@ end
 # end
 # Trollop::die :customer_numbers, "required" unless options[:customer_numbers].present?
 
-exit Blues.new.send(ARGV[0])
+exit Blues.new(ARGV[0]).send(ARGV[1])

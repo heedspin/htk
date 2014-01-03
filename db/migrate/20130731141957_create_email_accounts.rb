@@ -9,6 +9,6 @@ class CreateEmailAccounts < ActiveRecord::Migration
       t.integer :port
       t.timestamps
     end
-    add_index :email_accounts, :username, unique: true
+    # add_index :email_accounts, [:username, :user_id], unique: true
   end
 end

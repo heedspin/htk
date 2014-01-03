@@ -24,7 +24,9 @@ class User < ApplicationModel
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
 
-	attr_accessible :email, :password, :password_confirmation
+  # Setup accessible (or protected) attributes for your model
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :email_accounts_attributes
 
 	has_many :email_accounts
+	accepts_nested_attributes_for :email_accounts
 end
