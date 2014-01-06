@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20131208203914) do
+ActiveRecord::Schema.define(:version => 20140104012927) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -124,6 +124,15 @@ ActiveRecord::Schema.define(:version => 20131208203914) do
     t.integer  "user_id"
     t.integer  "party_role_id"
     t.datetime "created_at"
+  end
+
+  create_table "signed_request_users", :force => true do |t|
+    t.datetime "created_at"
+    t.string   "original_opensocial_app_id"
+    t.string   "original_opensocial_app_url"
+    t.string   "opensocial_owner_id"
+    t.string   "opensocial_container"
+    t.integer  "user_id"
   end
 
   create_table "tag_type_groups", :force => true do |t|

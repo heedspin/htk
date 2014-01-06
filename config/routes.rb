@@ -1,4 +1,12 @@
 Htk::Application.routes.draw do
+  namespace :api do
+    namespace :v1 do
+      match 'comments', to: 'comments#index', via: [:get, :post]
+      resources :signed_request_users, :only => [:create]
+    end
+  end 
+
+
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
 

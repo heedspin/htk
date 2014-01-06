@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ApplicationManifest xmlns="http://schemas.google.com/ApplicationManifest/2009">
+
+  <Name>HTK Comments v21</Name>
+  <Description>Shared Comments</Description>
+
+  <Extension id="navLink" type="link">
+    <Name>HTK Comments</Name>
+    <Url>https://htk.lxdinc.com</Url>
+  </Extension>
+
+  <Extension id="MessageIDExtractor" type="contextExtractor">
+    <Url>google.com:MessageIDExtractor</Url>
+    <Triggers ref="CommentsGadget"/>
+    <Scope ref="messageId"/>
+    <Container name="mail"/>
+  </Extension>
+  <Extension id="EmailTimeExtractor" type="contextExtractor">
+    <Url>google.com:EmailTimeExtractor</Url>
+    <Triggers ref="CommentsGadget"/>
+    <Scope ref="dateSent"/>
+    <Scope ref="dateReceived"/>
+    <Container name="mail"/>
+  </Extension>
+  <Extension id="SenderEmailExtractor" type="contextExtractor">
+    <Url>google.com:SenderEmailExtractor</Url>
+    <Triggers ref="CommentsGadget"/>
+    <Scope ref="fromAddress"/>
+    <Container name="mail"/>
+  </Extension>
+  <Extension id="RecipientToEmailExtractor" type="contextExtractor">
+    <Url>google.com:RecipientToEmailExtractor</Url>
+    <Triggers ref="CommentsGadget"/>
+    <Scope ref="recipientToAddress"/>
+    <Container name="mail"/>
+  </Extension>
+  <Extension id="RecipientCCEmailExtractor" type="contextExtractor">
+    <Url>google.com:RecipientCCEmailExtractor</Url>
+    <Triggers ref="CommentsGadget"/>
+    <Scope ref="recipientCcAddress"/>
+    <Container name="mail"/>
+  </Extension>
+  <Extension id="SubjectExtractor" type="contextExtractor">
+    <Url>google.com:SubjectExtractor</Url>
+    <Triggers ref="CommentsGadget"/>
+    <Scope ref="subject"/>
+    <Container name="mail"/>
+  </Extension>
+  <Extension id="EmailBodyExtractor" type="contextExtractor">
+    <Url>google.com:EmailBodyExtractor</Url>
+    <Triggers ref="CommentsGadget"/>
+    <Scope ref="body"/>
+    <Container name="mail"/>
+  </Extension>
+
+  <Extension id="CommentsGadget" type="gadget">
+    <Name>HTK Comments Gadget</Name>
+    <Url>https://s3.amazonaws.com/lxd-stk/comments_gadget/spec-v21.xml</Url>
+    <Container name="mail"/>
+  </Extension>
+
+  <Scope id="messageId">
+    <Url>tag:google.com,2010:auth/contextual/extractor/MESSAGE_ID</Url>
+    <Reason>I read the message id from the email header.</Reason>
+  </Scope>
+  <Scope id="dateSent">
+    <Url>tag:google.com,2010:auth/contextual/extractor/DATE_SENT</Url>
+    <Reason>I read the send date from the email header.</Reason>
+  </Scope>
+  <Scope id="dateReceived">
+    <Url>tag:google.com,2010:auth/contextual/extractor/DATE_RECEIVED</Url>
+    <Reason>I read the send received from the email header.</Reason>
+  </Scope>
+  <Scope id="fromAddress">
+    <Url>tag:google.com,2010:auth/contextual/extractor/FROM_ADDRESS</Url>
+    <Reason>I read the from address the email header.</Reason>
+  </Scope>
+  <Scope id="recipientToAddress">
+    <Url>tag:google.com,2010:auth/contextual/extractor/TO_ADDRESS</Url>
+    <Reason>I read the to address the email header.</Reason>
+  </Scope>
+  <Scope id="recipientCcAddress">
+    <Url>tag:google.com,2010:auth/contextual/extractor/CC_EMAIL</Url>
+    <Reason>I read the cc address the email header.</Reason>
+  </Scope>
+  <Scope id="subject">
+    <Url>tag:google.com,2010:auth/contextual/extractor/SUBJECT</Url>
+    <Reason>I read the email subject.</Reason>
+  </Scope>
+  <Scope id="body">
+    <Url>tag:google.com,2010:auth/contextual/extractor/BODY</Url>
+    <Reason>I read the email body.</Reason>
+  </Scope>
+</ApplicationManifest>
