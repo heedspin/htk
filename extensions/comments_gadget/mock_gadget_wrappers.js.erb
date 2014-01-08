@@ -1,0 +1,20 @@
+function adjust_window_height() {
+	// do nothing
+}
+function getContentMatches() {
+	[ { subject: 'hello', "message-id": 'helloid' }, { subject: 'world', "message-id": 'worldid' } ]
+}
+function htkPost(url, callback, data) {
+	data["opensocial_owner_id"] = 'test user';
+	data["opensocial_container"] = 'test container';
+	$.ajax({
+		url: url,
+		type: 'POST',
+		dataType: 'json',
+		data: data
+	}).done(function(response) {
+		callback({rc: 200, data: response})
+	}).fail(function(xhr, exception){
+		callback({rc: xhr.status})
+	})
+}

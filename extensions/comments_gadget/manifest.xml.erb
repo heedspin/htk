@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ApplicationManifest xmlns="http://schemas.google.com/ApplicationManifest/2009">
 
-  <Name>HTK Comments v21</Name>
+  <Name>HTK Comments v<%= config['version'] %></Name>
   <Description>Shared Comments</Description>
 
   <Extension id="navLink" type="link">
@@ -55,7 +55,7 @@
 
   <Extension id="CommentsGadget" type="gadget">
     <Name>HTK Comments Gadget</Name>
-    <Url>https://s3.amazonaws.com/lxd-stk/comments_gadget/spec-v21.xml</Url>
+    <Url>https://s3.amazonaws.com/lxd-stk/comments_gadget/spec-v<%= config['version'] %>.xml</Url>
     <Container name="mail"/>
   </Extension>
 

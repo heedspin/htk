@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <ModulePrefs title="HTK Comments v<%= config['version']%>"
+    description=""
+    height="200"
+    scrolling="true"
+    author="Tim Harrison"
+    author_email="tharrison@lxdinc.com"
+    author_location="Raleigh, NC">
+
+    <Require feature="dynamic-height"/>
+    <Require feature="google.contentmatch">
+      <Param name="extractors">
+        google.com:MessageIDExtractor,google.com:EmailTimeExtractor,google.com:SenderEmailExtractor,google.com:RecipientToEmailExtractor,google.com:RecipientCCEmailExtractor,google.com:SubjectExtractor,google.com:EmailBodyExtractor
+      </Param>
+    </Require>
+  </ModulePrefs>
+
+  <Content type="html" view="card">
+    <![CDATA[
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+      <script type="text/javascript">
+        <%= insert_file 'gadget_wrappers.js.erb' %>
+        <%= insert_file 'spec.js.erb' %>
+        comments_gadget_ready();
+      </script>
+    ]]>
+  </Content>
+</Module>

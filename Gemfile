@@ -35,6 +35,7 @@ gem 'pg'
 gem 'devise'
 gem 'activeadmin'
 gem 'oauth'
+gem 'html_press'
 
 group :development do
   gem 'annotate', :git => 'https://github.com/ctran/annotate_models.git'

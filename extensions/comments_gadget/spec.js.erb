@@ -1,0 +1,78 @@
+var container = null;
+var statusMsg = null;
+var loginForm = null;
+
+function log(text) {
+  console.log(text);
+}
+function loginResponse(obj) {
+  var rc = "";
+  if (obj.rc) rc = obj.rc;
+  if (rc == 401) {
+    statusMsg.empty().append("Login failed.");
+    promptLogin();
+  } else if (rc == 200) {
+    statusMsg.empty().append("Login successful!  Loading comments...");
+    loadComments();
+    adjust_window_height();
+  } else {
+    statusMsg.empty().append("Login error");
+    adjust_window_height();
+    log("Login response: " + JSON.stringify(obj));                    
+  }
+}
+function promptLogin() {
+  if (!loginForm) {
+    login_html = "<%= insert_file('html/login.html', :javascript_escape => true) %>"
+    loginForm = $(login_html);
+    container.append(loginForm);
+    $("#login").on('click', function(e) {
+      e.preventDefault();
+      loginForm.hide();
+      var email = $("#email");
+      var password = $("#password");
+      htkPost("https://<%= config['api_hostname'] %>/api/v1/signed_request_users", 
+        loginResponse, { email: email.val(), password: password.val() } );
+      statusMsg.empty().append("Logging in to HTK as " + email.val()).show();
+      adjust_window_height();
+      email.val("");
+      password.val("");
+    });
+    adjust_window_height();        
+  } else {
+    loginForm.show();
+  }
+}
+function commentsResponse(obj) {
+  if (obj.rc && (obj.rc == "401")) {
+    statusMsg.hide();
+    promptLogin();
+  } else if (obj.errors.length > 0) {
+    statusMsg.empty().append("Error").show();
+    log("Error response: " + JSON.stringify(obj));
+    adjust_window_height();
+  } else {
+    statusMsg.empty().append("Victory").show();
+    adjust_window_height();
+    log("Result: " + JSON.stringify(obj.data));
+  }
+}
+function loadComments() {
+  var matches = getContentMatches();
+  var all_data = new Object();
+  for (var match in matches) {
+    for (var key in matches[match]) {
+      all_data[key] = matches[match][key];
+    }
+  }
+  htkPost("https://<%= config['api_hostname'] %>/api/v1/comments", commentsResponse, all_data );        
+}
+
+function comments_gadget_ready() {
+  container = $(document.createElement('div'));
+  statusMsg = $("<p>Loading...</p>");
+  container.append(statusMsg);
+  $('body').append(container);
+  adjust_window_height();
+  loadComments();  
+}

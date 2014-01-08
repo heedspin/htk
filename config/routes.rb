@@ -22,6 +22,7 @@ Htk::Application.routes.draw do
   resources :messages, :only => [:index, :show, :update, :destroy]
   # resources :message_bodies, :only => [:show]
   resources :users, :only => [:show]
+  match 'test_comments_gadget', to: 'test_comments_gadget#index'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

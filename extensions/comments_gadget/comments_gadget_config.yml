@@ -1,0 +1,10 @@
+shared: &shared
+  version: 22
+
+development:
+  <<: *shared
+  api_hostname: stk.lxdinc.com
+
+production:
+  <<: *shared
+  api_hostname: htk.lxdinc.com
