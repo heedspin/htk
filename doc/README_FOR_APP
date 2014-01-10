@@ -7,10 +7,13 @@ Run "rake doc:app" to generate API documentation for your models, controllers, h
 
 ## s3cmd
 
- * Get it:
+ * Get it (Mac)
    brew install python
    download s3cmd from here: http://s3tools.org/download
    sudo python setup.py install
+
+ * Get it (Ubuntu)
+   sudo apt-get install s3cmd
 
  * Configure:
    cd RAILS_ROOT

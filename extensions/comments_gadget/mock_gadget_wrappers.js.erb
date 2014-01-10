@@ -13,8 +13,8 @@ function htkPost(url, callback, data) {
 		dataType: 'json',
 		data: data
 	}).done(function(response) {
-		callback({rc: 200, data: response})
+		callback({rc: 200, data: response, errors: [] })
 	}).fail(function(xhr, exception){
-		callback({rc: xhr.status})
+		callback({rc: xhr.status, data: xhr.responseText, errors: [ "post failed" ]})
 	})
 }

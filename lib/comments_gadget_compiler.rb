@@ -5,17 +5,21 @@ require 'action_view/helpers/javascript_helper'
 class CommentsGadgetCompiler
 	include ActionView::Helpers::JavaScriptHelper
 	attr_accessor :environment, :config, :source_directory
-	def initialize(environment)
-  	self.source_directory = File.join(Rails.root, 'extensions/comments_gadget')
+	def initialize(environment, source_directory)
+		self.source_directory = source_directory
   	gadget_config = YAML::load(IO.read(File.join(self.source_directory, 'comments_gadget_config.yml')))
 		self.environment = environment
 		self.config = gadget_config[self.environment]
 	end
 
+	def version
+		self.config['version']
+	end
+
 	def insert_file(filename, options=nil)
 		options ||= {}
 		result = IO.read(File.join(self.source_directory, filename))
-		if =~ /.*\.erb$/
+		if filename =~ /.*\.erb$/
 			result = ERB.new(result).result(binding)
 		end
 		if filename =~ /.*\.html(\.erb)?$/
