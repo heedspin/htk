@@ -46,13 +46,13 @@
     <Scope ref="subject"/>
     <Container name="mail"/>
   </Extension>
-  <Extension id="EmailBodyExtractor" type="contextExtractor">
+<!--   <Extension id="EmailBodyExtractor" type="contextExtractor">
     <Url>google.com:EmailBodyExtractor</Url>
     <Triggers ref="CommentsGadget"/>
     <Scope ref="body"/>
     <Container name="mail"/>
   </Extension>
-
+ -->
   <Extension id="CommentsGadget" type="gadget">
     <Name>HTK Comments Gadget</Name>
     <Url>https://s3.amazonaws.com/lxd-stk/comments_gadget/spec_<%= environment %>-v<%= config['version'] %>.xml</Url>

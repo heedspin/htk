@@ -5,8 +5,8 @@ require 'action_view/helpers/javascript_helper'
 class CommentsGadgetCompiler
 	include ActionView::Helpers::JavaScriptHelper
 	attr_accessor :environment, :config, :source_directory
-	def initialize(environment, source_directory)
-		self.source_directory = source_directory
+	def initialize(environment)
+		self.source_directory = File.join(Rails.root, 'extensions/comments_gadget')
   	gadget_config = YAML::load(IO.read(File.join(self.source_directory, 'comments_gadget_config.yml')))
 		self.environment = environment
 		self.config = gadget_config[self.environment]

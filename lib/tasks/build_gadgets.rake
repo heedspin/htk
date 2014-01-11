@@ -4,9 +4,8 @@ namespace :htk do
   desc "Build HTK Gadgets"
   task :build_gadgets => :environment do
   	['development', 'production'].each do |environment|
-	  	source_directory = File.join(Rails.root, 'extensions/comments_gadget')
-	  	output_directory = File.join(source_directory, 'output')
-	  	compiler = CommentsGadgetCompiler.new(environment, source_directory)
+	  	compiler = CommentsGadgetCompiler.new(environment)
+	  	output_directory = File.join(compiler.source_directory, 'output')
   		['manifest', 'spec'].each do |base_filename|
   			output_file = "#{base_filename}_#{environment}.xml"
 	  		output_path = File.join(output_directory, output_file)

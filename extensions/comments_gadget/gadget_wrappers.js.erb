@@ -12,3 +12,10 @@ function htkPost(url, callback, data) {
   params[gadgets.io.RequestParameters.POST_DATA] = gadgets.io.encodeValues(data);
   gadgets.io.makeRequest(url, callback, params);        
 }
+function htkGet(url, callback, data) {
+  var params = {};
+  params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.SIGNED;
+  params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
+  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
+  gadgets.io.makeRequest(url + "?" + gadgets.io.encodeValues(data), callback, params);        
+}

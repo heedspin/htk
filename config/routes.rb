@@ -1,7 +1,8 @@
 Htk::Application.routes.draw do
   namespace :api do
     namespace :v1 do
-      match 'comments', to: 'comments#index', via: [:get, :post]
+      # match 'email_comments', to: 'email_comments#index', via: [:get, :post]
+      resources :email_comments
       resources :signed_request_users, :only => [:create]
     end
   end 

@@ -43,7 +43,7 @@ function promptLogin() {
     loginForm.show();
   }
 }
-function commentsResponse(obj) {
+function loadCommentsResponse(obj) {
   if (obj.rc && (obj.rc == "401")) {
     statusMsg.hide();
     promptLogin();
@@ -59,13 +59,24 @@ function commentsResponse(obj) {
 }
 function loadComments() {
   var matches = getContentMatches();
+  log("Content matches: " + JSON.stringify(matches));
+  var query_data = new Object();
+  for (var match in matches) {
+    for (var key in ["date_sent", "message_id", "subject", "sender_email"]) {
+      query_data[key] = matches[match][key];
+    }
+  }
+  htkGet("https://<%= config['api_hostname'] %>/api/v1/email_comments", loadCommentsResponse, query_data );        
+}
+function createComments() {
+  var matches = getContentMatches();
   var all_data = new Object();
   for (var match in matches) {
     for (var key in matches[match]) {
       all_data[key] = matches[match][key];
     }
   }
-  htkPost("https://<%= config['api_hostname'] %>/api/v1/comments", commentsResponse, all_data );        
+  htkPost("https://<%= config['api_hostname'] %>/api/v1/email_comments", loadCommentsResponse, all_data );        
 }
 
 function comments_gadget_ready() {

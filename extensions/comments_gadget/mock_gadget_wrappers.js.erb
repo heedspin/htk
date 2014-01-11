@@ -18,3 +18,17 @@ function htkPost(url, callback, data) {
 		callback({rc: xhr.status, data: xhr.responseText, errors: [ "post failed" ]})
 	})
 }
+function htkGet(url, callback, data) {
+	data["opensocial_owner_id"] = 'test user';
+	data["opensocial_container"] = 'test container';
+	$.ajax({
+		url: url,
+		type: 'GET',
+		dataType: 'json',
+		data: data
+	}).done(function(response) {
+		callback({rc: 200, data: response, errors: [] })
+	}).fail(function(xhr, exception){
+		callback({rc: xhr.status, data: xhr.responseText, errors: [ "get failed" ]})
+	})
+}

@@ -1,4 +1,4 @@
-class Api::V1::CommentsController < Api::V1::ApiController
+class Api::V1::EmailCommentsController < Api::V1::ApiController
 	respond_to :json
 
 	def index
