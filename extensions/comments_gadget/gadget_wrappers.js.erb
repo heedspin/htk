@@ -5,20 +5,34 @@ function adjust_window_height() {
 function getContentMatches() {
 	return google.contentmatch.getContentMatches();
 }
-function htkRequest(method, path, data, callback) {
+function htkAjax(method, path, data, callback) {
+  // gadgets.io.encodeValues does not format arrays rack-friendly.
+  var request_data = [];
+  for (var key in data) {
+    var value = data[key];
+    if (value instanceof Array) {
+      for (var i = 0; i < value.length; i++) {
+        request_data.push(encodeURIComponent(key)+"[]="+encodeURIComponent(value[i]));
+      }
+    } else {
+      request_data.push(encodeURIComponent(key)+"="+encodeURIComponent(value));
+    }
+  }
+  request_data = request_data.join("&");
+
   var params = {};
   var url = gadget_host_url + path;
   params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.SIGNED;
   params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
   if (method === "POST") {
     params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
-    params[gadgets.io.RequestParameters.POST_DATA] = gadgets.io.encodeValues(data);    
+    params[gadgets.io.RequestParameters.POST_DATA] = request_data;
   } else if (method === "GET") {
     params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
-    url = url + "?" + gadgets.io.encodeValues(data);
+    url = url + "?" + request_data;
   } else if (method === "PUT") {
     params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.PUT;
-    params[gadgets.io.RequestParameters.POST_DATA] = gadgets.io.encodeValues(data);    
+    params[gadgets.io.RequestParameters.POST_DATA] = request_data;
   } else if (method === "DELETE") {
     params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.DELETE;
   }

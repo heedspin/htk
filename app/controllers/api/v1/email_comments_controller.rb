@@ -11,7 +11,7 @@ class Api::V1::EmailCommentsController < Api::V1::ApiController
   
   def create
   	if (comment_text = params[:comment]).present? and (sender = params[:sender_email].try(:downcase)).present?
-  		participants = [sender] + (params[:recipient_cc_email] || []) + (params[:recipient_to_email]).map(&:downcase).map(&:strip)
+  		participants = ([sender] + [params[:recipient_cc_email]] + [params[:recipient_to_email]]).flatten.compact.map(&:downcase).map(&:strip)
   		if participants.include?(current_user.email)
 		  	comment = EmailComment.new(
 		  		:status => EmailCommentStatus.published,

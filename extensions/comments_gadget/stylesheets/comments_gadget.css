@@ -50,10 +50,10 @@
 }
 
 #ca_edit_comments, #ca_new_comment {
-	height: 4em;
+	/*height: 4em;*/
 	overflow-y:auto;
 	overflow-x: none;
-	width: 450px;
+	/*width: 450px;*/
 }
 
 #ca_new_comment > div {

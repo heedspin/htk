@@ -154,7 +154,7 @@ function updateComment(comment_id, comment_text) {
   });
 }
 function deleteComment(comment_id) {
-  htkRequest("DELETE", "/api/v1/email_comments/" + comment_id, {}, function(obj) {
+  htkRequest("DELETE", "/api/v1/email_comments/" + comment_id, null, function(obj) {
     var rc = "";
     if (obj.rc) rc = obj.rc;
     if (rc == 200) {
@@ -201,6 +201,33 @@ function loadComments() {
       adjust_window_height();
     }
   });        
+}
+
+function htkRequest(method, path, data, callback) {
+  var request_data = null;
+  if (!data) {
+    request_data = new Object();
+  } else if (data instanceof Array) {
+    request_data = new Object();
+    for (var index in data) {
+      for (var key in data[index]) {
+        var value = data[index][key];
+        var exists = request_data[key];
+        if (exists) {
+          if (exists instanceof Array) {
+            exists.push(value);
+          } else {
+            request_data[key] = [exists, value];
+          }
+        } else {
+          request_data[key] = value
+        }
+      }
+    }   
+  } else {
+    request_data = data
+  }
+  return htkAjax(method, path, request_data, callback);
 }
 
 function commentsGadgetReady() {
