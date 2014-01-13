@@ -32,7 +32,7 @@ else
 end
 
 gem 'pg'
-gem 'devise'
+gem 'devise', '3.0.2'
 gem 'activeadmin'
 gem 'oauth'
 gem 'html_press'

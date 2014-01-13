@@ -1,9 +1,14 @@
 var container = null;
 var statusMsg = null;
 var loginForm = null;
+var commentsTemplate = Handlebars.compile("<%= insert_file('html/comments.html', :javascript_escape => true) %>");
+var currentUser = null;
+var currentComments = null;
 
 function log(text) {
-  console.log(text);
+  if (console && console.log) {
+    console.log(text);    
+  }
 }
 function loginResponse(obj) {
   var rc = "";
@@ -31,8 +36,7 @@ function promptLogin() {
       loginForm.hide();
       var email = $("#email");
       var password = $("#password");
-      htkPost("https://<%= config['api_hostname'] %>/api/v1/signed_request_users", 
-        loginResponse, { email: email.val(), password: password.val() } );
+      htkRequest("POST", "/api/v1/signed_request_users", { email: email.val(), password: password.val() }, loginResponse);
       statusMsg.empty().append("Logging in to HTK as " + email.val()).show();
       adjust_window_height();
       email.val("");
@@ -43,43 +47,163 @@ function promptLogin() {
     loginForm.show();
   }
 }
-function loadCommentsResponse(obj) {
-  if (obj.rc && (obj.rc == "401")) {
-    statusMsg.hide();
-    promptLogin();
-  } else if (obj.errors.length > 0) {
-    statusMsg.empty().append("Error").show();
-    log("Error response: " + JSON.stringify(obj));
-    adjust_window_height();
-  } else {
-    statusMsg.empty().append("Victory").show();
-    adjust_window_height();
-    log("Result: " + JSON.stringify(obj.data));
+function createComment() {
+  var comment_text_area = $(this).parent().find("textarea");
+  var comment_text = comment_text_area.val();
+  if (comment_text) {
+    var matches = getContentMatches();
+    log("createComment: " + JSON.stringify(matches));
+    matches.push({comment: comment_text});
+    htkRequest("POST", "/api/v1/email_comments", matches, function(obj) {
+      var rc = "";
+      if (obj.rc) rc = obj.rc;
+      if (rc == 200) {
+        log("Posting new comment succeeded: " + JSON.stringify(obj.data));
+        comment_text_area.val("");
+        var new_comment = obj.data["comment"];
+        if (currentComments && new_comment) {
+          log("Created new comment: " + JSON.stringify(new_comment))
+          currentComments.unshift(new_comment);
+          renderComments();
+        }
+        adjust_window_height();
+      } else {
+        statusMsg.empty().append("Create comment failed.");
+        adjust_window_height();
+        log("Create comment response: " + JSON.stringify(obj));                    
+      }
+    });
   }
 }
+function renderComments() {
+  var comments_container = container.find("#ca_comments");
+  if (comments_container.length == 0) {
+    comments_container = $("<div id=\"ca_comments\"></div>");
+    container.append(comments_container);
+  }
+  var html = commentsTemplate({ current_user: currentUser, comments: currentComments });
+  var new_elements = $(html);
+  comments_container.replaceWith(new_elements);
+  statusMsg.empty();
+  commentsReady(new_elements);
+}
+function getComment(comment_id) {
+  if (!currentComments) return null;
+  for (var i=0; i < currentComments.length; i++) {
+    var comment = currentComments[i];
+    if (comment.id == comment_id) return comment;
+  }
+  return null;
+}
+function removeComment(comment_id) {
+  if (!currentComments) return null;
+  for (var i=0; i < currentComments.length; i++) {
+    var comment = currentComments[i];
+    if (comment.id == comment_id) currentComments.splice(i,1)
+  }
+}
+function commentsReady(comments_container) {
+  comments_container.find("#ca_new_comment > button").click(createComment);
+  comments_container.find("textarea.expanding").autogrow();
+  // Populated comment edit form.
+  comments_container.find(".ca_hidden_edit .ca_edit").on('click', function(e) {
+    var comment_id = $(this).parent().attr("data-id");
+    log("Editing comment " + comment_id);
+    $("#ca_new_comment").hide();
+    var edit_container = $("#ca_edit_comment").show();
+    edit_container.attr("data-id", comment_id);
+    var comment = getComment(comment_id);
+    if (comment) edit_container.find("textarea").val(comment.comment);
+  });
+  // Toggle Save / Delete button.
+  comments_container.find("#ca_edit_comments").on('click', 'input.delete_option', function(e) {
+    log("#ca_edit_comments input.delete_option click");
+    var save_button = $(this).siblings("button");
+    if ($(this).is(":checked")) {
+      save_button.html("Delete");
+    } else {
+      save_button.html("Save");     
+    }
+  });
+  // Handle Edit Save / Delete button.
+  comments_container.find("#ca_edit_comments").on("click", "#ca_edit_comment > button", function(e) {
+    var button = $(this);
+    var comment_id = button.parent().attr("data-id");   
+    if (button.html() == "Save") {
+      updateComment(comment_id, button.siblings("textarea").val());
+    } else {
+      deleteComment(comment_id);
+    }
+  });
+}
+function updateComment(comment_id, comment_text) {
+  htkRequest("PUT", "/api/v1/email_comments/" + comment_id, { comment: comment_text }, function(obj) {
+    var rc = "";
+    if (obj.rc) rc = obj.rc;
+    if (rc == 200) {
+      log("Putting comment succeeded");
+      if (currentComments) {
+        var comment = getComment(comment_id);
+        if (comment) comment.comment = comment_text;
+        renderComments();
+        showNewCommentForm();
+      }
+    } else {
+      log("Updating comment failed");
+    }
+  });
+}
+function deleteComment(comment_id) {
+  htkRequest("DELETE", "/api/v1/email_comments/" + comment_id, {}, function(obj) {
+    var rc = "";
+    if (obj.rc) rc = obj.rc;
+    if (rc == 200) {
+      console.log("Delete comment succeeded");
+      removeComment(comment_id);
+      renderComments();
+      showNewCommentForm();
+    } else {
+      log("Deleting comment failed");
+    }
+  });
+}
+function showNewCommentForm() {
+  $("#ca_new_comment").show();
+  $("#ca_edit_comment").hide(); 
+}
+var loadCommentsKeys = ["date_sent", "sender_email"];
 function loadComments() {
   var matches = getContentMatches();
-  log("Content matches: " + JSON.stringify(matches));
+  log("Load comments matches: " + JSON.stringify(matches));
   var query_data = new Object();
   for (var match in matches) {
-    for (var key in ["date_sent", "message_id", "subject", "sender_email"]) {
-      query_data[key] = matches[match][key];
-    }
-  }
-  htkGet("https://<%= config['api_hostname'] %>/api/v1/email_comments", loadCommentsResponse, query_data );        
-}
-function createComments() {
-  var matches = getContentMatches();
-  var all_data = new Object();
-  for (var match in matches) {
     for (var key in matches[match]) {
-      all_data[key] = matches[match][key];
+      if ($.inArray(key, loadCommentsKeys) >= 0) {
+        query_data[key] = matches[match][key];
+      }
     }
   }
-  htkPost("https://<%= config['api_hostname'] %>/api/v1/email_comments", loadCommentsResponse, all_data );        
+  log("Query data: " + JSON.stringify(query_data));
+  htkRequest("GET", "/api/v1/email_comments", query_data, function(obj) {
+    if (obj.rc && (obj.rc == "401")) {
+      statusMsg.hide();
+      promptLogin();
+    } else if (obj.errors.length > 0) {
+      statusMsg.empty().append("Error").show();
+      log("Error response: " + JSON.stringify(obj));
+      adjust_window_height();
+    } else {
+      log("Load Comments: " + JSON.stringify(obj.data));
+      currentUser = obj.data["current_user"];
+      currentComments = obj.data["comments"];
+      renderComments();
+      // statusMsg.empty().append("Victory").show();
+      adjust_window_height();
+    }
+  });        
 }
 
-function comments_gadget_ready() {
+function commentsGadgetReady() {
   container = $(document.createElement('div'));
   statusMsg = $("<p>Loading...</p>");
   container.append(statusMsg);

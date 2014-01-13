@@ -30,7 +30,7 @@ Run "rake doc:app" to generate API documentation for your models, controllers, h
 ## rsync
 
  * To blues
-   rsync -va --exclude-from=/Users/timothyharrison/Dropbox/p/htk/.rsync-exclude /Users/timothyharrison/Dropbox/p/htk/ blues:/home/ubuntu/rsync/p/htk
+   rsync -va --exclude=Gemfile.lock --exclude-from=/Users/timothyharrison/Dropbox/p/htk/.rsync-exclude /Users/timothyharrison/Dropbox/p/htk/ blues:/home/ubuntu/rsync/p/htk
 
  * From blues
-   rsync -va blues:/home/ubuntu/rsync/p/htk/extensions/comments_gadget/output /Users/timothyharrison/Dropbox/p/htk/extensions/comments_gadget/output/
+   rsync -va blues:/home/ubuntu/rsync/p/htk/extensions/comments_gadget/output/ /Users/timothyharrison/Dropbox/p/htk/extensions/comments_gadget/output

@@ -39,7 +39,7 @@ class Api::V1::ApiController < ActionController::Base
     	if api_user.nil?
     		render json: { error: 'Please sign in.'}, :status => :unauthorized
     	else
-    		# Assign api_user to Devise current_user?
+				sign_in(:user, api_user.user)
     	end
 		end
 

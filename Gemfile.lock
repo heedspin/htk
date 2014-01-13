@@ -220,7 +220,7 @@ DEPENDENCIES
   annotate!
   coffee-rails (~> 3.2.1)
   debugger
-  devise
+  devise (= 3.0.2)
   ember-rails!
   ember-source (= 1.2.0.1)
   handlebars-source

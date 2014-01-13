@@ -1,6 +1,6 @@
 class Api::V1::SignedRequestUsersController < Api::V1::ApiController
 	respond_to :json
-	skip_before_filter :verify_signed_user
+	skip_before_filter :verify_signed_user, :only => :create
 
 	def create
 		if SignedRequestUser.owner_container(params[:opensocial_owner_id], params[:opensocial_container]).first
@@ -11,10 +11,18 @@ class Api::V1::SignedRequestUsersController < Api::V1::ApiController
 				original_opensocial_app_url: params[:opensocial_app_url],
 				opensocial_owner_id: params[:opensocial_owner_id],
 				opensocial_container: params[:opensocial_container])
-			sign_in(:user, user)
+			# sign_in(:user, user)
 			render json: { result: 'success' }, status: 200
 		else
 			render json: { result: 'login failed' }, status: 401
+		end
+	end
+
+	def destroy
+		if SignedRequestUser.owner_container(params[:opensocial_owner_id], params[:opensocial_container]).first.destroy
+			render json: { result: 'logged out' }, status: 200
+		else
+			render json: { result: 'failed to logout' }, status: 401
 		end
 	end
 end

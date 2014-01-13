@@ -1,21 +1,26 @@
+var gadget_host_url = "https://<%= config['api_hostname'] %>";
 function adjust_window_height() {
 	gadgets.window.adjustHeight();
 }
 function getContentMatches() {
-	google.contentmatch.getContentMatches();
+	return google.contentmatch.getContentMatches();
 }
-function htkPost(url, callback, data) {
+function htkRequest(method, path, data, callback) {
   var params = {};
+  var url = gadget_host_url + path;
   params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.SIGNED;
   params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
-  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
-  params[gadgets.io.RequestParameters.POST_DATA] = gadgets.io.encodeValues(data);
-  gadgets.io.makeRequest(url, callback, params);        
-}
-function htkGet(url, callback, data) {
-  var params = {};
-  params[gadgets.io.RequestParameters.AUTHORIZATION] = gadgets.io.AuthorizationType.SIGNED;
-  params[gadgets.io.RequestParameters.CONTENT_TYPE] = gadgets.io.ContentType.JSON;
-  params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
-  gadgets.io.makeRequest(url + "?" + gadgets.io.encodeValues(data), callback, params);        
+  if (method === "POST") {
+    params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.POST;
+    params[gadgets.io.RequestParameters.POST_DATA] = gadgets.io.encodeValues(data);    
+  } else if (method === "GET") {
+    params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.GET;
+    url = url + "?" + gadgets.io.encodeValues(data);
+  } else if (method === "PUT") {
+    params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.PUT;
+    params[gadgets.io.RequestParameters.POST_DATA] = gadgets.io.encodeValues(data);    
+  } else if (method === "DELETE") {
+    params[gadgets.io.RequestParameters.METHOD] = gadgets.io.MethodType.DELETE;
+  }
+  return gadgets.io.makeRequest(url, callback, params);        
 }

@@ -33,7 +33,7 @@ class EmailAccount < ApplicationModel
   scope :active, :conditions => { :status_id => EmailAccountStatus.active.id }
 
   def username=(txt)
-    super txt.try(:downcase)
+    super txt.try(:downcase).try(:strip)
   end
 
   before_save :set_default_port

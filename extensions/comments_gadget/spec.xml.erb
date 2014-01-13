@@ -18,10 +18,16 @@
 
   <Content type="html" view="card">
     <![CDATA[
+      <style>
+        <%= insert_file 'stylesheets/comments_gadget.css' %>
+      </style>
       <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
       <script type="text/javascript">
+        <%= insert_file 'lib/handlebars-v1.3.0.js' %>
+        <%= insert_file 'lib/autogrow.js' %>
         <%= insert_file 'gadget_wrappers.js.erb' %>
         <%= insert_file 'spec.js.erb' %>
+        <%= insert_file 'lib/handlebars_helpers.js' %>
         comments_gadget_ready();
       </script>
     ]]>
