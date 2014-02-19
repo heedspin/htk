@@ -1,0 +1,106 @@
+#htkContainer {
+	padding: 5px 5px 5px 10px;
+	background-color: #efefef;
+	height: 4em;
+	max-height: 4em;
+ 	overflow: hidden;
+	font-size: .75em;
+}
+
+#deliverables, #edit_deliverables {
+	margin: 0 0 0 15px;	
+}
+
+#deliverables table {
+	border-collapse:collapse;
+	border-spacing:0;
+}
+
+#deliverables p {
+	margin: 0 0 5px 0;
+}
+
+#deliverables p:last-child {
+	margin: 0;
+}
+
+#edit_deliverable {
+	padding: .3em 0;
+}
+
+#deliverables, #deliverables_list, #edit_deliverables, #edit_deliverable, #new_deliverable {
+	float: left;
+	display: inline;
+}
+
+#deliverables_list {
+	padding: 0 17px 0 0;
+}
+
+#edit_deliverables, #new_deliverable {
+	/*height: 4em;*/
+	overflow-y:auto;
+	overflow-x: none;
+	/*width: 450px;*/
+}
+
+#new_deliverable > div {
+	float: left;
+}
+
+#new_deliverable textarea, #new_deliverable textareaClone {
+	padding: .3em;
+	background: #fff;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	line-height: 1em;
+	margin: .5em 0;
+	height: 1em;
+	width: 200px;
+}
+
+#edit_deliverable textarea {
+	float: left;
+/*	padding: .3em;*/
+	background: #fff;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	line-height: 1em;
+/*	margin: .5em 0;*/
+	height: 100%;
+	width: 200px;	
+}
+
+#edit_deliverable button, #edit_deliverable input {
+	margin: 0 0 0 .5em;
+	float: left;
+}
+
+#new_deliverable button {
+	margin: 1em 0 0 1.5em;
+}
+
+#create_deliverable {
+	/*float: left;*/
+	margin: 5px 0 0 10px;
+}
+
+.hidden_edit span.edit {
+	display: none;
+	float: right;
+	padding: 0;
+	margin: 0;
+/*	margin: 0 0 0 5px;*/
+}
+
+.hidden_edit:hover .edit {
+	display: inline;
+}
+
+#edit_deliverable {
+	display: none;
+}
+
+#edit_deliverable .delete_confirmation {
+	display: none;
+}

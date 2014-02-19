@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140111205533) do
+ActiveRecord::Schema.define(:version => 20140218021422) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -65,6 +65,30 @@ ActiveRecord::Schema.define(:version => 20140111205533) do
     t.datetime "created_at"
   end
 
+  create_table "deliverable_messages", :force => true do |t|
+    t.integer  "deliverable_id"
+    t.integer  "message_id"
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+  end
+
+  create_table "deliverable_users", :force => true do |t|
+    t.integer  "deliverable_id"
+    t.integer  "user_id"
+    t.boolean  "responsible"
+    t.integer  "access_id"
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+  end
+
+  create_table "deliverables", :force => true do |t|
+    t.string   "title"
+    t.integer  "parent_deliverable_id"
+    t.integer  "status_id"
+    t.datetime "created_at",            :null => false
+    t.datetime "updated_at",            :null => false
+  end
+
   create_table "email_account_conversations", :force => true do |t|
     t.integer  "status_id"
     t.integer  "party_id"
@@ -114,6 +138,9 @@ ActiveRecord::Schema.define(:version => 20140111205533) do
     t.text     "encoded_mail"
     t.datetime "created_at"
     t.text     "data"
+    t.string   "from_address"
+    t.string   "web_id"
+    t.integer  "message_id"
   end
 
   create_table "messages", :force => true do |t|

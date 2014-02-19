@@ -1,4 +1,4 @@
-require 'comments_gadget_compiler'
+require 'gadget_compiler'
 
 class TestCommentsGadgetController < ApplicationController
 	def index
@@ -7,6 +7,6 @@ class TestCommentsGadgetController < ApplicationController
 
 	helper_method :insert_file
 	def insert_file(filename)
-		CommentsGadgetCompiler.new(Rails.env).insert_file(filename)
+		GadgetCompiler.new(Rails.env, 'comments_gadget').insert_file(filename)
 	end
 end

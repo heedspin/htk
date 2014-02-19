@@ -1,11 +1,13 @@
 require 'oauth' 
 require 'openssl'
 require 'plutolib/oauth_rails3_request_proxy'
+require 'plutolib/logger_utils'
 
 class Api::V1::ApiController < ActionController::Base
 	respond_to :json
   before_filter :verify_signed
   before_filter :verify_signed_user
+  include Plutolib::LoggerUtils
 
 	protected
 

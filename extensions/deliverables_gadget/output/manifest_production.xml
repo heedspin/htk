@@ -1,61 +1,61 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ApplicationManifest xmlns="http://schemas.google.com/ApplicationManifest/2009">
 
-  <Name>HTK Comments v<%= config['version'] %></Name>
-  <Description>Shared Comments</Description>
+  <Name>HTK Deliverables v3</Name>
+  <Description>Shared Deliverables</Description>
 
   <Extension id="navLink" type="link">
-    <Name>HTK Comments</Name>
+    <Name>HTK Deliverables</Name>
     <Url>https://htk.lxdinc.com</Url>
   </Extension>
 
   <Extension id="MessageIDExtractor" type="contextExtractor">
     <Url>google.com:MessageIDExtractor</Url>
-    <Triggers ref="CommentsGadget"/>
+    <Triggers ref="DeliverablesGadget"/>
     <Scope ref="messageId"/>
     <Container name="mail"/>
   </Extension>
   <Extension id="EmailTimeExtractor" type="contextExtractor">
     <Url>google.com:EmailTimeExtractor</Url>
-    <Triggers ref="CommentsGadget"/>
+    <Triggers ref="DeliverablesGadget"/>
     <Scope ref="dateSent"/>
     <Scope ref="dateReceived"/>
     <Container name="mail"/>
   </Extension>
   <Extension id="SenderEmailExtractor" type="contextExtractor">
     <Url>google.com:SenderEmailExtractor</Url>
-    <Triggers ref="CommentsGadget"/>
+    <Triggers ref="DeliverablesGadget"/>
     <Scope ref="fromAddress"/>
     <Container name="mail"/>
   </Extension>
   <Extension id="RecipientToEmailExtractor" type="contextExtractor">
     <Url>google.com:RecipientToEmailExtractor</Url>
-    <Triggers ref="CommentsGadget"/>
+    <Triggers ref="DeliverablesGadget"/>
     <Scope ref="recipientToAddress"/>
     <Container name="mail"/>
   </Extension>
   <Extension id="RecipientCCEmailExtractor" type="contextExtractor">
     <Url>google.com:RecipientCCEmailExtractor</Url>
-    <Triggers ref="CommentsGadget"/>
+    <Triggers ref="DeliverablesGadget"/>
     <Scope ref="recipientCcAddress"/>
     <Container name="mail"/>
   </Extension>
   <Extension id="SubjectExtractor" type="contextExtractor">
     <Url>google.com:SubjectExtractor</Url>
-    <Triggers ref="CommentsGadget"/>
+    <Triggers ref="DeliverablesGadget"/>
     <Scope ref="subject"/>
     <Container name="mail"/>
   </Extension>
   <Extension id="EmailBodyExtractor" type="contextExtractor">
     <Url>google.com:EmailBodyExtractor</Url>
-    <Triggers ref="CommentsGadget"/>
+    <Triggers ref="DeliverablesGadget"/>
     <Scope ref="body"/>
     <Container name="mail"/>
   </Extension>
 
-  <Extension id="CommentsGadget" type="gadget">
-    <Name>HTK Comments Gadget</Name>
-    <Url>https://s3.amazonaws.com/lxd-stk/comments_gadget/spec_<%= environment %>-v<%= config['version'] %>.xml</Url>
+  <Extension id="DeliverablesGadget" type="gadget">
+    <Name>HTK Deliverables Gadget</Name>
+    <Url>https://s3.amazonaws.com/lxd-stk/deliverables_gadget/spec_production-v3.xml</Url>
     <Container name="mail"/>
   </Extension>
 

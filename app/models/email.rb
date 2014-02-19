@@ -13,6 +13,9 @@
 #  encoded_mail     :text
 #  created_at       :datetime
 #  data             :text
+#  from_address     :string(255)
+#  web_id           :string(255)
+#  message_id       :integer
 #
 
 require 'htk_imap/htk_imap'
@@ -22,11 +25,12 @@ class Email < ApplicationModel
 	include EmailAccountCache	
 	include HtkImap::MailUtils
 	include ActionView::Helpers::TextHelper
-	attr_accessible :folder, :date, :uid, :guid, :subject, :mail, :thread_id, :raw_email
+	attr_accessible :folder, :date, :uid, :guid, :subject, :mail, :thread_id, :raw_email, :from_address, :web_id
 	belongs_to :email_account
 	# attr_accessor :email_account_conversations
 	attr_accessor :parties
 	# has_many :parties, through: :email_account_conversations
+	belongs_to :message
 
 	def parties
 		@parties ||= []
@@ -47,11 +51,31 @@ class Email < ApplicationModel
 		where(['emails.uid < ?', uid])
 	end
 	def self.thread(thread_id)
-		where(:thread_id => thread_id)
+		where(thread_id: thread_id)
+	end
+	def self.from_address(from_address)
+		where(from_address: from_address.downcase)
+	end
+	def self.epoch_to_date(date)
+		if date.is_a?(String)
+			# Convert GMail epoch time to datetime
+			DateTime.strptime(date[0..9], '%s')
+		else
+			date
+		end
+	end
+	def self.date(date)
+		where date: epoch_to_date(date)
+	end
+	def date=(date)
+		super self.class.epoch_to_date(date)
+	end
+	def self.web_id(web_id)
+		where web_id: web_id
 	end
 
 	def participants
-		@participants ||= ((to_addresses || []) + (from_addresses || []) + cc_addresses || []).uniq
+		@participants ||= ((to_addresses || []) + [from_address] + (cc_addresses || [])).uniq
 	end
 
 	# def email_address_id
@@ -82,9 +106,10 @@ class Email < ApplicationModel
 		end
 	end
 
+	attr_accessible :to_addresses, :cc_addresses, :body_brief
 	serialized_attribute :to_addresses, default: '[]'
-	serialized_attribute :from_addresses, default: '[]'
 	serialized_attribute :cc_addresses, default: '[]'
+	serialized_attribute :body_brief, default: 'nil'
 
 	attr_accessor :mail
 	def mail=(m)
@@ -92,7 +117,7 @@ class Email < ApplicationModel
 		self.subject = m.subject
 		strip_attachments(m)
 		self.encoded_mail = m.encoded
-		self.from_addresses = m.from_addrs.uniq.map(&:downcase)
+		self.from_address = m.from_addrs.uniq.first.try(:downcase)
 		self.to_addresses = m.to_addrs.uniq.map(&:downcase)
 		self.cc_addresses = m.cc_addrs.uniq.map(&:downcase)
 		@mail = m
@@ -129,5 +154,12 @@ class Email < ApplicationModel
 			end
 	  end
 	  @html_body
+	end
+
+	def same_email?(email)
+		(self.from_address == email.from_address) && 
+		(self.date == email.date) && 
+		(self.to_addresses.try(:sort) == email.to_addresses.try(:sort)) && 
+		(self.cc_addresses.try(:sort) == email.cc_addresses.try(:sort))
 	end
 end

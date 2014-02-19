@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<meta charset="utf-8" />
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  	<title>HTK Test Deliverables Gadget</title>
+    <style>
+      <%= insert_file 'stylesheets/deliverables_gadget.css' %>
+    </style>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript">
+        <%= insert_file '../gadgets_lib/handlebars-v1.3.0.js' %>
+        <%= insert_file '../gadgets_lib/autogrow.js' %>
+        <%= insert_file '../gadgets_lib/gadgets.js.erb' %>
+        <%= insert_file 'mock_gadget_wrappers.js.erb' %>
+        <%= insert_file 'deliverables_gadget_spec.js.erb' %>
+        <%= insert_file '../gadgets_lib/common_handlebars_helpers.js' %>
+        <%= insert_file 'lib/handlebars_helpers.js' %>
+      $(document).ready(function(){
+        deliverablesGadgetReady();
+        $("#reload").click(function() {
+          htkLoadGadget();
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h3>Current User</h3>
+    <label>Open Social Owner Id</label>
+    <input type="text" id="opensocial_owner_id" size="50" value="<%= params[:opensocial_owner_id]%>">
+    <br />
+    <h3>Email</h3>
+    <label>From Address</label>
+    <input type="text" name="sender_email" size="50" value="<%= params[:from_address]%>" class="contentMatch">
+    <br />
+    <label>To Addresses</label>
+    <input type="text" name="recipient_to_email" size="150" value="<%= params[:to_addresses] %>" class="multiContentMatch">
+    <br />
+    <label>CC Addresses</label>
+    <input type="text" name="recipient_cc_email" size="150" value="<%= params[:cc_addresses] %>" class="multiContentMatch">
+    <br />
+    <label>Send Date</label>
+    <input type="text" name="date_sent" value="<%= params[:date] %>" class="contentMatch">
+    <br />
+    <label>Subject</label>
+    <input type="text" name="subject" value="<%= params[:subject] %>" class="contentMatch">
+    <br />
+    <label>Message ID</label>
+    <input type="text" name="message_id" value="<%= params[:message_id] %>" class="contentMatch">
+    <br />
+    <button type="button" id="reload">Reload</button>
+  </body>
+</html>

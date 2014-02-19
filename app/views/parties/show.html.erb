@@ -15,7 +15,7 @@
 		<% @messages.each do |message| %>
 		<tr>
 			<td><%= message.date %></td>
-			<td><%= message.from_addresses.join(', ') %></td>
+			<td><%= message.from_address %></td>
 			<td><%= (message.to_addresses + message.cc_addresses).sort.join(', ') %></td>
 			<td><%= message.subject %></td>
 			<td><%= limit_string message.text_body, 255 %></td>

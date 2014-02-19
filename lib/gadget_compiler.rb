@@ -2,12 +2,13 @@ require 'uglifier'
 require 'html_press'
 require 'action_view/helpers/javascript_helper'
 
-class CommentsGadgetCompiler
+class GadgetCompiler
 	include ActionView::Helpers::JavaScriptHelper
-	attr_accessor :environment, :config, :source_directory
-	def initialize(environment)
-		self.source_directory = File.join(Rails.root, 'extensions/comments_gadget')
-  	gadget_config = YAML::load(IO.read(File.join(self.source_directory, 'comments_gadget_config.yml')))
+	attr_accessor :environment, :config, :source_directory, :name
+	def initialize(environment, name)
+		self.name = name
+		self.source_directory = File.join(Rails.root, 'extensions', name)
+  	gadget_config = YAML::load(IO.read(File.join(self.source_directory, name + '_config.yml')))
 		self.environment = environment
 		self.config = gadget_config[self.environment]
 	end

@@ -1,0 +1,93 @@
+var htkContainer = null;
+var htkLoginForm = null;
+var htkStatusMsg = null;
+
+function htkLog(text) {
+  if (console && console.log) {
+    console.log(text);    
+  }
+}
+function htkLoginResponse(obj) {
+  var rc = "";
+  if (obj.rc) rc = obj.rc;
+  if (rc == 401) {
+    htkStatusMsg.empty().append("Login failed.");
+    htkPromptLogin();
+  } else if (rc == 200) {
+    htkStatusMsg.empty().append("Login successful!  Loading comments...");
+    htkLoadGadget();
+    adjust_window_height();
+  } else {
+    htkStatusMsg.empty().append("Login error");
+    adjust_window_height();
+    log("Login response: " + JSON.stringify(obj));                    
+  }
+}
+function htkPromptLogin() {
+  if (!htkLoginForm) {
+    login_html = "<%= insert_file('html/login.html', :javascript_escape => true) %>"
+    htkLoginForm = $(login_html);
+    htkContainer.append(htkLoginForm);
+    $("#login").on('click', function(e) {
+      e.preventDefault();
+      htkLoginForm.hide();
+      var email = $("#email");
+      var password = $("#password");
+      htkRequest("POST", "/api/v1/signed_request_users", { email: email.val(), password: password.val() }, htkLoginResponse);
+      htkStatusMsg.empty().append("Logging in to HTK as " + email.val()).show();
+      adjust_window_height();
+      email.val("");
+      password.val("");
+    });
+    adjust_window_height();        
+  } else {
+    htkLoginForm.show();
+  }
+}
+function htkRequest(method, path, data, callback) {
+  var request_data = null;
+  if (!data) {
+    request_data = new Object();
+  } else if (data instanceof Array) {
+    request_data = new Object();
+    for (var index in data) {
+      for (var key in data[index]) {
+        var value = data[index][key];
+        var exists = request_data[key];
+        if (exists) {
+          if (exists instanceof Array) {
+            exists.push(value);
+          } else {
+            request_data[key] = [exists, value];
+          }
+        } else {
+          request_data[key] = value
+        }
+      }
+    }   
+  } else {
+    request_data = data
+  }
+  return htkAjax(method, path, request_data, callback);
+}
+var htkKeyMap = {
+  "message_id": "web_id",
+  "sender_email": "from_address",
+  "date_sent": "date",
+  "recipient_to_email": "to_addresses",
+  "recipient_cc_email": "cc_addresses"
+}
+function htkGetContentMatches(keys) {
+  var matches = getContentMatches();
+  var result = [];
+  for (var match in matches) {
+    for (var key in matches[match]) {
+      if ($.inArray(key, keys) >= 0) {
+        var obj = new Object();
+        obj[htkKeyMap[key] || key] = matches[match][key];
+        result.push(obj);
+      }
+    }
+  }
+  return result;
+}

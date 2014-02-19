@@ -21,6 +21,8 @@ class Message < ApplicationModel
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :conversation
 	belongs_to :source_email, :class_name => 'Email'
+	has_many :deliverable_messages
+	has_many :deliverables, through: :deliverable_messages
 
 	def self.user(user, party_role=PartyRole.read_only)
 		user_id = user.is_a?(User) ? user.id : user
@@ -37,7 +39,7 @@ class Message < ApplicationModel
 	delegate :participants, to: :source_email
 	delegate :subject, to: :source_email
 	delegate :date, to: :source_email
-	delegate :from_addresses, to: :source_email
+	delegate :from_address, to: :source_email
 	delegate :to_addresses, to: :source_email
 	delegate :cc_addresses, to: :source_email
 	delegate :participants, to: :source_email
@@ -68,6 +70,18 @@ class Message < ApplicationModel
 
 	def text_body_without_reply
 		self.extract_email_reply self.text_body
+	end
+
+	def self.find_or_create(email)
+		emails = Email.from_address(email.from_address).date(email.date).includes(:email_account, :message).all
+		same_emails = emails.select { |e| e.same_email?(email) }
+		if same_emails.size == 0
+			email.create_message!
+		elsif same_emails.size == 1
+			same_emails.first.message
+		else
+			raise "Found #{same_emails.size} matching emails from #{email.from_address} at #{email.date}"
+		end
 	end
 
 end
