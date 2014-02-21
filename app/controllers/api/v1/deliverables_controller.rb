@@ -4,10 +4,13 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	  {root: 'deliverable'}
 	end
 
+	# ActiveModel::Serializer::IncludeError (Cannot serialize deliverable_users when DeliverableSerializer does not have a root!):
+	#  app/controllers/api/v1/deliverables_controller.rb:10:in `index'
 	def index
 		if email = Email.user(current_user).find_by_web_id(params[:web_id])
 			deliverables = email.message.deliverables.not_deleted
-			render json: { deliverables: deliverables.map { |d| DeliverableSerializer.new(d, root: false) }	}
+			render json: deliverables
+			# render json: { deliverables: deliverables.map { |d| DeliverableSerializer.new(d, root: false) }	}
 		else
 			render json: { result: 'no email' }, status: 404
 		end
@@ -24,7 +27,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   		Deliverable.transaction do
   			deliverable.save!
 		  	deliverable.messages << email.message
-  			User.emails(participants).accessible_to(current_user).each do |recipient|
+  			User.email_accounts(email.participants).accessible_to(current_user).each do |recipient|
   				access = if recipient.id == current_user.id
   					DeliverableAccess.owner
   				else

@@ -21,7 +21,7 @@ class Message < ApplicationModel
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :conversation
 	belongs_to :source_email, :class_name => 'Email'
-	has_many :deliverable_messages
+	has_many :deliverable_messages, conditions: where(is_related: true), dependent: :destroy
 	has_many :deliverables, through: :deliverable_messages
 
 	def self.user(user, party_role=PartyRole.read_only)

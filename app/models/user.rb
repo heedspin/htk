@@ -40,11 +40,11 @@ class User < ApplicationModel
     "#{self.first_name} #{self.last_name}".strip
   end
 
-  def self.emails(emails)
-    where ['users.email in (?)', emails]
+  def self.email_accounts(emails)
+    joins(:email_accounts).where(['email_accounts.username in (?)', emails])
   end
   def self.accessible_to(user)
-    where ['users.email like ?', '%@' + user.email_domain ]
+    joins(:email_accounts).where(['email_accounts.username like ?', '%@' + user.email_domain ])
   end
 
   def email_domain

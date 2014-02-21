@@ -110,6 +110,16 @@ class Email < ApplicationModel
 	serialized_attribute :to_addresses, default: '[]'
 	serialized_attribute :cc_addresses, default: '[]'
 	serialized_attribute :body_brief, default: 'nil'
+	%w(to_addresses cc_addresses).each do |key|
+		class_eval <<-RUBY
+		def #{key}=(val)
+			unless val.is_a?(Array)
+				val = [val]
+			end
+			self.data['#{key}'] = val
+		end
+		RUBY
+	end
 
 	attr_accessor :mail
 	def mail=(m)

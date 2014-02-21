@@ -13,18 +13,36 @@ function createEmail() {
       adjust_window_height();
     } else {
       htkLog("Created email: " + JSON.stringify(obj.data));
-      htkLoadGadget();
+      loadDeliverables();
     }
   });
 }
 function htkLoadGadget() {
-  var query_data = htkGetContentMatches(['message_id']);
-  htkLog("Load Deliverables Matches: " + JSON.stringify(query_data));
-  var handleGetDeliverables = function(obj) {
+  triedCreatingEmail = false;
+  getCurrentUser();
+}
+
+function getCurrentUser() {
+  htkRequest("GET", "/api/v1/users/current", null, function(obj) {
     if (obj.rc && (obj.rc == "401")) {
       htkStatusMsg.hide();
       htkPromptLogin();
-    } else if (obj.rc && (obj.rc == "404")) {
+    } else if (obj.errors.length > 0) {
+      htkStatusMsg.empty().append("Error").show();
+      htkLog("Error response: " + JSON.stringify(obj));
+      adjust_window_height();
+    } else {
+      currentUser = obj.data["user"];
+      htkLog("Current user: " + JSON.stringify(currentUser));
+      loadDeliverables();
+    }    
+  })
+}
+function loadDeliverables() {
+  var query_data = htkGetContentMatches(['message_id']);
+  htkLog("Load Deliverables Matches: " + JSON.stringify(query_data));
+  var handleGetDeliverables = function(obj) {
+    if (obj.rc && (obj.rc == "404")) {
       htkLog("Email not found");
       if (!triedCreatingEmail) {
         triedCreatingEmail = true;
@@ -36,8 +54,7 @@ function htkLoadGadget() {
       adjust_window_height();
     } else {
       htkLog("Load Deliverables: " + JSON.stringify(obj.data));
-      currentUser = obj.data["current_user"];
-      currentDeliverables = obj.data["deliverables"];
+      currentDeliverables = obj.data["deliverable"];
       renderDeliverables();
       // statusMsg.empty().append("Victory").show();
       adjust_window_height();

@@ -7,6 +7,7 @@
 #  message_id     :integer
 #  created_at     :datetime         not null
 #  updated_at     :datetime         not null
+#  is_related     :boolean          default(TRUE)
 #
 
 class DeliverableMessage < ApplicationModel
