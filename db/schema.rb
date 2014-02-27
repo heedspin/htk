@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140221024024) do
+ActiveRecord::Schema.define(:version => 20140222172909) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -46,25 +46,6 @@ ActiveRecord::Schema.define(:version => 20140221024024) do
   add_index "admin_users", ["email"], :name => "index_admin_users_on_email", :unique => true
   add_index "admin_users", ["reset_password_token"], :name => "index_admin_users_on_reset_password_token", :unique => true
 
-  create_table "conversation_imports", :force => true do |t|
-    t.integer  "status_id"
-    t.integer  "email_account_conversation_id"
-    t.integer  "process_pending_imports_id"
-    t.integer  "delayed_job_id"
-    t.integer  "delayed_job_status_id"
-    t.text     "delayed_job_log"
-    t.string   "delayed_job_method"
-    t.integer  "user_id"
-    t.datetime "created_at",                    :null => false
-    t.datetime "updated_at",                    :null => false
-  end
-
-  create_table "conversations", :force => true do |t|
-    t.integer  "status_id"
-    t.integer  "party_id"
-    t.datetime "created_at"
-  end
-
   create_table "deliverable_messages", :force => true do |t|
     t.integer  "deliverable_id"
     t.integer  "message_id"
@@ -90,13 +71,14 @@ ActiveRecord::Schema.define(:version => 20140221024024) do
     t.datetime "updated_at",            :null => false
   end
 
-  create_table "email_account_conversations", :force => true do |t|
-    t.integer  "status_id"
-    t.integer  "party_id"
-    t.integer  "conversation_id"
+  create_table "email_account_threads", :force => true do |t|
     t.integer  "email_account_id"
-    t.string   "thread_id"
-    t.datetime "created_at"
+    t.integer  "email_thread_id"
+    t.string   "imap_thread_id"
+    t.string   "subject"
+    t.datetime "start_time"
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
   end
 
   create_table "email_accounts", :force => true do |t|
@@ -128,6 +110,11 @@ ActiveRecord::Schema.define(:version => 20140221024024) do
     t.datetime "updated_at",       :null => false
   end
 
+  create_table "email_threads", :force => true do |t|
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
   create_table "emails", :force => true do |t|
     t.integer  "email_account_id"
     t.string   "thread_id"
@@ -142,33 +129,14 @@ ActiveRecord::Schema.define(:version => 20140221024024) do
     t.string   "from_address"
     t.string   "web_id"
     t.integer  "message_id"
+    t.integer  "email_account_thread_id"
   end
 
   create_table "messages", :force => true do |t|
     t.integer  "status_id"
-    t.integer  "conversation_id"
+    t.integer  "email_thread_id"
     t.string   "envelope_message_id"
     t.integer  "source_email_id"
-    t.datetime "created_at"
-    t.text     "data"
-  end
-
-  create_table "parties", :force => true do |t|
-    t.integer  "status_id"
-    t.string   "name"
-    t.text     "description"
-    t.integer  "creator_id"
-    t.datetime "created_at",      :null => false
-    t.datetime "updated_at",      :null => false
-    t.datetime "index_timestamp"
-    t.string   "luid"
-  end
-
-  create_table "party_users", :force => true do |t|
-    t.integer  "status_id"
-    t.integer  "party_id"
-    t.integer  "user_id"
-    t.integer  "party_role_id"
     t.datetime "created_at"
   end
 

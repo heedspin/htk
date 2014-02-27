@@ -13,22 +13,12 @@ class Api::V1::EmailsController < Api::V1::ApiController
 			render json: { result: 'forbidden' }, status: 403
   	else
   		email_account = current_user.email_accounts.first
-  		email = email_account.emails.build(date: params[:date],
-  			subject: params[:subject], 
-  			from_address: params[:from_address], 
-  			web_id: params[:web_id],
-  			body_brief: params[:body_brief],
-  			to_addresses: to_addresses,
-  			cc_addresses: cc_addresses)
-  		Email.transaction do
-	  		message = Message.find_or_create(email)
-	  		email.message = message
-	  		if email.save	  			
-	  			render json: email
-	  		else
-	  			render json: { errors: email.errors }, status: 422
-		  	end
-		  end
+  		@email = Email.web_create(email_account, params)
+  		if @email.errors.size > 0
+  			render json: { errors: @email.errors }, status: 422
+  		else
+  			render json: @email
+	  	end
 	  end
 	end
 end

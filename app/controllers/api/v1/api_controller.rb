@@ -12,7 +12,7 @@ class Api::V1::ApiController < ActionController::Base
 	protected
 
 	  def verify_signed
-	  	if Rails.env.development?
+	  	if Rails.env.development? or Rails.env.test?
 	  		return if current_user
 	  	end
 	  	if (cert_id = params[:xoauth_public_key]) and (cert_file = File.join(Rails.root, 'config/certificates', cert_id)) and File.exists?(cert_file)

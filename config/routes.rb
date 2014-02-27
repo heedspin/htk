@@ -22,7 +22,6 @@ Htk::Application.routes.draw do
   resources :emails, :controller => 'email_accounts/emails', :only => :show
   resources :email_summaries, :controller => 'email_accounts/email_summaries', :only => :index
 
-  resources :parties
   resources :messages, :only => [:index, :show, :update, :destroy]
   # resources :message_bodies, :only => [:show]
   resources :users, :only => [:show]

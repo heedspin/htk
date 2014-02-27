@@ -4,11 +4,10 @@
 #
 #  id                  :integer          not null, primary key
 #  status_id           :integer
-#  conversation_id     :integer
+#  email_thread_id     :integer
 #  envelope_message_id :string(255)
 #  source_email_id     :integer
 #  created_at          :datetime
-#  data                :text
 #
 
 require 'email_account_cache'
@@ -17,20 +16,17 @@ require 'extract_email_reply'
 class Message < ApplicationModel
 	include EmailAccountCache	
 	include ExtractEmailReply
-	attr_accessible :status_id, :date, :hidden, :status, :conversation_id, :conversation, :envelope_message_id, :source_email_id
+	attr_accessible :status_id, :status, :envelope_message_id, :source_email_id, :email_thread_id, :email_thread
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
-	belongs_to :conversation
 	belongs_to :source_email, :class_name => 'Email'
 	has_many :deliverable_messages, conditions: where(is_related: true), dependent: :destroy
 	has_many :deliverables, through: :deliverable_messages
+	belongs_to :email_thread
 
 	def self.user(user, party_role=PartyRole.read_only)
 		user_id = user.is_a?(User) ? user.id : user
 		joins(conversation: {party: :party_users}).where(party_users: { user_id: user_id, party_role_id: party_role.same_or_better })
 	end
-
-	serialized_attribute :hidden, default: 'false'
-	serialized_attribute :cached_searchable_text
 
 	delegate :text_body, to: :source_email
 	delegate :text_body_without_reply, to: :source_email

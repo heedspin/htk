@@ -2,7 +2,7 @@ require 'test_helper'
 
 class EmailAccountsControllerTest < HtkControllerTest
   setup do
-    @email_account = email_accounts(:user1_account1)
+    @email_account = email_accounts(:user1)
     sign_in User.first
   end
 

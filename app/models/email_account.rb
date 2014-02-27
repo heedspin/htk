@@ -23,9 +23,9 @@ class EmailAccount < ApplicationModel
   belongs_to :user
   belongs_to_active_hash :status, :class_name => 'EmailAccountStatus'
   validates_uniqueness_of :username, :case_sensitive => false, :scope => :user_id
-  has_many :email_account_conversations
   has_many :message_receipts, :through => :email_account_conversations
   has_many :emails
+  has_many :email_account_threads
 
   def self.username(txt)
     where username: txt.downcase
