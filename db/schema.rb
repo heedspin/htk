@@ -73,12 +73,12 @@ ActiveRecord::Schema.define(:version => 20140222172909) do
 
   create_table "email_account_threads", :force => true do |t|
     t.integer  "email_account_id"
-    t.integer  "email_thread_id"
+    t.integer  "message_thread_id"
     t.string   "imap_thread_id"
     t.string   "subject"
     t.datetime "start_time"
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
+    t.datetime "created_at",        :null => false
+    t.datetime "updated_at",        :null => false
   end
 
   create_table "email_accounts", :force => true do |t|
@@ -110,11 +110,6 @@ ActiveRecord::Schema.define(:version => 20140222172909) do
     t.datetime "updated_at",       :null => false
   end
 
-  create_table "email_threads", :force => true do |t|
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
-  end
-
   create_table "emails", :force => true do |t|
     t.integer  "email_account_id"
     t.string   "thread_id"
@@ -132,9 +127,14 @@ ActiveRecord::Schema.define(:version => 20140222172909) do
     t.integer  "email_account_thread_id"
   end
 
+  create_table "message_threads", :force => true do |t|
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
   create_table "messages", :force => true do |t|
     t.integer  "status_id"
-    t.integer  "email_thread_id"
+    t.integer  "message_thread_id"
     t.string   "envelope_message_id"
     t.integer  "source_email_id"
     t.datetime "created_at"

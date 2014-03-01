@@ -26,6 +26,7 @@ class EmailAccount < ApplicationModel
   has_many :message_receipts, :through => :email_account_conversations
   has_many :emails
   has_many :email_account_threads
+  has_many :signed_request_users, :primary_key => :user_id, :foreign_key => :user_id
 
   def self.username(txt)
     where username: txt.downcase

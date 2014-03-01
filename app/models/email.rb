@@ -34,7 +34,7 @@ class Email < ApplicationModel
 	scope :by_uid, order(:uid)
 	scope :uid_desc, order('emails.uid desc')
 
-	delegate :message_id, to: :mail
+	# delegate :message_id, to: :mail
 	delegate :in_reply_to, to: :mail
 
 	def self.user(user)
@@ -176,7 +176,7 @@ class Email < ApplicationModel
 		(self.cc_addresses.try(:sort) == email.cc_addresses.try(:sort))
 	end
 
-	def self.web_create(email_account, params)
+	def self.web_create(email_account, params)		
 		subject = params[:subject]
 		date = params[:date]
 		email = email_account.emails.build(date: date,
@@ -188,42 +188,42 @@ class Email < ApplicationModel
   			cc_addresses: params[:cc_addresses])
 		Email.transaction do
   		message = Message.find_or_create(email)
+			# TODO: ensure MessageThread always created.
   		email.message = message
-  		if message.email_thread
-  			eat = message.email_thread.email_account_threads.email_account(email_account).first
+  		if message.message_thread
+  			eat = message.message_thread.email_account_threads.email_account(email_account).first
   			if eat.nil?
-  				eat = email.create_email_account_thread!(email_account: email_account, email_thread: message.email_thread, subject: subject, start_time: date)
+  				eat = email.create_email_account_thread!(email_account: email_account, message_thread: message.message_thread, subject: subject, start_time: date)
   			elsif email.date < eat.start_time
-  				eat.update_attributes start_time: email.date
+  				eat.update_attributes! start_time: email.date
   			end
 				email.email_account_thread = eat
   		else # New message.
-  			email_thread = nil
+  			message_thread = nil
   			# Look for existing thread.
   			related_emails = email_account.emails.between(email.date.advance(:days => -3), email.date.advance(:days => 3)).subject(subject).all
   			if related_emails.size > 0
   				first_email = related_emails.sort_by(&:date).first
   				first_eat = first_email.email_account_thread
+  				message_thread = first_eat.message_thread
   				if email.date < first_eat.start_time
-  					first_eat.start_time = email.date
-  					first_eat.save!
+  					first_eat.update_attributes! start_time: email.date
   				end
   				related_emails.push(email)
   				related_emails.each do |e|
   					if e.email_account_thread != first_eat
-  						if e.email_account_thread
-  							e.email_account_thread.destroy
-  						end
+  						# if e.email_account_thread
+  						# 	e.email_account_thread.destroy
+  						# end
 		  				e.email_account_thread = first_eat
 		  				e.save!
 		  			end
 		  		end
   			else # No related emails. Create new thread.
-  				# FIX: Email Account Threads do not have email account ids!
-  				eat = email.create_email_account_thread!(email_account: email_account, start_time: email.date, subject: subject)
-  				email_thread = eat.create_email_thread!
+  				message_thread = MessageThread.create!
+  				email.create_email_account_thread!(message_thread: message_thread, email_account: email_account, start_time: email.date, subject: subject)
   			end
-  			message.update_attributes! email_thread: email_thread
+  			message.update_attributes! message_thread: message_thread
   		end
   		email.save!
   	end

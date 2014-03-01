@@ -4,7 +4,7 @@
 #
 #  id                  :integer          not null, primary key
 #  status_id           :integer
-#  email_thread_id     :integer
+#  message_thread_id   :integer
 #  envelope_message_id :string(255)
 #  source_email_id     :integer
 #  created_at          :datetime
@@ -16,12 +16,13 @@ require 'extract_email_reply'
 class Message < ApplicationModel
 	include EmailAccountCache	
 	include ExtractEmailReply
-	attr_accessible :status_id, :status, :envelope_message_id, :source_email_id, :email_thread_id, :email_thread
+	attr_accessible :status_id, :status, :envelope_message_id, :source_email_id, :message_thread_id, :message_thread
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :source_email, :class_name => 'Email'
-	has_many :deliverable_messages, conditions: where(is_related: true), dependent: :destroy
+	has_many :deliverable_messages, dependent: :destroy, conditions: {is_related: true}
 	has_many :deliverables, through: :deliverable_messages
-	belongs_to :email_thread
+	belongs_to :message_thread
+	has_many :emails
 
 	def self.user(user, party_role=PartyRole.read_only)
 		user_id = user.is_a?(User) ? user.id : user

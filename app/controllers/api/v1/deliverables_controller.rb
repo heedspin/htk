@@ -9,7 +9,8 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	def index
 		if email = Email.user(current_user).find_by_web_id(params[:web_id])
 			deliverables = email.message.deliverables.not_deleted
-			render json: deliverables
+			# render json: deliverables
+			render json: { deliverables: deliverables, email: EmailSerializer.new(email, root: false) }
 			# render json: { deliverables: deliverables.map { |d| DeliverableSerializer.new(d, root: false) }	}
 		else
 			render json: { result: 'no email' }, status: 404

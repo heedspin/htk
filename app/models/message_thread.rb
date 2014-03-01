@@ -1,12 +1,13 @@
 # == Schema Information
 #
-# Table name: email_threads
+# Table name: message_threads
 #
 #  id         :integer          not null, primary key
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #
 
-class EmailThread < ApplicationModel
-	has_many :email_account_threads
+class MessageThread < ApplicationModel
+	has_many :email_account_threads, dependent: :destroy
+	has_many :messages, dependent: :destroy
 end

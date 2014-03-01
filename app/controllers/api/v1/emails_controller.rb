@@ -10,6 +10,7 @@ class Api::V1::EmailsController < Api::V1::ApiController
 		participants = ([params[:from_address]] + [cc_addresses] + [to_addresses]).flatten.compact.map(&:downcase).map(&:strip)
 		if !participants.include?(current_user.email)
 			log_error "#{current_user.email} can not create email with participants: " + participants.join(', ')
+			logger.info "#{current_user.email} can not create email with participants: " + participants.join(', ')
 			render json: { result: 'forbidden' }, status: 403
   	else
   		email_account = current_user.email_accounts.first

@@ -12,8 +12,10 @@ class Api::V1::ApiController < ActionController::Base
 	protected
 
 	  def verify_signed
-	  	if Rails.env.development? or Rails.env.test?
+	  	if Rails.env.development?
 	  		return if current_user
+	  	elsif Rails.env.test?
+	  		return
 	  	end
 	  	if (cert_id = params[:xoauth_public_key]) and (cert_file = File.join(Rails.root, 'config/certificates', cert_id)) and File.exists?(cert_file)
 		    cert = OpenSSL::X509::Certificate.new(File.read(cert_file))
@@ -36,13 +38,21 @@ class Api::V1::ApiController < ActionController::Base
 	  end
 
 	  def verify_signed_user
-    	# logger.info 'API: Verified Signed Request: ' + req.signature_base_string.inspect
-    	api_user = SignedRequestUser.owner_container(params[:opensocial_owner_id], params[:opensocial_container]).first
-    	if api_user.nil?
+	  	opensocial_owner_id = params[:opensocial_owner_id]
+	  	opensocial_container = params[:opensocial_container]
+	  	if opensocial_owner_id.nil? or opensocial_container.nil?
     		render json: { error: 'Please sign in.'}, :status => :unauthorized
     	else
-				sign_in(:user, api_user.user)
-    	end
+	    	# logger.info 'API: Verified Signed Request: ' + req.signature_base_string.inspect
+	    	api_user = SignedRequestUser.owner_container(opensocial_owner_id, opensocial_container).first
+	    	if api_user.nil?
+	    		logger.info "User failed to sign in using: #{opensocial_owner_id} #{opensocial_container}"
+	    		render json: { error: 'Please sign in.'}, :status => :unauthorized
+	    	else
+	    		sign_out(:user)
+					sign_in(:user, api_user.user)
+	    	end
+	    end
 		end
 
 end

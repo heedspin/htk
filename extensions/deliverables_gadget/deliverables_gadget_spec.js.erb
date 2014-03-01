@@ -2,6 +2,7 @@ var deliverablesTemplate = Handlebars.compile("<%= insert_file('html/deliverable
 var currentDeliverables = null;
 var currentUser = null;
 var triedCreatingEmail = false;
+var currentEmail = null;
 
 function createEmail() {
   htkLog("Creating email");
@@ -54,7 +55,8 @@ function loadDeliverables() {
       adjust_window_height();
     } else {
       htkLog("Load Deliverables: " + JSON.stringify(obj.data));
-      currentDeliverables = obj.data["deliverable"];
+      currentDeliverables = obj.data["deliverables"];
+      currentEmail = obj.data['email'];
       renderDeliverables();
       // statusMsg.empty().append("Victory").show();
       adjust_window_height();
@@ -75,7 +77,7 @@ function renderDeliverables() {
   var html = deliverablesTemplate({ current_user: currentUser, deliverables: currentDeliverables });
   var new_elements = $(html);
   deliverables_container.replaceWith(new_elements);
-  htkStatusMsg.empty();
+  htkStatusMsg.empty().append("EAT-" + currentEmail.email_account_thread_id + " T-" + currentEmail.message_thread_id + " M-" + currentEmail.message_id);
   deliverablesReady(new_elements);
 }
 

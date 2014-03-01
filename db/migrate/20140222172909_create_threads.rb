@@ -1,12 +1,12 @@
 class CreateThreads < ActiveRecord::Migration
   def change
-  	create_table :email_threads do |t|
+  	create_table :message_threads do |t|
   		t.timestamps
   	end
 
   	create_table :email_account_threads do |t|
       t.references :email_account
-      t.references :email_thread
+      t.references :message_thread
   		t.string :imap_thread_id
   		t.string :subject
   		t.datetime :start_time
