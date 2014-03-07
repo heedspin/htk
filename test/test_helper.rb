@@ -2,6 +2,9 @@ ENV["RAILS_ENV"] = "test"
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 require 'plutolib/plutobug'
+require 'lib/factories/thread_factory'
+require 'lib/factories/email_factory'
+require 'lib/factories/deliverable_factory'
 
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in alphabetical order.

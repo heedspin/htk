@@ -5,6 +5,7 @@ Htk::Application.routes.draw do
       resources :email_comments
       resources :signed_request_users, :only => [:create]
       resources :deliverables
+      resources :thread_deliverables
       resources :emails, :only => :create
       resources :users, :only => :show
     end

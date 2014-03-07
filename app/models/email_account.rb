@@ -28,6 +28,8 @@ class EmailAccount < ApplicationModel
   has_many :email_account_threads
   has_many :signed_request_users, :primary_key => :user_id, :foreign_key => :user_id
 
+  alias_attribute :email, :username
+
   def self.username(txt)
     where username: txt.downcase
   end

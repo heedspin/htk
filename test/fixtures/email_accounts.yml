@@ -30,3 +30,13 @@ user2:
   authentication_string: MyString
   server: MyString
   port: 1
+
+red_user1:
+  id: 3
+  user_id: 3
+  username: red_user1@red-example.com
+
+red_user2:
+  id: 4
+  user_id: 4
+  username: red_user2@red-example.com

@@ -33,3 +33,11 @@ user1:
 user2:
   id: 2
   email: user2@example.com
+
+red_user1:
+  id: 3
+  email: red_user1@red-example.com
+
+red_user2:
+  id: 4
+  email: red_user2@red-example.com

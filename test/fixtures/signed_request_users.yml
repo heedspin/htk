@@ -22,3 +22,15 @@ user2:
   opensocial_owner_id: user2
   user_id: 2
   opensocial_container: testcontainer1
+
+red_user1:
+  id: 3
+  opensocial_owner_id: red_user1
+  user_id: 3
+  opensocial_container: testcontainer1
+
+red_user2:
+  id: 4
+  opensocial_owner_id: red_user2
+  user_id: 4
+  opensocial_container: testcontainer1

@@ -7,10 +7,10 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	# ActiveModel::Serializer::IncludeError (Cannot serialize deliverable_users when DeliverableSerializer does not have a root!):
 	#  app/controllers/api/v1/deliverables_controller.rb:10:in `index'
 	def index
-		if email = Email.user(current_user).find_by_web_id(params[:web_id])
-			deliverables = email.message.deliverables.not_deleted
+		if @email = Email.user(current_user).find_by_web_id(params[:web_id])
+			@deliverables = @email.message.message_thread.deliverables.not_deleted
 			# render json: deliverables
-			render json: { deliverables: deliverables, email: EmailSerializer.new(email, root: false) }
+			render json: { deliverables: @deliverables, email: EmailSerializer.new(@email, root: false) }
 			# render json: { deliverables: deliverables.map { |d| DeliverableSerializer.new(d, root: false) }	}
 		else
 			render json: { result: 'no email' }, status: 404
@@ -19,25 +19,13 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   
   def create
   	deliverable_title = params[:title] || 'Deliverable'
-  	web_id = params[:message_id]
+  	web_id = params[:web_id]
   	email = Email.user(current_user).find_by_web_id(web_id) if web_id
 		if email.nil?
   		render json: { result: 'no email' }, status: 422
   	else
-	  	deliverable = Deliverable.new(:status => DeliverableStatus.published, :title => deliverable_title)
-  		Deliverable.transaction do
-  			deliverable.save!
-		  	deliverable.messages << email.message
-  			User.email_accounts(email.participants).accessible_to(current_user).each do |recipient|
-  				access = if recipient.id == current_user.id
-  					DeliverableAccess.owner
-  				else
-  					DeliverableAccess.edit
-  				end
-  				deliverable.deliverable_users.create!(user_id: recipient.id, access_id: access.id)
-  			end
-  		end
-  		render json: deliverable
+  		@deliverable = Deliverable.web_create(email: email, current_user: current_user, title: deliverable_title)
+  		render json: @deliverable
 	  end
 	end
 

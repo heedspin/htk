@@ -10,4 +10,6 @@
 class MessageThread < ApplicationModel
 	has_many :email_account_threads, dependent: :destroy
 	has_many :messages, dependent: :destroy
+	has_many :thread_deliverables, dependent: :destroy
+	has_many :deliverables, through: :thread_deliverables
 end

@@ -26,7 +26,7 @@ class Email < ApplicationModel
 	include EmailAccountCache	
 	include HtkImap::MailUtils
 	include ActionView::Helpers::TextHelper
-	attr_accessible :folder, :date, :uid, :guid, :subject, :mail, :thread_id, :raw_email, :from_address, :web_id
+	attr_accessible :folder, :date, :uid, :guid, :subject, :mail, :thread_id, :raw_email, :from_address, :web_id, :message
 	belongs_to :email_account
 	belongs_to :message
 	belongs_to :email_account_thread
@@ -78,7 +78,7 @@ class Email < ApplicationModel
 	end
 
 	def participants
-		@participants ||= ((to_addresses || []) + [from_address] + (cc_addresses || [])).uniq
+		@participants ||= ((to_addresses || []) + [from_address] + (cc_addresses || [])).compact.uniq
 	end
 
 	# def email_address_id
@@ -171,21 +171,13 @@ class Email < ApplicationModel
 
 	def same_email?(email)
 		(self.from_address == email.from_address) && 
-		(self.date == email.date) && 
+		(self.date.to_i == email.date.to_i) && 
 		(self.to_addresses.try(:sort) == email.to_addresses.try(:sort)) && 
 		(self.cc_addresses.try(:sort) == email.cc_addresses.try(:sort))
 	end
 
-	def self.web_create(email_account, params)		
-		subject = params[:subject]
-		date = params[:date]
-		email = email_account.emails.build(date: date,
-  			subject: subject, 
-  			from_address: params[:from_address], 
-  			web_id: params[:web_id],
-  			body_brief: params[:body_brief],
-  			to_addresses: params[:to_addresses],
-  			cc_addresses: params[:cc_addresses])
+	def self.web_create(email_account, params)			
+		email = email_account.emails.build(params)
 		Email.transaction do
   		message = Message.find_or_create(email)
 			# TODO: ensure MessageThread always created.
@@ -193,7 +185,7 @@ class Email < ApplicationModel
   		if message.message_thread
   			eat = message.message_thread.email_account_threads.email_account(email_account).first
   			if eat.nil?
-  				eat = email.create_email_account_thread!(email_account: email_account, message_thread: message.message_thread, subject: subject, start_time: date)
+  				eat = email.create_email_account_thread!(email_account: email_account, message_thread: message.message_thread, subject: email.subject, start_time: email.date)
   			elsif email.date < eat.start_time
   				eat.update_attributes! start_time: email.date
   			end
@@ -201,7 +193,7 @@ class Email < ApplicationModel
   		else # New message.
   			message_thread = nil
   			# Look for existing thread.
-  			related_emails = email_account.emails.between(email.date.advance(:days => -3), email.date.advance(:days => 3)).subject(subject).all
+  			related_emails = email_account.emails.between(email.date.advance(:days => -3), email.date.advance(:days => 3)).subject(email.subject).all
   			if related_emails.size > 0
   				first_email = related_emails.sort_by(&:date).first
   				first_eat = first_email.email_account_thread
@@ -221,7 +213,7 @@ class Email < ApplicationModel
 		  		end
   			else # No related emails. Create new thread.
   				message_thread = MessageThread.create!
-  				email.create_email_account_thread!(message_thread: message_thread, email_account: email_account, start_time: email.date, subject: subject)
+  				email.create_email_account_thread!(message_thread: message_thread, email_account: email_account, start_time: email.date, subject: email.subject)
   			end
   			message.update_attributes! message_thread: message_thread
   		end
