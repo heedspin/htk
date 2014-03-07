@@ -82,7 +82,7 @@ function htkGetContentMatches(keys) {
   var result = [];
   for (var match in matches) {
     for (var key in matches[match]) {
-      if ($.inArray(key, keys) >= 0) {
+      if ((keys == null) || ($.inArray(key, keys) >= 0)) {
         var obj = new Object();
         obj[htkKeyMap[key] || key] = matches[match][key];
         result.push(obj);

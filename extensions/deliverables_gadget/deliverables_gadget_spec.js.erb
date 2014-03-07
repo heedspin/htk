@@ -126,7 +126,7 @@ function createDeliverable() {
   var deliverable_title_input = $(this).parent().find("input");
   var deliverable_title = deliverable_title_input.val();
   if (deliverable_title) {
-    var matches = getContentMatches();
+    var matches = htkGetContentMatches();
     htkLog("createDeliverable: " + JSON.stringify(matches));
     matches.push({title: deliverable_title});
     htkRequest("POST", "/api/v1/deliverables", matches, function(obj) {
