@@ -86,7 +86,8 @@ class EmailAccount < ApplicationModel
     last_email = self.emails.by_uid.last
     proc = Proc.new do |raw_email|
       begin
-        self.emails.create!(raw_email: raw_email)
+        email = self.emails.build(raw_email: raw_email)
+        email.bring_in!
       rescue ActiveRecord::StatementInvalid
         log_error "Failed to save email:", $!
       end

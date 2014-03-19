@@ -7,7 +7,7 @@ class CreateThreads < ActiveRecord::Migration
   	create_table :email_account_threads do |t|
       t.references :email_account
       t.references :message_thread
-  		t.string :imap_thread_id
+  		t.string :thread_id
   		t.string :subject
   		t.datetime :start_time
   		t.timestamps

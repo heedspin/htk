@@ -5,7 +5,7 @@ class CreateEmails < ActiveRecord::Migration
   		t.string :thread_id
       t.string :folder
       t.datetime :date
-  		t.string :uid
+  		t.integer :uid
       t.string :guid
       t.string :subject
       t.text :encoded_mail

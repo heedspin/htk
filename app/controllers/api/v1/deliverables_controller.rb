@@ -7,7 +7,10 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	# ActiveModel::Serializer::IncludeError (Cannot serialize deliverable_users when DeliverableSerializer does not have a root!):
 	#  app/controllers/api/v1/deliverables_controller.rb:10:in `index'
 	def index
-		if @email = Email.user(current_user).find_by_web_id(params[:web_id])
+		if @email = Email.user(current_user).from_address(params[:from_address]).date(params[:date]).first
+			if (new_web_id = params[:web_id]) and (@email.web_id != new_web_id)
+				@email.update_attributes(web_id: new_web_id)
+			end
 			@deliverables = @email.message.message_thread.deliverables.not_deleted
 			# render json: deliverables
 			render json: { deliverables: @deliverables, email: EmailSerializer.new(@email, root: false) }
@@ -19,8 +22,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   
   def create
   	deliverable_title = params[:title] || 'Deliverable'
-  	web_id = params[:web_id]
-  	email = Email.user(current_user).find_by_web_id(web_id) if web_id
+  	email = Email.user(current_user).from_address(params[:from_address]).date(params[:date]).first
 		if email.nil?
   		render json: { result: 'no email' }, status: 422
   	else

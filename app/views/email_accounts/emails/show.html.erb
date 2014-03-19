@@ -1,0 +1,27 @@
+<% content_for :javascripts do %>
+<script type="text/javascript">
+  $(document).ready(function(){
+		deliverablesGadgetReady();
+	});
+</script>
+<% end %>
+<div id="htkContainer">
+<h3>Deliverables</h3>
+</div>
+
+<h2><%= @email.subject %></h2>
+<p>
+	From: <%= @email.from_address %><br />
+	To: <%= @email.to_addresses.map(&:to_s).join(', ') %><br />
+	Sent: <%= @email.date %>
+</p>
+<hr />
+
+<%= @email.html_body.html_safe %>
+
+<input type="hidden" name="sender_email" size="50" value="<%= @email.from_address %>" class="contentMatch">
+<input type="hidden" name="recipient_to_email" value="<%= @email.to_addresses.join(',') %>" class="multiContentMatch">
+<input type="hidden" name="recipient_cc_email" value="<%= @email.cc_addresses.join(',') %>" class="multiContentMatch">
+<input type="hidden" name="date_sent" value="<%= @email.date.to_i %>" class="contentMatch">
+<input type="hidden" name="subject" value="<%= @email.subject %>" class="contentMatch">
+<input type="hidden" name="message_id" value="<%= @email.message_id %>" class="contentMatch">

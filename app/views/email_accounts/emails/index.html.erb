@@ -1,6 +1,7 @@
 <table>
 	<thead>
 		<tr>
+			<th>From</th>
 			<th>To</th>
 			<th>Subject</th>
 			<th>Date</th>
@@ -9,8 +10,9 @@
 	<tbody>
 		<% @emails.each do |email| %>
 		<tr>
+			<td><%= email.from_address %></td>
 			<td><%= email.to_addresses.map(&:to_s).join(', ') %></td>
-			<td><%= email.subject %></td>
+			<td><%= link_to email.subject, email_account_email_url(@email_account, email) %></td>
 			<td><%= email.date %></td>
 		</tr>
 		<% end %>

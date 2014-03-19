@@ -1,6 +1,7 @@
 ActiveAdmin.register EmailAccount do
 	belongs_to :user
 	navigation_menu :user
+	# belongs_to :email_account_status
 	filter :user
 	filter :server
 	index do

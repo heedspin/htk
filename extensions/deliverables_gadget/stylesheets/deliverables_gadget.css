@@ -1,8 +1,6 @@
 #htkContainer {
 	padding: 5px 5px 5px 10px;
 	background-color: #efefef;
-	height: 4em;
-	max-height: 4em;
  	overflow: hidden;
 	font-size: .75em;
 }

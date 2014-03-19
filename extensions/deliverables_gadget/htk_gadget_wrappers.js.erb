@@ -1,0 +1,39 @@
+var gadget_host_url = "https://<%= gadget_config['api_hostname'] %>";
+function adjust_window_height() {
+	// do nothing
+}
+// https://stk.lxdinc.com/test_deliverables_gadget?from_address=paynecakes@gmail.com&to_addresses=tim@ncwinetrading.com,lindsay@ncwinetrading.com&cc_addresses=charles@ncwinetrading.com&date=1377267742726&subject=Hello%20World
+function getContentMatches() {
+	var result = [];
+	$(".contentMatch").each(function(index) {
+		var obj = new Object();
+		element = $(this);
+		obj[element.attr("name")] = element.val();
+		result.push(obj);
+	})
+	// $(".multiContentMatch").each(function(index) {
+	// 	element = $(this);
+	// 	var values = element.val().split(",");
+	// 	for (var i=0,max=values.length; i < max; ++i) {
+	// 		var obj = new Object();
+	// 		obj[element.attr("name")] = values[i];
+	// 		result.push(obj);
+	// 	}
+	// })
+	htkLog("getContentMatches: " + JSON.stringify(result));
+	return result;
+}
+function htkAjax(method, url, request_data, callback) {
+	request_data["opensocial_owner_id"] = $("#opensocial_owner_id").val();
+	request_data["opensocial_container"] = 'mock container';
+	$.ajax({
+		url: gadget_host_url + url,
+		type: method,
+		dataType: 'json',
+		data: request_data
+	}).done(function(response) {
+		callback({rc: 200, data: response, errors: [] });
+	}).fail(function(xhr, exception){
+		callback({rc: xhr.status, data: xhr.responseText, errors: [ method + " failed" ]});
+	});
+}

@@ -1,3 +1,16 @@
+# == Schema Information
+#
+# Table name: deliverable_users
+#
+#  id             :integer          not null, primary key
+#  deliverable_id :integer
+#  user_id        :integer
+#  responsible    :boolean
+#  access_id      :integer
+#  created_at     :datetime         not null
+#  updated_at     :datetime         not null
+#
+
 require 'test_helper'
 
 # bundle exec rake test TEST=test/unit/deliverable_user_test.rb

@@ -6,7 +6,7 @@ Htk::Application.routes.draw do
       resources :signed_request_users, :only => [:create]
       resources :deliverables
       resources :thread_deliverables
-      resources :emails, :only => :create
+      # resources :emails, :only => :create
       resources :users, :only => :show
     end
   end 
@@ -15,7 +15,7 @@ Htk::Application.routes.draw do
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
 
-  devise_for :users
+  devise_for :users, path: "auth"
 
   resources :email_accounts do
     resources :emails, :controller => 'email_accounts/emails'

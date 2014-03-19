@@ -1,25 +1,10 @@
-var deliverablesTemplate = Handlebars.compile("<%= insert_file('html/deliverables.html', :javascript_escape => true) %>");
 var currentDeliverables = null;
 var currentUser = null;
-var triedCreatingEmail = false;
 var currentEmail = null;
+var deliverablesTemplate = Handlebars.compile("<%= insert_file('html/deliverables.html', :javascript_escape => true) %>");
 
-function createEmail() {
-  htkLog("Creating email");
-  var query_data = htkGetContentMatches(["date_sent", "sender_email", "message_id", "body", "subject", "recipient_to_email", "recipient_cc_email"]);
-  htkRequest("POST", "/api/v1/emails", query_data, function(obj) {
-    if (obj.errors.length > 0) {
-      htkStatusMsg.empty().append("Error").show();
-      htkLog("Error response: " + JSON.stringify(obj));
-      adjust_window_height();
-    } else {
-      htkLog("Created email: " + JSON.stringify(obj.data));
-      loadDeliverables();
-    }
-  });
-}
+
 function htkLoadGadget() {
-  triedCreatingEmail = false;
   getCurrentUser();
 }
 
@@ -40,15 +25,12 @@ function getCurrentUser() {
   })
 }
 function loadDeliverables() {
-  var query_data = htkGetContentMatches(['message_id']);
+  var query_data = htkGetContentMatches(["date_sent", "sender_email", "'message_id"]);
   htkLog("Load Deliverables Matches: " + JSON.stringify(query_data));
   var handleGetDeliverables = function(obj) {
     if (obj.rc && (obj.rc == "404")) {
       htkLog("Email not found");
-      if (!triedCreatingEmail) {
-        triedCreatingEmail = true;
-        createEmail();
-      }
+      htkStatusMsg.empty().append("Email not processed by server yet");
     } else if (obj.errors.length > 0) {
       htkStatusMsg.empty().append("Error").show();
       htkLog("Error response: " + JSON.stringify(obj));
@@ -82,10 +64,13 @@ function renderDeliverables() {
 }
 
 function deliverablesGadgetReady() {
-  htkContainer = $("<div class=\"htkContainer\"></div>");
+  htkContainer = $("#htkContainer");
+  if (!htkContainer) {
+    htkContainer = $("<div id=\"htkContainer\"></div>");    
+    $('body').append(htkContainer);
+  }
   htkStatusMsg = $("<p>Loading Deliverables...</p>");
   htkContainer.append(htkStatusMsg);
-  $('body').append(htkContainer);
   adjust_window_height();
   htkLoadGadget();  
 }

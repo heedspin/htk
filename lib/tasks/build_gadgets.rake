@@ -20,6 +20,7 @@ namespace :htk do
 	  end
   end
 
+  # TODO: Integrate: bundle exec rake assets:precompile RAILS_ENV=development
   task :build_deliverables => :environment do
   	['development', 'production'].each do |environment|
 	  	compiler = GadgetCompiler.new(environment, 'deliverables_gadget')

@@ -19,11 +19,7 @@ Run "rake doc:app" to generate API documentation for your models, controllers, h
    cd RAILS_ROOT
    s3cmd --configure -c config/s3cfg
 
- * Publish gadget spec / Production
-   s3cmd put -c config/s3cfg --acl-public extensions/comments_gadget/spec.xml s3://lxd-htk/comments_gadget/spec-v1.xml
- * Publish gadget spec / Staging
-   s3cmd put -c config/s3cfg --acl-public extensions/comments_gadget/spec.xml s3://lxd-stk/comments_gadget/spec-v1.xml
-
+##  Gadget
  * Manage gadget on domain
 	 http://code.google.com/googleapps/console/a/ncwinetrading.com
 

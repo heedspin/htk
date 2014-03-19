@@ -14,13 +14,13 @@ class Api::V1::EmailsController < Api::V1::ApiController
 			render json: { result: 'forbidden' }, status: 403
   	else
   		email_account = current_user.email_accounts.first
-  		@email = Email.web_create(email_account, 
-  			from_address: params[:from_address], 
+      @email = email_account.emails.build(from_address: params[:from_address], 
   			to_addresses: to_addresses,
   			cc_addresses: cc_addresses,
   			subject: params[:subject],
   			date: params[:date],
   			web_id: params[:web_id])
+      @email.bring_in!
   		if @email.errors.size > 0
   			render json: { errors: @email.errors }, status: 422
   		else

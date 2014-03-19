@@ -58,7 +58,12 @@ module Htk
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
+
+    config.assets.paths << Rails.root.join('extensions', 'deliverables_gadget')
+    config.assets.paths << Rails.root.join('extensions', 'gadgets_lib')
+    config.assets.paths << Rails.root.join('extensions', 'deliverables_gadget', 'stylesheets')
   end
 end
 
 require 'app_config'
+require 'asset_pipeline_helpers'

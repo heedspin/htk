@@ -13,18 +13,23 @@
 //= require jquery
 //= require jquery_ujs
 //= require foundation
-//= require handlebars
-//= require ember
-//= require ember-data
+//=# require handlebars
+//=# require ember
+//=# require ember-data
 //= require_self
-//= require htk
-//= require lib/lib
-Htk = Ember.Application.create({
-  LOG_TRANSITIONS: true,
-  LOG_ACTIVE_GENERATION: true
-});
-//= require_tree .
+//=# require htk
+//=# require lib/lib
 
-Ember.LOG_BINDINGS = true
+// Htk = Ember.Application.create({
+//   LOG_TRANSITIONS: true,
+//   LOG_ACTIVE_GENERATION: true
+// });
+
+//=# require_tree .
+
+// Ember.LOG_BINDINGS = true
+
+//= require deliverables_assets
+
 
 $(function(){ $(document).foundation(); });

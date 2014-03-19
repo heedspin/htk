@@ -38,6 +38,7 @@ class Api::V1::ApiController < ActionController::Base
 	  end
 
 	  def verify_signed_user
+	  	return if current_user # When API is called while user logged in.
 	  	opensocial_owner_id = params[:opensocial_owner_id]
 	  	opensocial_container = params[:opensocial_container]
 	  	if opensocial_owner_id.nil? or opensocial_container.nil?

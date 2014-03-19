@@ -1,3 +1,15 @@
+# == Schema Information
+#
+# Table name: deliverables
+#
+#  id                    :integer          not null, primary key
+#  title                 :string(255)
+#  parent_deliverable_id :integer
+#  status_id             :integer
+#  created_at            :datetime         not null
+#  updated_at            :datetime         not null
+#
+
 require 'test_helper'
 
 # bundle exec rake test TEST=test/unit/deliverable_test.rb

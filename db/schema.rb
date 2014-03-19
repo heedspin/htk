@@ -74,7 +74,7 @@ ActiveRecord::Schema.define(:version => 20140303005517) do
   create_table "email_account_threads", :force => true do |t|
     t.integer  "email_account_id"
     t.integer  "message_thread_id"
-    t.string   "imap_thread_id"
+    t.string   "thread_id"
     t.string   "subject"
     t.datetime "start_time"
     t.datetime "created_at",        :null => false

@@ -17,8 +17,4 @@ class UsersController < ApplicationController
         User.find(params[:id])
       end
     end
-
-    def parent_object
-      @parent_object ||= Party.user(current_user).find(params[:party_id])
-    end
 end

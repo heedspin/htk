@@ -19,10 +19,9 @@ end
 
 gem 'json'
 gem "jquery-rails", "< 3.0.0" # active_admin requires < 3.
-# gem "ember-rails" #, "~> 0.13.0"
-gem 'ember-rails', git: 'git://github.com/emberjs/ember-rails.git'
-gem 'ember-source', '1.2.0.1'
-gem 'handlebars-source'#, '1.0.0.rc3'
+# gem 'ember-rails', git: 'git://github.com/emberjs/ember-rails.git'
+# gem 'ember-source', '1.2.0.1'
+# gem 'handlebars-source'#, '1.0.0.rc3'
 gem 'active_hash'
 
 if File.exists?('../plutolib')
@@ -36,6 +35,7 @@ gem 'devise', '3.0.2'
 gem 'activeadmin'
 gem 'oauth'
 gem 'html_press'
+gem 'active_model_serializers'
 
 group :development do
   gem 'annotate', :git => 'https://github.com/ctran/annotate_models.git'

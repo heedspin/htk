@@ -16,12 +16,17 @@
   	<%= stylesheet_link_tag    "application", :media => "all" %>
     <%= javascript_include_tag "application" %>
   	<%= javascript_include_tag "vendor/custom.modernizr" %>
-    <%= csrf_meta_tags %>
+    <%= yield :stylesheets %>
+    <%= csrf_meta_tag %>
+    <%= yield :javascripts -%>
   </head>
 
   <body>
-
-    <%= yield %>
-    
+    <%= render partial: 'layouts/navigation' %>
+    <div class="container">
+      <div class="row">
+        <%= yield %>
+      </div>
+    </div>
   </body>
 </html>

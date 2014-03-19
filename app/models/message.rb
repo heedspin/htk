@@ -72,12 +72,13 @@ class Message < ApplicationModel
 	def self.find_or_create(email)
 		emails = Email.from_address(email.from_address).date(email.date).includes(:email_account, :message).all
 		same_emails = emails.select { |e| e.same_email?(email) }
-		if same_emails.size == 0
+		messages = same_emails.map(&:message).uniq
+		if messages.size == 0
 			email.create_message!
-		elsif same_emails.size == 1
-			same_emails.first.message
+		elsif messages.size == 1
+			messages.first
 		else
-			raise "Found #{same_emails.size} matching emails from #{email.from_address} at #{email.date}"
+			raise "Found #{messages.size} messages from #{email.from_address} at #{email.date}: " + messages.map(&:id).join(', ')
 		end
 	end
 

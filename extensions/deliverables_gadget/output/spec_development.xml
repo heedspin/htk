@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-  <ModulePrefs title="HTK Comments v3"
+  <ModulePrefs title="HTK Deliverables v5"
     description=""
     height="200"
     scrolling="true"
@@ -19,7 +19,7 @@
   <Content type="html" view="card">
     <![CDATA[
       <style>
-        #contextassistant {
+        #htkContainer {
 	padding: 5px 5px 5px 10px;
 	background-color: #efefef;
 	height: 4em;
@@ -28,60 +28,48 @@
 	font-size: .75em;
 }
 
-#contextassistant table {
+#deliverables, #edit_deliverables {
+	margin: 0 0 0 15px;	
+}
+
+#deliverables table {
 	border-collapse:collapse;
 	border-spacing:0;
 }
 
-#contextassistant p {
+#deliverables p {
 	margin: 0 0 5px 0;
 }
 
-#contextassistant p:last-child {
+#deliverables p:last-child {
 	margin: 0;
 }
 
-/*.ca_comment textarea {
-	padding: .5em;
-	background: #fff;
-	white-space: pre-wrap;
-	word-wrap: break-word;
-	font-size: .75em;
-	line-height: 1.5em;
-	margin: .5em 0;
-	width: 30%;
-}
-*/
-
-#ca_edit_comment {
+#edit_deliverable {
 	padding: .3em 0;
 }
 
-#ca_comments, #ca_edit_comments {
-	margin: 0 0 0 15px;	
-}
-
-#ca_comments, #ca_comments_list, #ca_edit_comments, #ca_edit_comment, #ca_new_comment {
+#deliverables, #deliverables_list, #edit_deliverables, #edit_deliverable, #new_deliverable {
 	float: left;
 	display: inline;
 }
 
-#ca_comments_list {
+#deliverables_list {
 	padding: 0 17px 0 0;
 }
 
-#ca_edit_comments, #ca_new_comment {
+#edit_deliverables, #new_deliverable {
 	/*height: 4em;*/
 	overflow-y:auto;
 	overflow-x: none;
 	/*width: 450px;*/
 }
 
-#ca_new_comment > div {
+#new_deliverable > div {
 	float: left;
 }
 
-#ca_new_comment textarea, #ca_new_comment textareaClone {
+#new_deliverable textarea, #new_deliverable textareaClone {
 	padding: .3em;
 	background: #fff;
 	white-space: pre-wrap;
@@ -92,7 +80,7 @@
 	width: 200px;
 }
 
-#ca_edit_comment textarea {
+#edit_deliverable textarea {
 	float: left;
 /*	padding: .3em;*/
 	background: #fff;
@@ -104,21 +92,21 @@
 	width: 200px;	
 }
 
-#ca_edit_comment button, #ca_edit_comment input {
+#edit_deliverable button, #edit_deliverable input {
 	margin: 0 0 0 .5em;
 	float: left;
 }
 
-#ca_new_comment button {
+#new_deliverable button {
 	margin: 1em 0 0 1.5em;
 }
 
-#ca_create_comment {
+#create_deliverable {
 	/*float: left;*/
 	margin: 5px 0 0 10px;
 }
 
-.ca_hidden_edit span.ca_edit {
+.hidden_edit span.edit {
 	display: none;
 	float: right;
 	padding: 0;
@@ -126,15 +114,15 @@
 /*	margin: 0 0 0 5px;*/
 }
 
-.ca_hidden_edit:hover .ca_edit {
+.hidden_edit:hover .edit {
 	display: inline;
 }
 
-#ca_edit_comment {
+#edit_deliverable {
 	display: none;
 }
 
-#ca_edit_comment .delete_confirmation {
+#edit_deliverable .delete_confirmation {
 	display: none;
 }
       </style>
@@ -2952,20 +2940,20 @@ var __module0__ = (function(__dependency1__, __dependency2__, __dependency3__, _
 var htkLoginForm = null;
 var htkStatusMsg = null;
 
-function log(text) {
+function htkLog(text) {
   if (console && console.log) {
     console.log(text);    
   }
 }
-function loginResponse(obj) {
+function htkLoginResponse(obj) {
   var rc = "";
   if (obj.rc) rc = obj.rc;
   if (rc == 401) {
     htkStatusMsg.empty().append("Login failed.");
-    promptLogin();
+    htkPromptLogin();
   } else if (rc == 200) {
     htkStatusMsg.empty().append("Login successful!  Loading comments...");
-    loadComments();
+    htkLoadGadget();
     adjust_window_height();
   } else {
     htkStatusMsg.empty().append("Login error");
@@ -2973,17 +2961,17 @@ function loginResponse(obj) {
     log("Login response: " + JSON.stringify(obj));                    
   }
 }
-function promptLogin() {
-  if (!loginForm) {
-    login_html = "<%= insert_file('html/login.html', :javascript_escape => true) %>"
-    loginForm = $(login_html);
-    htkContainer.append(loginForm);
+function htkPromptLogin() {
+  if (!htkLoginForm) {
+    login_html = "<div id=\"dialog-form\" title=\"HTK Login\"><p>Please enter your HTK username (email) and password.<\/p><form><fieldset> <label for=\"email\">Email<\/label> <input name=\"email\" id=\"email\" value=\"\" class=\"text ui-widget-content ui-corner-all\"/> <label for=\"password\">Password<\/label> <input type=\"password\" name=\"password\" id=\"password\" value=\"\" class=\"text ui-widget-content ui-corner-all\"/><\/fieldset> <button id=\"login\">Login<\/button><\/form><\/div>"
+    htkLoginForm = $(login_html);
+    htkContainer.append(htkLoginForm);
     $("#login").on('click', function(e) {
       e.preventDefault();
-      loginForm.hide();
+      htkLoginForm.hide();
       var email = $("#email");
       var password = $("#password");
-      htkRequest("POST", "/api/v1/signed_request_users", { email: email.val(), password: password.val() }, loginResponse);
+      htkRequest("POST", "/api/v1/signed_request_users", { email: email.val(), password: password.val() }, htkLoginResponse);
       htkStatusMsg.empty().append("Logging in to HTK as " + email.val()).show();
       adjust_window_height();
       email.val("");
@@ -2991,7 +2979,7 @@ function promptLogin() {
     });
     adjust_window_height();        
   } else {
-    loginForm.show();
+    htkLoginForm.show();
   }
 }
 function htkRequest(method, path, data, callback) {
@@ -3020,8 +3008,27 @@ function htkRequest(method, path, data, callback) {
   }
   return htkAjax(method, path, request_data, callback);
 }
-
-
+var htkKeyMap = {
+  "message_id": "web_id",
+  "sender_email": "from_address",
+  "date_sent": "date",
+  "recipient_to_email": "to_addresses",
+  "recipient_cc_email": "cc_addresses"
+}
+function htkGetContentMatches(keys) {
+  var matches = getContentMatches();
+  var result = [];
+  for (var match in matches) {
+    for (var key in matches[match]) {
+      if ((keys == null) || ($.inArray(key, keys) >= 0)) {
+        var obj = new Object();
+        obj[htkKeyMap[key] || key] = matches[match][key];
+        result.push(obj);
+      }
+    }
+  }
+  return result;
+}
         var gadget_host_url = "https://stk.lxdinc.com";
 function adjust_window_height() {
 	gadgets.window.adjustHeight();
@@ -3063,31 +3070,139 @@ function htkAjax(method, path, data, callback) {
   return gadgets.io.makeRequest(url, callback, params);        
 }
 
-        var loadDeliverablesKeys = ["date_sent", "sender_email", "message_id"];
+        var deliverablesTemplate = Handlebars.compile("<div id=\"deliverables\"><div id=\"deliverables_list\"> {{#each deliverables}}<p class=\"htk_hidden_edit\" data-id=\"{{id}}\"> {{title}}<\/p> {{/each}}<\/div><div id=\"edit_deliverables\"><div id=\"new_deliverable\"> <input placeholder=\"Deliverable Title\"/> <button type=\"button\" id=\"create_deliverable\">Save<\/button><\/div><div id=\"edit_deliverable\"> <input placeholder=\"Deliverable Title\" name=\"deliverable[title]\"/> <button type=\"button\">Save<\/button> <input type=\"checkbox\" class=\"delete_option\">Delete<\/input><\/div><\/div><\/div>");
+var currentDeliverables = null;
+var currentUser = null;
+var currentEmail = null;
+
+function htkLoadGadget() {
+  getCurrentUser();
+}
+
+function getCurrentUser() {
+  htkRequest("GET", "/api/v1/users/current", null, function(obj) {
+    if (obj.rc && (obj.rc == "401")) {
+      htkStatusMsg.hide();
+      htkPromptLogin();
+    } else if (obj.errors.length > 0) {
+      htkStatusMsg.empty().append("Error").show();
+      htkLog("Error response: " + JSON.stringify(obj));
+      adjust_window_height();
+    } else {
+      currentUser = obj.data["user"];
+      htkLog("Current user: " + JSON.stringify(currentUser));
+      loadDeliverables();
+    }    
+  })
+}
 function loadDeliverables() {
-  var matches = getContentMatches();
-  var query_data = new Object();
-  for (var match in matches) {
-    for (var key in matches[match]) {
-      if ($.inArray(key, loadDeliverablesKeys) >= 0) {
-        query_data[key] = matches[match][key];
-      }
+  var query_data = htkGetContentMatches(["date_sent", "sender_email", "'message_id"]);
+  htkLog("Load Deliverables Matches: " + JSON.stringify(query_data));
+  var handleGetDeliverables = function(obj) {
+    if (obj.rc && (obj.rc == "404")) {
+      htkLog("Email not found");
+      htkStatusMsg.empty().append("Email not processed by server yet");
+    } else if (obj.errors.length > 0) {
+      htkStatusMsg.empty().append("Error").show();
+      htkLog("Error response: " + JSON.stringify(obj));
+      adjust_window_height();
+    } else {
+      htkLog("Load Deliverables: " + JSON.stringify(obj.data));
+      currentDeliverables = obj.data["deliverables"];
+      currentEmail = obj.data['email'];
+      renderDeliverables();
+      // statusMsg.empty().append("Victory").show();
+      adjust_window_height();
     }
   }
-  log("Load Deliverables Matches: " + JSON.stringify(query_data));
+  htkRequest("GET", "/api/v1/deliverables", query_data, handleGetDeliverables);
+
   htkStatusMsg.empty().append("Done").show();
   adjust_window_height();
 }
 
+function renderDeliverables() {
+  var deliverables_container = htkContainer.find("#deliverables");
+  if (deliverables_container.length == 0) {
+    deliverables_container = $("<div id=\"deliverables\"></div>");
+    htkContainer.append(deliverables_container);
+  }
+  var html = deliverablesTemplate({ current_user: currentUser, deliverables: currentDeliverables });
+  var new_elements = $(html);
+  deliverables_container.replaceWith(new_elements);
+  htkStatusMsg.empty().append("EAT-" + currentEmail.email_account_thread_id + " T-" + currentEmail.message_thread_id + " M-" + currentEmail.message_id);
+  deliverablesReady(new_elements);
+}
+
 function deliverablesGadgetReady() {
-  htkContainer = $(document.createElement('div'));
+  htkContainer = $("<div class=\"htkContainer\"></div>");
   htkStatusMsg = $("<p>Loading Deliverables...</p>");
   htkContainer.append(htkStatusMsg);
   $('body').append(htkContainer);
   adjust_window_height();
-  loadDeliverables();  
+  htkLoadGadget();  
 }
 
+function deliverablesReady(container) {
+  container.find("#new_deliverable > button").click(createDeliverable);
+  container.find(".htk_hidden_edit .htk_edit").on('click', function(e) {
+    var deliverable_id = $(this).parent().attr("data-id");
+    htkLog("Editing Deliverable " + deliverable_id);
+    $("#new_deliverable").hide();
+    var edit_container = $("#edit_deliverable").show();
+    edit_container.attr("data-id", deliverable_id);
+    var deliverable = getDeliverable(deliverable_id);
+    if (deliverable) edit_container.find("input").val(deliverable.title);
+  });
+  // Toggle Save / Delete button.
+  container.find("#edit_deliverables").on('click', 'input.delete_option', function(e) {
+    htkLog("#edit_deliverables input.delete_option click");
+    var save_button = $(this).siblings("button");
+    if ($(this).is(":checked")) {
+      save_button.html("Delete");
+    } else {
+      save_button.html("Save");     
+    }
+  });
+  // Handle Edit Save / Delete button.
+  container.find("#edit_deliverables").on("click", "#edit_deliverable > button", function(e) {
+    var button = $(this);
+    var deliverable_id = button.parent().attr("data-id");   
+    if (button.html() == "Save") {
+      updateDeliverable(deliverable_id, button.siblings("input").val());
+    } else {
+      deleteDeliverable(deliverable_id);
+    }
+  });
+}
+function createDeliverable() {
+  var deliverable_title_input = $(this).parent().find("input");
+  var deliverable_title = deliverable_title_input.val();
+  if (deliverable_title) {
+    var matches = htkGetContentMatches();
+    htkLog("createDeliverable: " + JSON.stringify(matches));
+    matches.push({title: deliverable_title});
+    htkRequest("POST", "/api/v1/deliverables", matches, function(obj) {
+      var rc = "";
+      if (obj.rc) rc = obj.rc;
+      if (rc == 200) {
+        htkLog("Posting new deliverable succeeded: " + JSON.stringify(obj.data));
+        deliverable_title_input.val("");
+        var new_deliverable = obj.data["deliverable"];
+        if (currentDeliverables && new_deliverable) {
+          htkLog("Created new deliverable: " + JSON.stringify(new_deliverable))
+          currentDeliverables.unshift(new_deliverable);
+          renderDeliverables();
+        }
+        adjust_window_height();
+      } else {
+        htkStatusMsg.empty().append("Create deliverable failed.");
+        adjust_window_height();
+        htkLog("Create deliverable response: " + JSON.stringify(obj));
+      }
+    });
+  }
+}
         Handlebars.registerHelper('link', function(text, url) {
   text = Handlebars.Utils.escapeExpression(text);
 	var result = null;
@@ -3122,17 +3237,17 @@ Handlebars.registerHelper('if_equal', function(a,b,options) {
 		return options.inverse(this);
 	}
 });
-        Handlebars.registerHelper('each_comment', function(comments, options) {
+        Handlebars.registerHelper('each_deliverable', function(deliverables, options) {
 	var out = '';
 	var current_creator_id = null;
-	for (var i = 0; i < comments.length; i++) {
-		var comment = comments[i];
-		if (comment.creator_id != current_creator_id) {
-			current_creator_id = comment.creator_id;
-			comment = $.extend(true, {new_creator: true}, comment);
-			out = out + options.fn(comment);
+	for (var i = 0; i < deliverables.length; i++) {
+		var deliverable = deliverables[i];
+		if (deliverable.creator_id != current_creator_id) {
+			current_creator_id = deliverable.creator_id;
+			deliverable = $.extend(true, {new_creator: true}, deliverable);
+			out = out + options.fn(deliverable);
 		} else {
-			out = out + options.fn(comment);
+			out = out + options.fn(deliverable);
 		}
 	}
 	return out;
