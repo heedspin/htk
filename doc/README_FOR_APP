@@ -20,6 +20,13 @@ Run "rake doc:app" to generate API documentation for your models, controllers, h
    s3cmd --configure -c config/s3cfg
 
 ##  Gadget
+ * Build gadget
+   bundle exec rake htk:build_deliverables RAILS_ENV=development
+   or
+   bundle exec rake htk:build_deliverables RAILS_ENV=production
+
+   Output is written to public/assets/deliverables_gadget
+
  * Manage gadget on domain
 	 http://code.google.com/googleapps/console/a/ncwinetrading.com
 

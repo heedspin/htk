@@ -2,11 +2,12 @@ require 'deliverables_gadget_compiler'
 
 # bundle exec rake htk:build_deliverables RAILS_ENV=development
 namespace :htk do
-  desc "Build HTK Gadgets"
+  desc "Build HTK Deliverables Gadget"
   # TODO: Integrate: bundle exec rake assets:precompile RAILS_ENV=development
   task :build_deliverables => :environment do
   	compiler = DeliverablesGadgetCompiler.new
-  	output_directory = compiler.gadget_root.join('output')
+  	output_directory = Rails.root.join('public', 'assets', 'deliverables_gadget')
+  	FileUtils.mkdir_p output_directory
   	Rake::Task["assets:precompile"].reenable
 		Rake::Task["assets:precompile"].invoke
 		['manifest', 'spec'].each do |base_filename|
