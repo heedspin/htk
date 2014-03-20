@@ -1,41 +1,24 @@
-require 'gadget_compiler'
+require 'deliverables_gadget_compiler'
 
+# bundle exec rake htk:build_deliverables RAILS_ENV=development
 namespace :htk do
   desc "Build HTK Gadgets"
-  task :build_comments => :environment do
-  	['development', 'production'].each do |environment|
-	  	compiler = GadgetCompiler.new(environment, 'comments_gadget')
-	  	output_directory = File.join(compiler.source_directory, 'output')
-  		['manifest', 'spec'].each do |base_filename|
-  			output_file = "#{base_filename}_#{environment}.xml"
-	  		output_path = File.join(output_directory, output_file)
-		  	File.open(output_path, 'w+') do |out|
-		  		out << compiler.insert_file("#{base_filename}.xml.erb")
-		  	end
-		  	puts "Wrote #{output_file}"
-		  	if base_filename == 'spec'
-					puts `s3cmd put -c config/s3cfg --acl-public #{output_path} s3://lxd-stk/#{compiler.name}/#{base_filename}_#{environment}-v#{compiler.version}.xml`
-				end
-		  end
-	  end
-  end
-
   # TODO: Integrate: bundle exec rake assets:precompile RAILS_ENV=development
   task :build_deliverables => :environment do
-  	['development', 'production'].each do |environment|
-	  	compiler = GadgetCompiler.new(environment, 'deliverables_gadget')
-	  	output_directory = File.join(compiler.source_directory, 'output')
-  		['manifest', 'spec'].each do |base_filename|
-  			output_file = "#{base_filename}_#{environment}.xml"
-	  		output_path = File.join(output_directory, output_file)
-		  	File.open(output_path, 'w+') do |out|
-		  		out << compiler.insert_file("#{base_filename}.xml.erb")
-		  	end
-		  	puts "Wrote #{output_file}"
-		  	if base_filename == 'spec'
-					puts `s3cmd put -c config/s3cfg --acl-public #{output_path} s3://lxd-stk/#{compiler.name}/#{base_filename}_#{environment}-v#{compiler.version}.xml`
-				end
-		  end
+  	compiler = DeliverablesGadgetCompiler.new
+  	output_directory = compiler.gadget_root.join('output')
+  	Rake::Task["assets:precompile"].reenable
+		Rake::Task["assets:precompile"].invoke
+		['manifest', 'spec'].each do |base_filename|
+			output_file = "#{base_filename}_#{Rails.env}.xml"
+  		output_path = File.join(output_directory, output_file)
+	  	File.open(output_path, 'w+') do |out|
+	  		out << compiler.insert_file("#{base_filename}.xml.erb")
+	  	end
+	  	puts "Wrote #{output_file}"
+	  	if base_filename == 'spec'
+				puts `s3cmd put -c config/s3cfg --acl-public #{output_path} s3://lxd-stk/deliverables_gadget/#{base_filename}_#{Rails.env}-v#{compiler.version}.xml`
+			end
 	  end
   end
 end

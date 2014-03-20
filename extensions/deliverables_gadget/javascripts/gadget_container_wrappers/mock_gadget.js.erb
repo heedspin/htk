@@ -1,4 +1,4 @@
-var gadget_host_url = "https://<%= config['api_hostname'] %>";
+var gadget_host_url = "https://<%= gadget_config['api_hostname'] %>";
 function adjust_window_height() {
 	// do nothing
 }
@@ -22,18 +22,4 @@ function getContentMatches() {
 	})
 	htkLog("getContentMatches: " + JSON.stringify(result));
 	return result;
-}
-function htkAjax(method, url, request_data, callback) {
-	request_data["opensocial_owner_id"] = $("#opensocial_owner_id").val();
-	request_data["opensocial_container"] = 'mock container';
-	$.ajax({
-		url: gadget_host_url + url,
-		type: method,
-		dataType: 'json',
-		data: request_data
-	}).done(function(response) {
-		callback({rc: 200, data: response, errors: [] });
-	}).fail(function(xhr, exception){
-		callback({rc: xhr.status, data: xhr.responseText, errors: [ method + " failed" ]});
-	});
 }

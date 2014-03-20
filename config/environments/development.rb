@@ -38,5 +38,7 @@ Htk::Application.configure do
   # Devise wants:
   config.action_mailer.default_url_options = { :host => 's3.lxdinc.com' }
 
+  config.assets.precompile += %w[deliverables_chrome.js deliverables_web.js deliverables_gadget.css]
+
   # config.ember.variant = :development
 end

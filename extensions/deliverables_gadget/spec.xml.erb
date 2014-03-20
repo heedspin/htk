@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-  <ModulePrefs title="HTK Deliverables v<%= config['version']%>"
+  <ModulePrefs title="HTK Deliverables v<%= gadget_config['version']%>"
     description=""
     height="200"
     scrolling="true"
@@ -19,18 +19,14 @@
   <Content type="html" view="card">
     <![CDATA[
       <style>
-        <%= insert_file 'stylesheets/deliverables_gadget.css' %>
+        <%= insert_file Rails.root.join('public', 'assets', 'deliverables_gadget.css') %>
       </style>
       <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
       <script type="text/javascript">
-        <%= insert_file '../gadgets_lib/handlebars-v1.3.0.js' %>
-        <%= insert_file '../gadgets_lib/autogrow.js' %>
-        <%= insert_file '../gadgets_lib/gadgets.js.erb' %>
-        <%= insert_file 'gadget_wrappers.js.erb' %>
-        <%= insert_file 'deliverables_gadget_spec.js.erb' %>
-        <%= insert_file '../gadgets_lib/common_handlebars_helpers.js' %>
-        <%= insert_file 'lib/handlebars_helpers.js' %>
-        deliverablesGadgetReady();
+        <%= insert_file Rails.root.join('public', 'assets', 'deliverables_chrome.js') %>
+        $(function() {
+          deliverablesGadgetReady();
+        });
       </script>
     ]]>
   </Content>

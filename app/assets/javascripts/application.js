@@ -29,7 +29,7 @@
 
 // Ember.LOG_BINDINGS = true
 
-//= require deliverables_assets
+//= require deliverables_web
 
 
 $(function(){ $(document).foundation(); });
