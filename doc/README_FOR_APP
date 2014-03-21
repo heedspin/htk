@@ -28,7 +28,7 @@ Run "rake doc:app" to generate API documentation for your models, controllers, h
    Output is written to public/deliverables_gadget
 
  * Manage gadget on domain
-	 http://code.google.com/googleapps/console/a/ncwinetrading.com
+	http://code.google.com/googleapps/console/a/ncwinetrading.com
 
 ## rsync
 

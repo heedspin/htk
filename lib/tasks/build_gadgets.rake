@@ -21,5 +21,7 @@ namespace :htk do
 				puts `s3cmd put -c config/s3cfg --acl-public #{output_path} s3://lxd-stk/deliverables_gadget/#{base_filename}_#{Rails.env}-v#{compiler.version}.xml`
 			end
 	  end
+	  # Keep from messing up development mode!
+		Rake::Task["assets:clean"].invoke
   end
 end
