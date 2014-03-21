@@ -20,3 +20,4 @@ config/database.yml
 config/s3cfg
 extensions/comments_gadget/output
 public/assets
+public/deliverables_gadget

@@ -6,7 +6,7 @@ namespace :htk do
   # TODO: Integrate: bundle exec rake assets:precompile RAILS_ENV=development
   task :build_deliverables => :environment do
   	compiler = DeliverablesGadgetCompiler.new
-  	output_directory = Rails.root.join('public', 'assets', 'deliverables_gadget')
+  	output_directory = Rails.root.join('public', 'deliverables_gadget')
   	FileUtils.mkdir_p output_directory
   	Rake::Task["assets:precompile"].reenable
 		Rake::Task["assets:precompile"].invoke
