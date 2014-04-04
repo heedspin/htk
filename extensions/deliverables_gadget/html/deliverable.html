@@ -1,0 +1,10 @@
+<div id="htk-detail-{{id}}">
+	{{#with deliverable}}
+		<p>{{title}}<br />
+			Created by: {{owner.first_name}}<br />
+			{{#if responsible}}
+			Assigned to: {{responsible.first_name}}
+			{{/if}}
+		</p>
+	{{/with}}
+</div>

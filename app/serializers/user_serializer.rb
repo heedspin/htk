@@ -1,5 +1,3 @@
 class UserSerializer < ActiveModel::Serializer
-  # embed :ids, include: true
-  attributes :id, :email
-  # has_many :email_accounts, key: :email_accounts
+  attributes :id, :email, :first_name, :last_name
 end

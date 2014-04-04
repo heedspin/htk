@@ -16,4 +16,7 @@ class DeliverableUser < ApplicationModel
 	belongs_to :user
   belongs_to_active_hash :access, :class_name => 'DeliverableAccess'
   attr_accessible :user_id, :access_id, :responsible
+  def significant?
+  	self.access.owner? || self.responsible
+  end
 end
