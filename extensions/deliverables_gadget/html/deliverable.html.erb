@@ -1,0 +1,11 @@
+{{#with deliverable}}
+<div class="htk-show" id="htk-detail-{{id}}" data-id="{{id}}">
+		<p>{{title}}<br />
+			Created by: {{owner.first_name}}<br />
+			{{#if responsible}}
+			Assigned to: {{responsible.first_name}}
+			{{/if}}
+		</p>
+		<div class="htk-action htk-action-ed"><%= image_tag 'edit.png' %></div>
+</div>
+{{/with}}

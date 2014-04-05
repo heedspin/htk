@@ -40,4 +40,8 @@ class Deliverable < ApplicationModel
   	end
   	deliverable
   end
+  def self.editable_by(user)
+    user_id = user.is_a?(User) ? user.id : user
+    includes(:deliverable_users).where(deliverable_users: { user_id: user_id, access_id: [DeliverableAccess.owner.id, DeliverableAccess.edit.id] })
+  end
 end

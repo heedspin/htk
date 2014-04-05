@@ -43,21 +43,21 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	end
 
 	def update
-		if comment = editable_object
-			if comment.update_attributes(comment: params[:comment])
+		if @deliverable = editable_object
+			if @deliverable.update_attributes(title: params[:title])
 				render json: { result: 'success'}
 			else
-				render json: { errors: comment.errors }, status: 422
+				render json: { errors: @deliverable.errors }, status: 422
 			end
 		end
 	end
 
 	def destroy
-		if comment = editable_object
-			if comment.destroy
+		if @deliverable = editable_object
+			if @deliverable.destroy
 				render json: { result: 'success'}
 			else
-				render json: { errors: comment.errors }, status: 422
+				render json: { errors: @deliverable.errors }, status: 422
 			end	
 		end
 	end
@@ -65,12 +65,6 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	protected
 
 		def editable_object
-			comment = EmailComment.accessible_to(current_user).find(params[:id]) || not_found
-			if comment.owner_email_comment_user.user_id != current_user.id
-				render json: { result: 'forbidden' }, status: 403
-				nil
-			else
-				comment
-			end
+			Deliverable.editable_by(current_user).find(params[:id]) || not_found
 		end
 end

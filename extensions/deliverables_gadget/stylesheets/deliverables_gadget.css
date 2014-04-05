@@ -51,9 +51,6 @@ span.htk-responsible {
 .htk-action {
 	cursor: pointer;
 }
-#htk-action-nd {
-	float: left;
-}
 .htk-hidden {
 	display: none;
 }

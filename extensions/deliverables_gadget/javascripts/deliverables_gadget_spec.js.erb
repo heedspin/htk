@@ -5,7 +5,7 @@ var currentEmail = null;
 var currentDeliverableUsers = null;
 var currentUsers = null;
 var deliverablesTemplate = Handlebars.compile("<%= insert_file('html/deliverables.html.erb', :javascript_escape => true) %>");
-var deliverableTemplate = Handlebars.compile("<%= insert_file('html/deliverable.html', :javascript_escape => true) %>");
+var deliverableTemplate = Handlebars.compile("<%= insert_file('html/deliverable.html.erb', :javascript_escape => true) %>");
 var deliverableLiTemplate = Handlebars.compile("<%= insert_file('html/deliverable_li.html', :javascript_escape => true) %>");
 var selectedDeliverableTemplate = Handlebars.compile("<%= insert_file('html/selected_deliverable.html', :javascript_escape => true) %>");
 var selectedDeliverable = null;
@@ -31,12 +31,11 @@ function getCurrentUser() {
   })
 }
 function getDeliverable(deliverable_id) {
-  if (!currentDeliverables) return null;
-  for (var i=0; i < currentDeliverables.length; i++) {
-    var deliverable = currentDeliverables[i];
-    if (deliverable.id == deliverable_id) return deliverable;
-  }
-  return null;
+  var deliverable = _.find(currentDeliverables, function(deliverable) {
+    return (deliverable.id == deliverable_id);
+  });
+  // htkLog("getDeliverable " + deliverable_id + " = " + JSON.stringify(deliverable));
+  return deliverable;
 }
 function parseDeliverablesJson(obj) {
   new_deliverables = new Array();
@@ -88,12 +87,10 @@ function renderDeliverables() {
     htkContainer.append(deliverables_container);
   }
   deliverables_container.replaceWith($(deliverablesTemplate({ current_user: currentUser })));
-  var deliverables_list = $("#htk-dlist");
   _.each(currentDeliverables, function (deliverable) {
-    deliverables_list.append($(deliverableLiTemplate({ deliverable: deliverable })));
+    $(deliverableLiTemplate({ deliverable: deliverable })).insertBefore($("#htk-action-nd"));
   });
-  if (!selectedDeliverable) setSelectedDeliverable(currentDeliverables[0]);
-  showSelectedDeliverable();
+  showDeliverable();
   // html = selectedDeliverableTemplate({ current_user: currentUser, deliverable: selectedDeliverable });
   // var details = $(html);
   // $("#htk-details").append(details);
@@ -115,26 +112,71 @@ function deliverablesGadgetReady() {
 
 function setupDeliverablesMarkup() {
   $("#htk-dlist").on("click", ".htk-action-sd", function() {
-    setSelectedDeliverable(getDeliverable($(this).parent().attr("data-id")));
-    showSelectedDeliverable();
+    showDeliverable(getDeliverable($(this).parent().attr("data-id")));
   });
   $("#htk-action-nd").click(function() {
     $("#htk-details").children().hide();
     $("#htk-form-nd").show();
   });
+  $("#htk-details").on("click", ".htk-action-ed", function() {
+    $("#htk-details").children().hide();
+    var edit_form = $("#htk-form-ed");
+    var deliverable = getDeliverable($(this).parent().attr("data-id"));
+    edit_form.attr("data-id", deliverable.id);
+    edit_form.find("input[name=title]").val(deliverable.title);
+    edit_form.show();
+  });
   $("#htk-form-nd > button").click(createDeliverable);
+  $("#htk-form-ed > button").click(function() {
+    var button = $(this);
+    var form = button.parent();
+    var deliverable_id = form.attr("data-id");
+    if (button.html() == "Save") {
+      updateDeliverable(deliverable_id, form);
+    } else {
+      deleteDeliverable(deliverable_id);
+    }
+  });
+  // Toggle Save / Delete button.
+  $("#htk-form-ed input.htk-action-delete").click(function() {
+    var save_button = $(this).siblings("button");
+    if ($(this).is(":checked")) {
+      save_button.html("Delete");
+    } else {
+      save_button.html("Save");     
+    }
+  });
 };
-function showSelectedDeliverable() {
+function showDeliverable(deliverable) {
+  if (!deliverable) deliverable = currentDeliverables[0];
+  _.each(currentDeliverables, function(d) {
+    d.isSelected = false;
+  });
+  deliverable.isSelected = true;
+  selectedDeliverable = deliverable;
+  $(".htk-d").each(function() {
+    var li = $(this);
+    if (li.attr("data-id") == deliverable.id) {
+      li.addClass("selected");
+    } else {
+      li.removeClass("selected");
+    }
+  });
+
+  var need_to_create = true;
   var details = $("#htk-details");
-  details.children().hide();
-  var deliverable_details = details.find("#htk-detail-" + selectedDeliverable.id);
-  if (deliverable_details.size() > 0) {
-    deliverable_details.show();
-  } else {
-    var html = deliverableTemplate({ current_user: currentUser, deliverable: selectedDeliverable });
-    new_details = $(html);
-    details.append(new_details);
-    // Register callbacks.
+  details.children().each(function() {
+    var _this = $(this);
+    if (_this.attr("id") == deliverable.id) {
+      _this.show();
+      need_to_create = false;
+    } else if (_this.attr("id") != "htk-action-nd") {
+      _this.hide();
+    }
+  });
+  if (need_to_create) {
+    var html = deliverableTemplate({ current_user: currentUser, deliverable: deliverable });
+    $("#htk-details").append($(html));
   }
 }
 function createDeliverable() {
@@ -150,13 +192,9 @@ function createDeliverable() {
       if (rc == 200) {
         htkLog("Created new deliverable: " + JSON.stringify(obj.data))
         deliverable_title_input.val("");
-        var new_deliverables = parseDeliverablesJson(obj);
-        $("#htk-dlist").append($(deliverableLiTemplate({ deliverable: new_deliverables[0] })));
-          // var new_deliverable = obj.data["deliverable"];
-        // if (currentDeliverables && new_deliverable) {
-        //   currentDeliverables.unshift(new_deliverable);
-        //   renderDeliverables();
-        // }
+        var new_deliverable = parseDeliverablesJson(obj)[0];
+        $(deliverableLiTemplate({ deliverable: new_deliverable })).insertBefore($("#htk-action-nd"));
+        showDeliverable(new_deliverable);
         adjust_window_height();
       } else {
         htkStatusMsg.empty().append("Create deliverable failed.");
@@ -166,20 +204,41 @@ function createDeliverable() {
     });
   }
 }
-
-function setSelectedDeliverable(sd) {
-  _.each(currentDeliverables, function(deliverable) {
-    deliverable.isSelected = false;
-  });
-  sd.isSelected = true;
-  selectedDeliverable = sd;
-  $(".htk-d").each(function() {
-    var li = $(this);
-    if (li.attr("data-id") == sd.id) {
-      li.addClass("selected");
+function updateDeliverable(deliverable_id, form) {
+  var title = form.find("input[name=title]").val();
+  htkLog("updating deliverable " + deliverable_id + " with title " + title);
+  htkRequest("PUT", "/api/v1/deliverables/" + deliverable_id, { title: title }, function(obj) {
+    var rc = "";
+    if (obj.rc) rc = obj.rc;
+    if (rc == 200) {
+      htkLog("Putting deliverable succeeded");
+      var deliverable = getDeliverable(deliverable_id);
+      deliverable.title = title;
+      $("#htk-dlist").find("li[data-id=" + deliverable_id + "] span.htk-title").html(title);
+      showDeliverable(deliverable);
     } else {
-      li.removeClass("selected");
+      htkLog("Updating deliverable failed");
     }
   });
-
+}
+function deleteDeliverable(deliverable_id) {
+  htkRequest("DELETE", "/api/v1/deliverables/" + deliverable_id, null, function(obj) {
+    var rc = "";
+    if (obj.rc) rc = obj.rc;
+    if (rc == 200) {
+      htkLog("Delete deliverable succeeded");
+      removeDeliverable(deliverable_id);
+      showDeliverable();
+    } else {
+      log("Deleting comment failed");
+    }
+  });
+}
+function removeDeliverable(deliverable_id) {
+  for (var i=0; i < currentDeliverables.length; i++) {
+    var deliverable = currentDeliverables[i];
+    if (deliverable.id == deliverable_id) currentDeliverables.splice(i,1)
+  }
+  $("#htk-dlist").find("li[data-id=" + deliverable_id + "]").remove();
+  $(".htk-show > div[data-id=" + deliverable_id + "]").remove();
 }
