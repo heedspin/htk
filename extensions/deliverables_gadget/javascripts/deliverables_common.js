@@ -5,3 +5,6 @@
 //= require deliverables_gadget_spec.js.erb
 //= require_tree ./models
 //= require ./lib/handlebars_helpers.js
+//= require lib/jquery.formToNameValues.js
+//= require lib/jquery.resetForm.js
+//= require helpers/simple_format.js.coffee

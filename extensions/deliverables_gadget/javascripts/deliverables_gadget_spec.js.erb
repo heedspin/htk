@@ -1,4 +1,4 @@
-// ping12345
+// touch123
 var currentDeliverables = null;
 var currentUser = null;
 var currentEmail = null;
@@ -95,7 +95,7 @@ function renderDeliverables() {
   // var details = $(html);
   // $("#htk-details").append(details);
   htkStatusMsg.empty().append("EAT-" + currentEmail.email_account_thread_id + " T-" + currentEmail.message_thread_id + " M-" + currentEmail.message_id);
-  setupDeliverablesMarkup();
+  setupDeliverablesEvents();
 }
 
 function deliverablesGadgetReady() {
@@ -110,7 +110,7 @@ function deliverablesGadgetReady() {
   htkLoadGadget();  
 }
 
-function setupDeliverablesMarkup() {
+function setupDeliverablesEvents() {
   $("#htk-dlist").on("click", ".htk-action-sd", function() {
     showDeliverable(getDeliverable($(this).parent().attr("data-id")));
   });
@@ -118,14 +118,7 @@ function setupDeliverablesMarkup() {
     $("#htk-details").children().hide();
     $("#htk-form-nd").show();
   });
-  $("#htk-details").on("click", ".htk-action-ed", function() {
-    $("#htk-details").children().hide();
-    var edit_form = $("#htk-form-ed");
-    var deliverable = getDeliverable($(this).parent().attr("data-id"));
-    edit_form.attr("data-id", deliverable.id);
-    edit_form.find("input[name=title]").val(deliverable.title);
-    edit_form.show();
-  });
+  $("#htk-details").on("click", ".htk-action-ed", editDeliverable);
   $("#htk-form-nd > button").click(createDeliverable);
   $("#htk-form-ed > button").click(function() {
     var button = $(this);
@@ -135,6 +128,7 @@ function setupDeliverablesMarkup() {
       updateDeliverable(deliverable_id, form);
     } else {
       deleteDeliverable(deliverable_id);
+      button.html("Save");
     }
   });
   // Toggle Save / Delete button.
@@ -146,6 +140,15 @@ function setupDeliverablesMarkup() {
       save_button.html("Save");     
     }
   });
+};
+function editDeliverable() {
+  $("#htk-details").children().hide();
+  var edit_form = $("#htk-form-ed");
+  var deliverable = getDeliverable($(this).parent().attr("data-id"));
+  edit_form.attr("data-id", deliverable.id);
+  edit_form.find("input[name=title]").val(deliverable.title);
+  edit_form.find("textarea[name=description]").val(deliverable.description);
+  edit_form.show();
 };
 function showDeliverable(deliverable) {
   if (!deliverable) deliverable = currentDeliverables[0];
@@ -180,21 +183,19 @@ function showDeliverable(deliverable) {
   }
 }
 function createDeliverable() {
-  var deliverable_title_input = $(this).parent().find("input");
-  var deliverable_title = deliverable_title_input.val();
-  if (deliverable_title) {
-    var matches = htkGetContentMatches();
+  var form = $(this).parent();
+  if (form.find("input[name=title]").val()) {
+    var matches = htkGetContentMatches().concat(form.formToNameValues());
     htkLog("createDeliverable: " + JSON.stringify(matches));
-    matches.push({title: deliverable_title});
     htkRequest("POST", "/api/v1/deliverables", matches, function(obj) {
       var rc = "";
       if (obj.rc) rc = obj.rc;
       if (rc == 200) {
         htkLog("Created new deliverable: " + JSON.stringify(obj.data))
-        deliverable_title_input.val("");
-        var new_deliverable = parseDeliverablesJson(obj)[0];
-        $(deliverableLiTemplate({ deliverable: new_deliverable })).insertBefore($("#htk-action-nd"));
-        showDeliverable(new_deliverable);
+        form.resetForm();
+        var nd = parseDeliverablesJson(obj)[0];
+        $(deliverableLiTemplate({ deliverable: nd })).insertBefore($("#htk-action-nd"));
+        showDeliverable(nd);
         adjust_window_height();
       } else {
         htkStatusMsg.empty().append("Create deliverable failed.");
@@ -205,16 +206,16 @@ function createDeliverable() {
   }
 }
 function updateDeliverable(deliverable_id, form) {
-  var title = form.find("input[name=title]").val();
-  htkLog("updating deliverable " + deliverable_id + " with title " + title);
-  htkRequest("PUT", "/api/v1/deliverables/" + deliverable_id, { title: title }, function(obj) {
+  var nameValues = form.formToNameValues();
+  htkLog("updating deliverable " + deliverable_id + " with " + JSON.stringify(nameValues));
+  htkRequest("PUT", "/api/v1/deliverables/" + deliverable_id, nameValues, function(obj) {
     var rc = "";
     if (obj.rc) rc = obj.rc;
     if (rc == 200) {
       htkLog("Putting deliverable succeeded");
       var deliverable = getDeliverable(deliverable_id);
-      deliverable.title = title;
-      $("#htk-dlist").find("li[data-id=" + deliverable_id + "] span.htk-title").html(title);
+      deliverable.update_attributes(nameValues);
+      $(".htk-show[data-id=" + deliverable_id + "]").remove();
       showDeliverable(deliverable);
     } else {
       htkLog("Updating deliverable failed");

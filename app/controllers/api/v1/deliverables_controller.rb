@@ -27,12 +27,12 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   end
   
   def create
-  	deliverable_title = params[:title] || 'Deliverable'
+  	title = params[:title] || 'Deliverable'
   	email = Email.user(current_user).from_address(params[:from_address]).date(params[:date]).first
 		if email.nil?
   		render json: { result: 'no email' }, status: 422
   	else
-  		@deliverable = Deliverable.web_create(email: email, current_user: current_user, title: deliverable_title)
+  		@deliverable = Deliverable.web_create(email: email, current_user: current_user, title: title, description: params[:description])
 			deliverable_users = @deliverable.deliverable_users.select(&:significant?)
 			render json: { 
 				deliverable: DeliverableSerializer.new(@deliverable, root: false), 
@@ -44,7 +44,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 
 	def update
 		if @deliverable = editable_object
-			if @deliverable.update_attributes(title: params[:title])
+			if @deliverable.update_attributes(title: params[:title], description: params[:description])
 				render json: { result: 'success'}
 			else
 				render json: { errors: @deliverable.errors }, status: 422

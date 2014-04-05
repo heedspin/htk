@@ -3,12 +3,12 @@
 		<li class="htk-action" id="htk-action-nd"><%= image_tag 'plus.png' %></li>
 	</ul>
 	<div id="htk-details">
-		<div id="htk-form-nd" class="htk-hidden">
-			<input type="text" placeholder="Deliverable Title" />
-			<textarea class='expanding' placeholder="Description"></textarea>
+		<form id="htk-form-nd" class="htk-hidden">
+			<input type="text" placeholder="Deliverable Title" name="title"/>
+			<textarea class='expanding' placeholder="Description" name="description"></textarea>
 			<button type="button" id="htk-action-cd">Save</button>
-		</div>
-		<div id="htk-form-ed" class="htk-hidden">
+		</form>
+		<form id="htk-form-ed" class="htk-hidden">
 			<input type="text" placeholder="Deliverable Title" name="title"/>
 			<textarea class='expanding' placeholder="Description" name="description"></textarea>
 			<button type="button">Save</button>

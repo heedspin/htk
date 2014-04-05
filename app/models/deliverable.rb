@@ -8,14 +8,15 @@
 #  status_id             :integer
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
+#  description           :text
 #
 
 class Deliverable < ApplicationModel
-	belongs_to :parent_deliverable, :class_name => 'Deliverable'
-  belongs_to_active_hash :status, :class_name => 'DeliverableStatus'
+	belongs_to :parent_deliverable, class_name: 'Deliverable'
+  belongs_to_active_hash :status, class_name: 'DeliverableStatus'
   has_many :deliverable_users, dependent: :destroy
   has_many :users, through: :deliverable_users
-  attr_accessible :title, :status, :status_id, :parent_deliverable_id
+  attr_accessible :title, :status, :status_id, :parent_deliverable_id, :description
   # has_many :deliverable_messages, dependent: :destroy
   # has_many :messages, through: :deliverable_messages
 
@@ -25,7 +26,7 @@ class Deliverable < ApplicationModel
   	email = args[:email] || (raise ':email required')
   	current_user = args[:current_user] || (raise ':current_user required')
   	title = args[:title] || (raise ':title required')
-  	deliverable = new(:status => DeliverableStatus.published, :title => title)
+  	deliverable = new(status: DeliverableStatus.published, title: title, description: args[:description])
   	Deliverable.transaction do
   		deliverable.save!
   		email.message.message_thread.deliverables << deliverable
