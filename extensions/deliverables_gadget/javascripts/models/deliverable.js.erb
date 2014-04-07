@@ -1,0 +1,79 @@
+function Deliverable(attributes, deliverable_users) {
+	HtkModel.call(this, attributes);
+	this.owner = null;
+	this.responsible = null;
+}
+
+Deliverable.prototype = Object.create(HtkModel.prototype, {
+	api_url : {	value : "/api/v1/deliverables" },
+	root_key : { value : "deliverable" },
+	attribute_keys : { value : <%= Deliverable.columns.map(&:name).to_json %> },
+	extract_index : {
+		value : function(obj) {
+		  var results = {
+		  	email : obj.data['email'],
+		  	users : obj.data['users'],
+		  	deliverable_users : [],
+		  	deliverables : [],
+		  	obj : obj
+		  };
+		  _.each(obj.data['deliverable_users'], function(du) {
+		    results.deliverable_users.push(new DeliverableUser(du, results.users));
+		  });
+		  _.each(obj.data["deliverables"], function(d) {
+		    results.deliverables.push(new Deliverable(d, results.deliverable_users));
+		  });
+		  return results;
+		}
+	},
+	extract_single : {
+		value : function(obj) {
+			htkLog("Deliverable.extract_single: " + JSON.stringify(obj));
+			var _self = this;
+		  var results = {
+		  	email : obj.data['email'],
+		  	users : obj.data['users'],
+		  	deliverable_users : [],
+		  	deliverable : _self,
+		  	obj : obj
+		  };
+		  _.each(obj.data['deliverable_users'], function(du) {
+		    results.deliverable_users.push(new DeliverableUser(du, results.users));
+		  });
+	    results.deliverable.update_attributes(obj.data['deliverable']);
+	    return results;
+		}
+	},
+	set_users : {
+		value : function (deliverable_users) {
+			var d = this;
+			_.each(deliverable_users, function(du) {
+				if (du.deliverable_id == d.id) {
+					if (du.access == "owner") {
+						d.owner = du.user;
+					}
+					if (du.responsible) {
+						d.responsible = du.user;
+					}
+				}
+			});
+		}
+	},
+	update_attribute : {
+		value : function(key, value) {
+			HtkModel.prototype.update_attribute.apply(this, [key, value]);
+			if (key == 'title') {
+			  $("#htk-dlist").find("li[data-id=" + this.id + "] span.htk-title").html(this.title);
+			}
+		}
+	},
+	mark_complete : {
+		value : function(args) {
+			var comment = new DeliverableComment({
+				deliverable_id: this.id, 
+				comment_type_id: <%= DeliverableCommentType.completion.id %>
+			});
+			comment.save(args);
+		}
+	}
+});

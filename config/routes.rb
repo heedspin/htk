@@ -4,7 +4,9 @@ Htk::Application.routes.draw do
       # match 'email_comments', to: 'email_comments#index', via: [:get, :post]
       resources :email_comments
       resources :signed_request_users, :only => [:create]
-      resources :deliverables
+      resources :deliverables do
+        resources :comments
+      end
       resources :thread_deliverables
       # resources :emails, :only => :create
       resources :users, :only => :show
@@ -26,7 +28,6 @@ Htk::Application.routes.draw do
   resources :messages, :only => [:index, :show, :update, :destroy]
   # resources :message_bodies, :only => [:show]
   resources :users, :only => [:show]
-  match 'test_comments_gadget', to: 'test_comments_gadget#index'
   match 'test_deliverables_gadget', to: 'test_deliverables_gadget#index'
 
   # The priority is based upon order of creation:

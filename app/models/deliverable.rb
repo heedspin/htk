@@ -5,28 +5,31 @@
 #  id                    :integer          not null, primary key
 #  title                 :string(255)
 #  parent_deliverable_id :integer
-#  status_id             :integer
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
 #  description           :text
+#  deleted_by_id         :integer
+#  completed_by_id       :integer
 #
 
 class Deliverable < ApplicationModel
 	belongs_to :parent_deliverable, class_name: 'Deliverable'
-  belongs_to_active_hash :status, class_name: 'DeliverableStatus'
   has_many :deliverable_users, dependent: :destroy
   has_many :users, through: :deliverable_users
   attr_accessible :title, :status, :status_id, :parent_deliverable_id, :description
   # has_many :deliverable_messages, dependent: :destroy
   # has_many :messages, through: :deliverable_messages
+  belongs_to :deleted_by, class_name: 'User', foreign_key: :deleted_by_id
+  belongs_to :completed_by, class_name: 'User', foreign_key: :completed_by_id
+  has_many :comments, class_name: 'DeliverableComment', dependent: :destroy
 
-  scope :not_deleted, where(['status_id != ?', DeliverableStatus.deleted])
+  scope :not_deleted, where('deleted_by_id is null')
 
   def self.web_create(args)
   	email = args[:email] || (raise ':email required')
   	current_user = args[:current_user] || (raise ':current_user required')
   	title = args[:title] || (raise ':title required')
-  	deliverable = new(status: DeliverableStatus.published, title: title, description: args[:description])
+  	deliverable = new(title: title, description: args[:description])
   	Deliverable.transaction do
   		deliverable.save!
   		email.message.message_thread.deliverables << deliverable

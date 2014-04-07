@@ -3,7 +3,6 @@ class CreateDeliverables < ActiveRecord::Migration
   	create_table :deliverables do |t|
   		t.string :title
   		t.integer :parent_deliverable_id
-      t.references :status
       t.timestamps
   	end
 

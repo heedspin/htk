@@ -1,14 +1,10 @@
 // touch123
-var currentDeliverables = null;
+var currentDeliverables = new Array();
 var currentUser = null;
 var currentEmail = null;
-var currentDeliverableUsers = null;
-var currentUsers = null;
 var deliverablesTemplate = Handlebars.compile("<%= insert_file('html/deliverables.html.erb', :javascript_escape => true) %>");
 var deliverableTemplate = Handlebars.compile("<%= insert_file('html/deliverable.html.erb', :javascript_escape => true) %>");
 var deliverableLiTemplate = Handlebars.compile("<%= insert_file('html/deliverable_li.html', :javascript_escape => true) %>");
-var selectedDeliverableTemplate = Handlebars.compile("<%= insert_file('html/selected_deliverable.html', :javascript_escape => true) %>");
-var selectedDeliverable = null;
 
 function htkLoadGadget() {
   getCurrentUser();
@@ -37,47 +33,30 @@ function getDeliverable(deliverable_id) {
   // htkLog("getDeliverable " + deliverable_id + " = " + JSON.stringify(deliverable));
   return deliverable;
 }
-function parseDeliverablesJson(obj) {
-  new_deliverables = new Array();
-  currentEmail = obj.data['email'];
-  currentUsers = obj.data['users'];
-  currentDeliverableUsers = new Array();
-  _.each(obj.data['deliverable_users'], function(du) {
-    currentDeliverableUsers.push(new DeliverableUser(du, currentUsers));
-  })
-  if (!currentDeliverables) currentDeliverables = new Array();
-  var deliverables = obj.data["deliverables"];
-  if (!deliverables) deliverables = [ obj.data["deliverable"] ];
-  _.each(deliverables, function(d) {
-    var new_deliverable = new Deliverable(d, currentDeliverableUsers);
-    currentDeliverables.push(new_deliverable);
-    new_deliverables.push(new_deliverable);
-  });
-  return new_deliverables;
-}
 function loadDeliverables() {
+  htkStatusMsg.empty().append("Loading Deliverables...").show();
+  adjust_window_height();
   var query_data = htkGetContentMatches(["date_sent", "sender_email", "'message_id"]);
   htkLog("Load Deliverables Matches: " + JSON.stringify(query_data));
-  var handleGetDeliverables = function(obj) {
-    if (obj.rc && (obj.rc == "404")) {
-      htkLog("Email not found");
-      htkStatusMsg.empty().append("Email not processed by server yet");
-    } else if (obj.errors.length > 0) {
-      htkStatusMsg.empty().append("Error").show();
-      htkLog("Error response: " + JSON.stringify(obj));
-      adjust_window_height();
-    } else {
-      htkLog("Load Deliverables: " + JSON.stringify(obj.data));
-      parseDeliverablesJson(obj)
+  Deliverable.prototype.all(query_data, {
+    success : function(results) {
+      // htkLog("Load Deliverables: " + JSON.stringify(obj.data));
+      currentDeliverables = currentDeliverables.concat(results.deliverables);
+      currentEmail = results.email;
       renderDeliverables();
-      // statusMsg.empty().append("Victory").show();
       adjust_window_height();
+    },
+    error : function(results) {
+      if (results.obj.rc && (results.obj.rc == "404")) {
+        htkLog("Email not found");
+        htkStatusMsg.empty().append("Email not processed by server yet");
+      } else if (results.obj.errors.length > 0) {
+        htkStatusMsg.empty().append("Error").show();
+        htkLog("Error response: " + JSON.stringify(obj));
+        adjust_window_height();
+      }
     }
-  }
-  htkRequest("GET", "/api/v1/deliverables", query_data, handleGetDeliverables);
-
-  htkStatusMsg.empty().append("Done").show();
-  adjust_window_height();
+  })
 }
 
 function renderDeliverables() {
@@ -91,9 +70,6 @@ function renderDeliverables() {
     $(deliverableLiTemplate({ deliverable: deliverable })).insertBefore($("#htk-action-nd"));
   });
   showDeliverable();
-  // html = selectedDeliverableTemplate({ current_user: currentUser, deliverable: selectedDeliverable });
-  // var details = $(html);
-  // $("#htk-details").append(details);
   htkStatusMsg.empty().append("EAT-" + currentEmail.email_account_thread_id + " T-" + currentEmail.message_thread_id + " M-" + currentEmail.message_id);
   setupDeliverablesEvents();
 }
@@ -116,9 +92,10 @@ function setupDeliverablesEvents() {
   });
   $("#htk-action-nd").click(function() {
     $("#htk-details").children().hide();
-    $("#htk-form-nd").show();
+    $("#htk-form-nd").resetForm().show();
   });
   $("#htk-details").on("click", ".htk-action-ed", editDeliverable);
+  $("#htk-details").on("click", ".htk-complete", completeDeliverable);
   $("#htk-form-nd > button").click(createDeliverable);
   $("#htk-form-ed > button").click(function() {
     var button = $(this);
@@ -128,7 +105,6 @@ function setupDeliverablesEvents() {
       updateDeliverable(deliverable_id, form);
     } else {
       deleteDeliverable(deliverable_id);
-      button.html("Save");
     }
   });
   // Toggle Save / Delete button.
@@ -144,19 +120,27 @@ function setupDeliverablesEvents() {
 function editDeliverable() {
   $("#htk-details").children().hide();
   var edit_form = $("#htk-form-ed");
+  edit_form.resetForm();
+  edit_form.find("button").html("Save");
   var deliverable = getDeliverable($(this).parent().attr("data-id"));
   edit_form.attr("data-id", deliverable.id);
   edit_form.find("input[name=title]").val(deliverable.title);
   edit_form.find("textarea[name=description]").val(deliverable.description);
   edit_form.show();
 };
+function completeDeliverable() {
+  var deliverable = getDeliverable($(this).parent().attr("data-id"));
+  deliverable.mark_complete({
+    success: function() {
+      htkLog("Deliverable marked complete");
+    },
+    error: function() {
+      htkLog("Failed to mark deliverable complete");
+    }
+  })
+}
 function showDeliverable(deliverable) {
   if (!deliverable) deliverable = currentDeliverables[0];
-  _.each(currentDeliverables, function(d) {
-    d.isSelected = false;
-  });
-  deliverable.isSelected = true;
-  selectedDeliverable = deliverable;
   $(".htk-d").each(function() {
     var li = $(this);
     if (li.attr("data-id") == deliverable.id) {
@@ -187,40 +171,38 @@ function createDeliverable() {
   if (form.find("input[name=title]").val()) {
     var matches = htkGetContentMatches().concat(form.formToNameValues());
     htkLog("createDeliverable: " + JSON.stringify(matches));
-    htkRequest("POST", "/api/v1/deliverables", matches, function(obj) {
-      var rc = "";
-      if (obj.rc) rc = obj.rc;
-      if (rc == 200) {
-        htkLog("Created new deliverable: " + JSON.stringify(obj.data))
-        form.resetForm();
-        var nd = parseDeliverablesJson(obj)[0];
-        $(deliverableLiTemplate({ deliverable: nd })).insertBefore($("#htk-action-nd"));
-        showDeliverable(nd);
+    var deliverable = new Deliverable(matches);
+    deliverable.save({
+      success : function(results) {
+        htkLog("Created new deliverable: " + JSON.stringify(results.obj.data));
+        // var nd = parseDeliverablesJson(obj)[0];
+        $(deliverableLiTemplate({ deliverable: deliverable })).insertBefore($("#htk-action-nd"));
+        showDeliverable(deliverable);
         adjust_window_height();
-      } else {
+      }, 
+      error : function(results) {
         htkStatusMsg.empty().append("Create deliverable failed.");
         adjust_window_height();
-        htkLog("Create deliverable response: " + JSON.stringify(obj));
+        htkLog("Create deliverable response: " + JSON.stringify(results.obj));
       }
-    });
+    })
   }
 }
 function updateDeliverable(deliverable_id, form) {
   var nameValues = form.formToNameValues();
   htkLog("updating deliverable " + deliverable_id + " with " + JSON.stringify(nameValues));
-  htkRequest("PUT", "/api/v1/deliverables/" + deliverable_id, nameValues, function(obj) {
-    var rc = "";
-    if (obj.rc) rc = obj.rc;
-    if (rc == 200) {
+  var deliverable = getDeliverable(deliverable_id);
+  deliverable.update_attributes(nameValues);
+  deliverable.save({
+    success : function(results) {
       htkLog("Putting deliverable succeeded");
-      var deliverable = getDeliverable(deliverable_id);
-      deliverable.update_attributes(nameValues);
       $(".htk-show[data-id=" + deliverable_id + "]").remove();
       showDeliverable(deliverable);
-    } else {
+    },
+    error : function(results) {
       htkLog("Updating deliverable failed");
     }
-  });
+  })
 }
 function deleteDeliverable(deliverable_id) {
   htkRequest("DELETE", "/api/v1/deliverables/" + deliverable_id, null, function(obj) {

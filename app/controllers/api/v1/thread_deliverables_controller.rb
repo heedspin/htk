@@ -11,7 +11,7 @@ class Api::V1::ThreadDeliverablesController < Api::V1::ApiController
 		if email.nil?
   		render json: { result: 'no email' }, status: 422
   	else
-	  	deliverable = Deliverable.new(:status => DeliverableStatus.published, :title => deliverable_title)
+	  	deliverable = Deliverable.new(:title => deliverable_title)
   		Deliverable.transaction do
   			deliverable.save!
 		  	deliverable.messages << email.message
