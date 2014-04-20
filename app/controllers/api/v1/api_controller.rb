@@ -2,14 +2,20 @@ require 'oauth'
 require 'openssl'
 require 'plutolib/oauth_rails3_request_proxy'
 require 'plutolib/logger_utils'
+require 'htk_current_user'
 
 class Api::V1::ApiController < ActionController::Base
 	respond_to :json
   before_filter :verify_signed
   before_filter :verify_signed_user
   include Plutolib::LoggerUtils
+  before_filter :record_current_user
 
-	protected
+  protected
+  
+    def record_current_user
+      HtkCurrentUser.user = current_user
+    end
 
 	  def verify_signed
 	  	if Rails.env.development?

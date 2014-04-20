@@ -7,7 +7,11 @@
 			{{/if}}
 		</p>
 		{{simpleFormat description}}
-		<div class="htk-action htk-action-ed"><%= image_tag 'edit.png' %></div>
+		<div class="htk-action htk-edit"><%= image_tag 'edit.png' %></div>
+		{{#if completed_by_id}}
+		<div class="htk-action htk-complete"><%= image_tag 'green-check.png' %></div>
+		{{else}}
 		<div class="htk-action htk-complete"><%= image_tag 'check.png' %></div>
+		{{/if}}
 </div>
 {{/with}}

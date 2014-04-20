@@ -2,8 +2,9 @@
 //= require ./lib/handlebars_helpers.js
 //= require ./lib/htk_gadgets.js.erb
 //= require lib/underscore-min.js
-//= require deliverables_gadget_spec.js.erb
+//= require deliverables_router.js.erb
 //= require ./models
+//= require ./controllers
 //= require ./lib/handlebars_helpers.js
 //= require lib/jquery.formToNameValues.js
 //= require lib/jquery.resetForm.js

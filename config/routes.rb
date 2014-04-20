@@ -3,9 +3,9 @@ Htk::Application.routes.draw do
     namespace :v1 do
       # match 'email_comments', to: 'email_comments#index', via: [:get, :post]
       resources :email_comments
-      resources :signed_request_users, :only => [:create]
+      resources :signed_request_users, only: [:create]
       resources :deliverables do
-        resources :comments
+        resources :comments, controller: 'deliverable_comments'
       end
       resources :thread_deliverables
       # resources :emails, :only => :create

@@ -1,0 +1,207 @@
+function DeliverablesController(router) {
+  HtkController.call(this, router);
+  this.currentDeliverables = new Array();
+  this.deliverablesTemplate = Handlebars.compile("<%= insert_file('html/deliverables.html.erb', :javascript_escape => true) %>");
+  this.deliverableTemplate = Handlebars.compile("<%= insert_file('html/deliverable.html.erb', :javascript_escape => true) %>");
+  this.deliverableLiTemplate = Handlebars.compile("<%= insert_file('html/deliverable_li.html', :javascript_escape => true) %>");
+  this.loadDeliverables();
+}
+
+DeliverablesController.prototype = Object.create(HtkController.prototype);
+
+DeliverablesController.prototype.loadDeliverables = function() {
+  var _this = this;
+  this.setStatusMsg("Loading Deliverables...");
+  adjust_window_height();
+  var query_data = htkGetContentMatches(["date_sent", "sender_email", "'message_id"]);
+  htkLog("Load Deliverables Matches: " + JSON.stringify(query_data));
+  Deliverable.prototype.all(query_data, {
+    success : function(results) {
+      // htkLog("Load Deliverables: " + JSON.stringify(obj.data));
+      _this.currentDeliverables = _this.currentDeliverables.concat(results.deliverables);
+      _this.router.currentEmail = results.email;
+      _this.renderDeliverables();
+      adjust_window_height();
+    },
+    error : function(results) {
+      if (results.obj.rc && (results.obj.rc == "404")) {
+        htkLog("Email not found");
+        _this.setStatusMsg("Email not processed by server yet");
+      } else if (results.obj.errors.length > 0) {
+        _this.setStatusMsg("Error");
+        htkLog("Error response: " + JSON.stringify(obj));
+        adjust_window_height();
+      }
+    }
+  })
+}
+DeliverablesController.prototype.removeDeliverable = function(deliverable_id) {
+  for (var i=0; i < this.currentDeliverables.length; i++) {
+    var deliverable = this.currentDeliverables[i];
+    if (deliverable.id == deliverable_id) this.currentDeliverables.splice(i,1)
+  }
+  $("#htk-dlist").find("li[data-id=" + deliverable_id + "]").remove();
+  $(".htk-show > div[data-id=" + deliverable_id + "]").remove();
+}
+DeliverablesController.prototype.getDeliverable = function(deliverable_id) {
+  var deliverable = _.find(this.currentDeliverables, function(deliverable) {
+    return (deliverable.id == deliverable_id);
+  });
+  htkLog("getDeliverable " + deliverable_id + " = " + JSON.stringify(deliverable));
+  return deliverable;
+}
+DeliverablesController.prototype.renderDeliverables = function() {
+  var _this = this;
+  var deliverables_container = this.router.htkContainer.find("#deliverables");
+  if (deliverables_container.length == 0) {
+    deliverables_container = $("<div id=\"deliverables\"></div>");
+    this.router.htkContainer.append(deliverables_container);
+  }
+  deliverables_container.replaceWith($(this.deliverablesTemplate({ current_user: this.router.currentUser })));
+  _.each(this.currentDeliverables, function (deliverable) {
+    $(_this.deliverableLiTemplate({ deliverable: deliverable })).insertBefore($("#htk-action-nd"));
+  });
+  this.showDeliverable();
+  this.setStatusMsg("EAT-" + this.router.currentEmail.email_account_thread_id + " T-" + this.router.currentEmail.message_thread_id + " M-" + this.router.currentEmail.message_id);
+  this.setupDeliverablesEvents();
+}
+DeliverablesController.prototype.setupDeliverablesEvents = function() {
+  var _this = this;
+  $("#htk-dlist").on("click", ".htk-action-sd", function() {
+    _this.showDeliverable(_this.getDeliverable($(this).parent().attr("data-id")));
+  });
+  $("#htk-action-nd").click($.proxy(this.newDeliverable, this));
+  $("#htk-col2").on("click", ".htk-edit", $.proxy(this.editDeliverable, this));
+  $("#htkv-nd > form > button").click($.proxy(this.createDeliverable, this));
+  $("#htkv-ed > form > button").click($.proxy(this.updateOrDeleteDeliverable, this));
+  // Toggle Save / Delete button.
+  $("#htkv-ed > form > input.htk-action-delete").click(function() {
+    var save_button = $(this).siblings("button");
+    if ($(this).is(":checked")) {
+      save_button.html("Delete");
+    } else {
+      save_button.html("Save");     
+    }
+  });
+  var completionCommentsController = new CompletionCommentsController(this.router);
+};
+
+DeliverablesController.prototype.updateOrDeleteDeliverable = function(event) {
+  var button = $(event.target);
+  var form = button.parent();
+  var deliverable_id = form.attr("data-id");
+  if (button.html() == "Save") {
+    this.updateDeliverable(deliverable_id, form);
+  } else {
+    this.deleteDeliverable(deliverable_id);
+  }
+}
+
+DeliverablesController.prototype.editDeliverable = function(e) {
+  $("#htk-col2").children().hide(); $("#htk-col3").children().hide();
+  var view = $("#htkv-ed");
+  var edit_form = view.find("form");
+  edit_form.resetForm();
+  edit_form.find("button").html("Save");
+  // FIXME: event.target is img.  We assumed this would propogate.
+  var deliverable = this.getDeliverable($(event.target).closest(".htk-show").attr("data-id"));
+  edit_form.attr("data-id", deliverable.id);
+  edit_form.find("input[name=title]").val(deliverable.title);
+  edit_form.find("textarea[name=description]").val(deliverable.description);
+  view.show();
+};
+
+DeliverablesController.prototype.showDeliverable = function(deliverable) {
+  $("#htk-col3").children().hide();
+  if (!deliverable) deliverable = this.currentDeliverables[0];
+  $(".htk-d").each(function() {
+    var li = $(this);
+    if (li.attr("data-id") == deliverable.id) {
+      li.addClass("selected");
+    } else {
+      li.removeClass("selected");
+    }
+  });
+
+  var need_to_create = true;
+  var container = $("#htk-col2");
+  container.children().each(function() {
+    var _this = $(this);
+    if (_this.attr("id") == deliverable.id) {
+      _this.show();
+      need_to_create = false;
+    } else if (_this.attr("id") != "htk-action-nd") {
+      _this.hide();
+    }
+  });
+  if (need_to_create) {
+    var html = this.deliverableTemplate({ current_user: this.router.currentUser, deliverable: deliverable });
+    container.append($(html));
+  }
+}
+
+DeliverablesController.prototype.newDeliverable = function(event) {
+  $("#htk-col2").children().hide(); $("#htk-col3").children().hide();
+  var view = $("#htkv-nd");
+  view.find("form").resetForm();
+  view.show();
+}
+
+DeliverablesController.prototype.createDeliverable = function(event) {
+  var _this = this;
+  var form = $(event.target).parent();
+  if (form.find("input[name=title]").val()) {
+    var matches = htkGetContentMatches().concat(form.formToNameValues());
+    htkLog("createDeliverable: " + JSON.stringify(matches));
+    var deliverable = new Deliverable(matches);
+    deliverable.save({
+      success : function(results) {
+        htkLog("Created new deliverable: " + JSON.stringify(results.obj.data));
+        _this.currentDeliverables.push(deliverable);
+        // var nd = parseDeliverablesJson(obj)[0];
+        $(_this.deliverableLiTemplate({ deliverable: deliverable })).insertBefore($("#htk-action-nd"));
+        _this.showDeliverable(deliverable);
+        adjust_window_height();
+      }, 
+      error : function(results) {
+        _this.setStatusMsg("Create deliverable failed.");
+        adjust_window_height();
+        htkLog("Create deliverable response: " + JSON.stringify(results.obj));
+      }
+    })
+  }
+}
+
+DeliverablesController.prototype.updateDeliverable = function(deliverable_id, form) {
+  var _this = this;
+  var nameValues = form.formToNameValues();
+  htkLog("updating deliverable " + deliverable_id + " with " + JSON.stringify(nameValues));
+  var deliverable = this.getDeliverable(deliverable_id);
+  deliverable.update_attributes(nameValues);
+  deliverable.save({
+    success : function(results) {
+      htkLog("Putting deliverable succeeded");
+      $(".htk-show[data-id=" + deliverable_id + "]").remove();
+      _this.showDeliverable(deliverable);
+    },
+    error : function(results) {
+      htkLog("Updating deliverable failed");
+    }
+  })
+}
+DeliverablesController.prototype.deleteDeliverable = function(deliverable_id) {
+  var _this = this;
+  htkRequest("DELETE", "/api/v1/deliverables/" + deliverable_id, null, function(obj) {
+    var rc = "";
+    if (obj.rc) rc = obj.rc;
+    if (rc == 200) {
+      htkLog("Delete deliverable succeeded");
+      _this.removeDeliverable(deliverable_id);
+      _this.showDeliverable();
+    } else {
+      log("Deleting comment failed");
+    }
+  });
+}
+
+

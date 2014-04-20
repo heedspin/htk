@@ -1,0 +1,47 @@
+var htkRouter = null;
+
+// Entry point for web version of gadget.
+function deliverablesGadgetReady() {
+  htkRouter = new DeliverablesRouter();
+}
+
+function DeliverablesRouter() {
+  this.currentUser = null;
+  this.currentEmail = null;
+  this.loginController = new HtkLoginController(this);
+  this.htkContainer = $("#htkContainer");
+  if (this.htkContainer.size() == 0) {
+    this.htkContainer = $("<div id=\"htkContainer\"></div>");    
+    $("body").append(this.htkContainer);
+  }
+  this.statusMsg = $("<p>Loading Deliverables...</p>");
+  this.htkContainer.append(this.statusMsg);
+  adjust_window_height();
+  this.loadGadget();
+}
+
+DeliverablesRouter.prototype = Object.create(null);
+
+// Entry point for gmail gadget.
+DeliverablesRouter.prototype.loadGadget = function() {
+  var _this = this;
+  htkRequest("GET", "/api/v1/users/current", null, function(obj) {
+    if (obj.rc && (obj.rc == "401")) {
+      _this.statusMsg.empty();
+      _this.loginController.promptLogin();
+    } else if (obj.errors.length > 0) {
+      _this.statusMsg.empty().append("Error").show();
+      htkLog("Error response: " + JSON.stringify(obj));
+      adjust_window_height();
+    } else {
+      _this.currentUser = obj.data["user"];
+      htkLog("Current user: " + JSON.stringify(_this.currentUser));
+      _this.setupControllers();
+    }    
+  })
+}
+
+DeliverablesRouter.prototype.setupControllers = function() {
+  this.deliverablesController = new DeliverablesController(this);
+  // this.completionCommentsController = new CompletionCommentsController(this);
+}

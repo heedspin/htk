@@ -7,10 +7,13 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	gadget_keys : {
 		value : ["opensocial_owner_id", "from_address", "to_addresses", "cc_addresses", "date", "subject", "web_id"]
 	},
+	api_url : {
+		value : function() {}
+	},
 	all : {
 		value : function(query_data, callbacks) {
 			var _self = this;
-			htkRequest("GET", this.api_url, query_data, function(obj) {
+			htkRequest("GET", this.api_url(), query_data, function(obj) {
 				var results = _self.extract_index(obj);
 	      if (obj.rc && obj.rc == 200) {
 	      	if (callbacks && callbacks.success && typeof(callbacks.success) === "function") {  
@@ -39,13 +42,13 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	update_attribute : {
 		value : function(key, value) {
-			htkLog("update_attribute " + key + " = " + value);
+			// htkLog("update_attribute " + key + " = " + value);
 			this[key] = value;
 		}
 	},
 	update_attributes_by_obj : {
 		value : function(obj) {
-			htkLog("update_attributes_by_obj: " + JSON.stringify(obj));
+			// htkLog("update_attributes_by_obj: " + JSON.stringify(obj));
 			for (var property in obj) {
 		    if (obj.hasOwnProperty(property)) {
 		    	this.update_attribute(property, obj[property]);
@@ -73,7 +76,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	saveRequest : {
 		value : function(http_method, url, query_data, callbacks) {
-			htkLog("saveRequest request: " + http_method + " " + url + " " + JSON.stringify(query_data));
+			// htkLog("saveRequest request: " + http_method + " " + url + " " + JSON.stringify(query_data));
 			var _self = this;
 	    htkRequest(http_method, url, query_data, function(obj) {
 	    	var results = _self.extract_single(obj);
@@ -93,12 +96,12 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	create : {		
 		value : function(callbacks) {
-	    this.saveRequest("POST", this.api_url, this.attributes(), callbacks);
+	    this.saveRequest("POST", this.api_url(), this.attributes(), callbacks);
 		}
 	},
 	update : {
 		value : function(callbacks) {	
-	    this.saveRequest("PUT", this.api_url + "/" + this.id, this.attributes(), callbacks);
+	    this.saveRequest("PUT", this.api_url() + "/" + this.id, this.attributes(), callbacks);
 		}
 	},
 	extract_index : {
@@ -108,7 +111,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	extract_single : {
 		value : function(obj) {
-    	return null;
+    	return { obj: obj };
 		}
 	}
 });

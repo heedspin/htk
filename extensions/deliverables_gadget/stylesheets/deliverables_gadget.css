@@ -27,7 +27,7 @@
 	display: inline;
 }
 
-#htk-dlist {
+#htk-col1, #htk-col2, #htk-col3 {
 	padding: 0 17px 0 0;
 	float: left;
 }
@@ -38,10 +38,6 @@ ul#htk-dlist {
 
 #htk-dlist li.selected {
 	background-color: #9999c5;
-}
-
-#htk-details {
-	float: left;
 }
 
 span.htk-responsible {

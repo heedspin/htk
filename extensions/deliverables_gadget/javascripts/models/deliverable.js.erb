@@ -5,7 +5,7 @@ function Deliverable(attributes, deliverable_users) {
 }
 
 Deliverable.prototype = Object.create(HtkModel.prototype, {
-	api_url : {	value : "/api/v1/deliverables" },
+	api_url : {	value : function(){ return "/api/v1/deliverables"; } },
 	root_key : { value : "deliverable" },
 	attribute_keys : { value : <%= Deliverable.columns.map(&:name).to_json %> },
 	extract_index : {
@@ -65,15 +65,6 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 			if (key == 'title') {
 			  $("#htk-dlist").find("li[data-id=" + this.id + "] span.htk-title").html(this.title);
 			}
-		}
-	},
-	mark_complete : {
-		value : function(args) {
-			var comment = new DeliverableComment({
-				deliverable_id: this.id, 
-				comment_type_id: <%= DeliverableCommentType.completion.id %>
-			});
-			comment.save(args);
 		}
 	}
 });

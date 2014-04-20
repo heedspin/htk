@@ -16,7 +16,7 @@ class Deliverable < ApplicationModel
 	belongs_to :parent_deliverable, class_name: 'Deliverable'
   has_many :deliverable_users, dependent: :destroy
   has_many :users, through: :deliverable_users
-  attr_accessible :title, :status, :status_id, :parent_deliverable_id, :description
+  attr_accessible :title, :status, :status_id, :parent_deliverable_id, :description, :completed_by_id
   # has_many :deliverable_messages, dependent: :destroy
   # has_many :messages, through: :deliverable_messages
   belongs_to :deleted_by, class_name: 'User', foreign_key: :deleted_by_id

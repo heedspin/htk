@@ -1,0 +1,47 @@
+function HtkLoginController(router) {
+  HtkController.call(this, router);
+  this.loginForm = null;
+}
+
+HtkLoginController.prototype = Object.create(HtkController.prototype);
+
+HtkLoginController.prototype.loginResponse = function(obj) {
+  var rc = "";
+  if (obj.rc) rc = obj.rc;
+  if (rc == 401) {
+    this.setStatusMsg("Login failed.");
+    this.promptLogin();
+  } else if (rc == 200) {
+    this.setStatusMsg("Login successful!  Loading comments...");
+    this.router.loadGadget();
+    adjust_window_height();
+  } else {
+    this.setStatusMsg("Login error");
+    adjust_window_height();
+    log("Login response: " + JSON.stringify(obj));                    
+  }
+}
+HtkLoginController.prototype.promptLogin = function() {
+  if (!this.loginForm) {
+    login_html = "<%= insert_file('html/login.html', :javascript_escape => true) %>"
+    this.loginForm = $(login_html);
+    this.router.htkContainer.append(this.loginForm);
+    $("#login").on('click', function(e) {
+      e.preventDefault();
+      this.loginForm.hide();
+      var email = $("#email");
+      var password = $("#password");
+      htkRequest("POST", 
+        "/api/v1/signed_request_users", 
+        { email: email.val(), password: password.val() }, 
+        $.proxy(this.loginResponse, this));
+      this.setStatusMsg("Logging in to HTK as " + email.val()).show();
+      adjust_window_height();
+      email.val("");
+      password.val("");
+    });
+    adjust_window_height();        
+  } else {
+    this.loginForm.show();
+  }
+}
