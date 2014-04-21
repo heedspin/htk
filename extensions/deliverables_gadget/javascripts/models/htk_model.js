@@ -80,9 +80,8 @@ HtkModel.prototype = Object.create(Object.prototype, {
 			var _self = this;
 	    htkRequest(http_method, url, query_data, function(obj) {
 	    	var results = _self.extract_single(obj);
-	    	htkLog("saveRequest response: " + JSON.stringify(results));
 	      if (obj.rc && obj.rc == 200) {
-	      	// _self.update_attributes(obj[_self.root_key]);
+	      	// Should be done by extract_single: _self.update_attributes(obj[_self.root_key]);
 	      	if (callbacks && callbacks.success && typeof(callbacks.success) === "function") {  
 	      		callbacks.success(results);
 					}

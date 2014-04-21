@@ -1,11 +1,8 @@
-#htkContainer {
+#htk-dcontainer {
 	padding: 5px 5px 5px 10px;
 	background-color: #efefef;
  	overflow: hidden;
 	font-size: .75em;
-}
-
-#htk-dcontainer {
 	margin: 0 0 0 15px;	
 }
 
@@ -22,7 +19,7 @@
 	margin: 0;
 }
 
-#htk-dcontainer, #htk-dlist {
+#htk-dlist {
 	float: left;
 	display: inline;
 }
@@ -38,6 +35,10 @@ ul#htk-dlist {
 
 #htk-dlist li.selected {
 	background-color: #9999c5;
+}
+
+#htk-dlist li.completed {
+	color: #BDBDBD;
 }
 
 span.htk-responsible {

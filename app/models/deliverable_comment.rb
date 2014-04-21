@@ -19,8 +19,8 @@ class DeliverableComment < ApplicationModel
 	attr_accessible :comment_type_id, :note
 
 	protected
-		after_save :update_deliverable
-		def update_deliverable
+		after_create :update_completion_status
+		def update_completion_status
 			if self.comment_type.complete?
 				self.deliverable.update_attributes(completed_by_id: HtkCurrentUser.user.id)
 			elsif self.comment_type.incomplete?

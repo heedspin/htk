@@ -1,30 +1,33 @@
 function CompletionCommentsController(router) {
-  htkLog("CompletionCommentsController");
   HtkController.call(this, router);
   $("#htk-col2").on("click", ".htk-complete", $.proxy(this.newCompletionComment, this));
-  $("#htkv-ncc > form > button").click($.proxy(this.createCompletionComment, this));  
+  $("#htkv-complete > form > button").click($.proxy(this.createCompletionComment, this));  
+  $("#htkv-incomplete > form > button").click($.proxy(this.createCompletionComment, this));  
 }
 CompletionCommentsController.prototype = Object.create(HtkController.prototype);
 
 CompletionCommentsController.prototype.newCompletionComment = function(event) {
-  htkLog("newCompletionComment");
   $("#htk-col3").children().hide();
   var deliverable = this.router.deliverablesController.getDeliverable($(event.target).closest(".htk-show").attr("data-id"));
-  var view = $("#htkv-ncc");
+  var view = null;
+  if (deliverable.isCompleted()) {
+    view = $("#htkv-incomplete");
+  } else {
+    view = $("#htkv-complete");
+  }
   view.find("input[name=deliverable_id]").val(deliverable.id);
   view.show();
 }
 CompletionCommentsController.prototype.createCompletionComment = function(event) {
   var _this = this;
   var form = $(event.target).parent();
-  var deliverable = this.router.deliverablesController.getDeliverable(form.find("input[name=deliverable_id]").val());
-  var comment = new DeliverableComment({deliverable_id: deliverable.id}, <%= DeliverableCommentType.complete.id %>);
+  var values = form.formToNameValues();
+  var comment = new DeliverableComment(values);
   htkLog("createCompletionComment: " + JSON.stringify(comment));
   comment.save({
     success: function(results) {
-      var deliverable_update = results.obj.data['deliverable'];
-      if (deliverable_update) deliverable.update_attributes(deliverable_update);
-      _this.router.deliverablesController.showDeliverable(deliverable);
+      _this.router.deliverablesController.handleDeliverableChange(results);
+      _this.router.deliverablesController.showDeliverable();
       htkLog("Deliverable marked complete");
     },
     error: function(results) {

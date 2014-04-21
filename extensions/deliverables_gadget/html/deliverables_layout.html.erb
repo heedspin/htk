@@ -24,12 +24,22 @@
 		</div>
 	</div>
 	<div id="htk-col3">
-		<div id="htkv-ncc" class="htk-hidden">
+		<div id="htkv-complete" class="htk-hidden">
 			<h3>Mark Job Complete</h3>
 			<form>
 				<input type="hidden" name="deliverable_id" />
+				<input type="hidden" name="comment_type_id" value="<%= DeliverableCommentType.complete.id %>" />
 				<textarea placeholder="Notes" name="note"></textarea>
 				<button type="button">Mark Complete</button>
+			</form>
+		</div>
+		<div id="htkv-incomplete" class="htk-hidden">
+			<h3>Mark Job Incomplete</h3>
+			<form>
+				<input type="hidden" name="deliverable_id" />
+				<input type="hidden" name="comment_type_id" value="<%= DeliverableCommentType.incomplete.id %>" />
+				<textarea placeholder="Notes" name="note"></textarea>
+				<button type="button">Mark Incomplete</button>
 			</form>
 		</div>
 	</div>

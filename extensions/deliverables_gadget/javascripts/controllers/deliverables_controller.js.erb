@@ -1,7 +1,7 @@
+// touch12
 function DeliverablesController(router) {
   HtkController.call(this, router);
   this.currentDeliverables = new Array();
-  this.deliverablesTemplate = Handlebars.compile("<%= insert_file('html/deliverables.html.erb', :javascript_escape => true) %>");
   this.deliverableTemplate = Handlebars.compile("<%= insert_file('html/deliverable.html.erb', :javascript_escape => true) %>");
   this.deliverableLiTemplate = Handlebars.compile("<%= insert_file('html/deliverable_li.html', :javascript_escape => true) %>");
   this.loadDeliverables();
@@ -44,31 +44,29 @@ DeliverablesController.prototype.removeDeliverable = function(deliverable_id) {
   $(".htk-show > div[data-id=" + deliverable_id + "]").remove();
 }
 DeliverablesController.prototype.getDeliverable = function(deliverable_id) {
-  var deliverable = _.find(this.currentDeliverables, function(deliverable) {
-    return (deliverable.id == deliverable_id);
+  var deliverable = _.find(this.currentDeliverables, function(d) {
+    return (d.id == deliverable_id);
   });
-  htkLog("getDeliverable " + deliverable_id + " = " + JSON.stringify(deliverable));
+  if (deliverable) {
+    htkLog("getDeliverable " + deliverable_id + " = " + deliverable.title);    
+  } else {
+    htkLog("getDeliverable no deliverable for " + deliverable_id);
+  }
   return deliverable;
 }
 DeliverablesController.prototype.renderDeliverables = function() {
   var _this = this;
-  var deliverables_container = this.router.htkContainer.find("#deliverables");
-  if (deliverables_container.length == 0) {
-    deliverables_container = $("<div id=\"deliverables\"></div>");
-    this.router.htkContainer.append(deliverables_container);
-  }
-  deliverables_container.replaceWith($(this.deliverablesTemplate({ current_user: this.router.currentUser })));
   _.each(this.currentDeliverables, function (deliverable) {
-    $(_this.deliverableLiTemplate({ deliverable: deliverable })).insertBefore($("#htk-action-nd"));
-  });
+    _this.addDeliverableLi(deliverable);
+  });  
   this.showDeliverable();
   this.setStatusMsg("EAT-" + this.router.currentEmail.email_account_thread_id + " T-" + this.router.currentEmail.message_thread_id + " M-" + this.router.currentEmail.message_id);
   this.setupDeliverablesEvents();
 }
 DeliverablesController.prototype.setupDeliverablesEvents = function() {
   var _this = this;
-  $("#htk-dlist").on("click", ".htk-action-sd", function() {
-    _this.showDeliverable(_this.getDeliverable($(this).parent().attr("data-id")));
+  $("#htk-dlist").on("click", ".htk-action-sd", function(event) {
+    _this.showDeliverable(_this.getDeliverable($(event.target).closest("li").attr("data-id")));
   });
   $("#htk-action-nd").click($.proxy(this.newDeliverable, this));
   $("#htk-col2").on("click", ".htk-edit", $.proxy(this.editDeliverable, this));
@@ -83,7 +81,6 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
       save_button.html("Save");     
     }
   });
-  var completionCommentsController = new CompletionCommentsController(this.router);
 };
 
 DeliverablesController.prototype.updateOrDeleteDeliverable = function(event) {
@@ -113,7 +110,12 @@ DeliverablesController.prototype.editDeliverable = function(e) {
 
 DeliverablesController.prototype.showDeliverable = function(deliverable) {
   $("#htk-col3").children().hide();
+  if (!deliverable) {
+    htkLog("showDeliverable called without deliverable.  Searching...");
+  }
+  if (!deliverable) deliverable = _.find(this.currentDeliverables, function(d) { return !d.isCompleted(); });
   if (!deliverable) deliverable = this.currentDeliverables[0];
+  htkLog("showDeliverable: " + deliverable.title);
   $(".htk-d").each(function() {
     var li = $(this);
     if (li.attr("data-id") == deliverable.id) {
@@ -135,8 +137,9 @@ DeliverablesController.prototype.showDeliverable = function(deliverable) {
     }
   });
   if (need_to_create) {
-    var html = this.deliverableTemplate({ current_user: this.router.currentUser, deliverable: deliverable });
-    container.append($(html));
+    var show_view = $(this.deliverableTemplate({ current_user: this.router.currentUser, deliverable: deliverable }));
+    deliverable.showView = show_view;
+    container.append(show_view);
   }
 }
 
@@ -159,7 +162,7 @@ DeliverablesController.prototype.createDeliverable = function(event) {
         htkLog("Created new deliverable: " + JSON.stringify(results.obj.data));
         _this.currentDeliverables.push(deliverable);
         // var nd = parseDeliverablesJson(obj)[0];
-        $(_this.deliverableLiTemplate({ deliverable: deliverable })).insertBefore($("#htk-action-nd"));
+        _this.addDeliverableLi(deliverable);
         _this.showDeliverable(deliverable);
         adjust_window_height();
       }, 
@@ -171,7 +174,26 @@ DeliverablesController.prototype.createDeliverable = function(event) {
     })
   }
 }
-
+DeliverablesController.prototype.addDeliverableLi = function(deliverable) {
+  var list_item = $(this.deliverableLiTemplate({ deliverable: deliverable }));
+  deliverable.listItem = list_item;
+  list_item.insertBefore($("#htk-action-nd"));
+}
+DeliverablesController.prototype.handleDeliverableChange = function(results) {
+  var deliverable_update = results.obj.data['deliverable'];
+  if (deliverable_update) {
+    var deliverable = this.getDeliverable(deliverable_update["id"]);
+    if (deliverable) {
+      deliverable.update_attributes(deliverable_update);
+      var list_item = $(this.deliverableLiTemplate({ deliverable: deliverable }));
+      deliverable.listItem.replaceWith(list_item);
+      deliverable.listItem = list_item;
+      var show_view = $(this.deliverableTemplate({ current_user: this.router.currentUser, deliverable: deliverable }));
+      deliverable.showView.replaceWith(show_view);
+      deliverable.showView = show_view;
+    }
+  }
+}
 DeliverablesController.prototype.updateDeliverable = function(deliverable_id, form) {
   var _this = this;
   var nameValues = form.formToNameValues();

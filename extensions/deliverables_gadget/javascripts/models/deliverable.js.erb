@@ -2,6 +2,8 @@ function Deliverable(attributes, deliverable_users) {
 	HtkModel.call(this, attributes);
 	this.owner = null;
 	this.responsible = null;
+	this.listItem = null;
+	this.showView = null;
 }
 
 Deliverable.prototype = Object.create(HtkModel.prototype, {
@@ -40,7 +42,8 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 		  _.each(obj.data['deliverable_users'], function(du) {
 		    results.deliverable_users.push(new DeliverableUser(du, results.users));
 		  });
-	    results.deliverable.update_attributes(obj.data['deliverable']);
+		  var deliverable_updates = obj.data['deliverable'];
+		  if (deliverable_updates) results.deliverable.update_attributes(deliverable_updates);
 	    return results;
 		}
 	},
@@ -65,6 +68,11 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 			if (key == 'title') {
 			  $("#htk-dlist").find("li[data-id=" + this.id + "] span.htk-title").html(this.title);
 			}
+		}
+	},
+	isCompleted : {
+		value : function() {
+			return this.completed_by_id != null;
 		}
 	}
 });

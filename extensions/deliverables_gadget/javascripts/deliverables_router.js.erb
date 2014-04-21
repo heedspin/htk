@@ -6,12 +6,13 @@ function deliverablesGadgetReady() {
 }
 
 function DeliverablesRouter() {
+  var layout = "<%= insert_file('html/deliverables_layout.html.erb', :javascript_escape => true) %>";
   this.currentUser = null;
   this.currentEmail = null;
   this.loginController = new HtkLoginController(this);
-  this.htkContainer = $("#htkContainer");
+  this.htkContainer = $("#htk-dcontainer");
   if (this.htkContainer.size() == 0) {
-    this.htkContainer = $("<div id=\"htkContainer\"></div>");    
+    this.htkContainer = $(layout);
     $("body").append(this.htkContainer);
   }
   this.statusMsg = $("<p>Loading Deliverables...</p>");
@@ -43,5 +44,5 @@ DeliverablesRouter.prototype.loadGadget = function() {
 
 DeliverablesRouter.prototype.setupControllers = function() {
   this.deliverablesController = new DeliverablesController(this);
-  // this.completionCommentsController = new CompletionCommentsController(this);
+  this.completionCommentsController = new CompletionCommentsController(this);
 }

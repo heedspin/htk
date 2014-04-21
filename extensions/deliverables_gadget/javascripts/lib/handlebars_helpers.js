@@ -5,3 +5,11 @@ Handlebars.registerHelper("selected", function(isSelected, options) {
 		return null;
 	}
 });
+
+Handlebars.registerHelper("completed", function(completedById, options) {
+	if (completedById) {
+		return "completed";
+	} else {
+		return null;
+	}
+});

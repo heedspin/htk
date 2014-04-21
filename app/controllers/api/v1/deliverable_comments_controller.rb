@@ -6,7 +6,7 @@ class Api::V1::DeliverableCommentsController < Api::V1::ApiController
 
   def create
   	@deliverable = editable_parent_object
-  	@comment = @deliverable.comments.build(comment_type_id: params[:comment_type_id], note: params[:note])
+  	@comment = @deliverable.comments.build(comment_type_id: params[:comment_type_id], note: params[:note], comment_type_id: params[:comment_type_id])
   	@comment.creator = current_user 
   	if @comment.save
 			render json: { 
