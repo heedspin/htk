@@ -9,3 +9,4 @@
 //= require lib/jquery.formToNameValues.js
 //= require lib/jquery.resetForm.js
 //= require helpers/simple_format.js.coffee
+//= require lib/tree.jquery.js

@@ -6,6 +6,9 @@
 			Assigned to: {{responsible.first_name}}
 			{{/if}}
 		</p>
+		{{#if parent}}
+		<p>Parent is {{parent.title}}</p>
+		{{/if}}
 		{{simpleFormat description}}
 		<div class="htk-action htk-edit"><%= image_tag 'edit.png' %></div>
 		{{#if completed_by_id}}

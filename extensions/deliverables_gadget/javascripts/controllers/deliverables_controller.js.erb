@@ -4,6 +4,8 @@ function DeliverablesController(router) {
   this.currentDeliverables = new Array();
   this.deliverableTemplate = Handlebars.compile("<%= insert_file('html/deliverable.html.erb', :javascript_escape => true) %>");
   this.deliverableLiTemplate = Handlebars.compile("<%= insert_file('html/deliverable_li.html', :javascript_escape => true) %>");
+  this.parentOptionsTemplate = Handlebars.compile("<option value=\"\">Select Parent</option>{{#each deliverables}}<option value=\"{{id}}\">{{title}}</option>{{/each}}");
+  this.currentRelations = null; 
   this.loadDeliverables();
 }
 
@@ -17,9 +19,11 @@ DeliverablesController.prototype.loadDeliverables = function() {
   htkLog("Load Deliverables Matches: " + JSON.stringify(query_data));
   Deliverable.prototype.all(query_data, {
     success : function(results) {
-      // htkLog("Load Deliverables: " + JSON.stringify(obj.data));
+      htkLog("Load Deliverables: " + JSON.stringify(results.obj.data));
       _this.currentDeliverables = _this.currentDeliverables.concat(results.deliverables);
       _this.router.currentEmail = results.email;
+      _this.currentRelations = results.relations;
+      _this.associateRelations();
       _this.renderDeliverables();
       adjust_window_height();
     },
@@ -29,10 +33,19 @@ DeliverablesController.prototype.loadDeliverables = function() {
         _this.setStatusMsg("Email not processed by server yet");
       } else if (results.obj.errors.length > 0) {
         _this.setStatusMsg("Error");
-        htkLog("Error response: " + JSON.stringify(obj));
+        htkLog("Error response: " + JSON.stringify(results.obj));
         adjust_window_height();
       }
     }
+  })
+}
+DeliverablesController.prototype.associateRelations = function() {
+  var _this = thisl;
+  _.each(this.currentRelations, function(r) {
+    r.set_deliverables(_this.currentDeliverables);
+  })
+  _.each(this.currentDeliverables, function(d) {
+    d.set_relations(_this.currentRelations);
   })
 }
 DeliverablesController.prototype.removeDeliverable = function(deliverable_id) {
@@ -81,6 +94,33 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
       save_button.html("Save");     
     }
   });
+  $("#htkv-nd > form > input[name='parent_name'], #htkv-ed > form > input[name='parent_name']").autocomplete({
+    source: function(request, response) {
+      htkRequest("GET", "/api/v1/deliverables?term=" + request.term, null, function(obj) {
+        if (obj.errors.length > 0) {
+          _this.statusMsg.empty().append("Error").show();
+          htkLog("Error response: " + JSON.stringify(obj));
+        } else {
+          htkLog("deliverables autocomplete: " + JSON.stringify(obj.data));
+          response(obj.data);
+        }    
+      });
+    },
+    select: function(event, ui) { 
+      var input = $(this);
+      input.val(ui.item.label); 
+      htkLog("parent deliverable selected: " + ui.item.label + " - " + ui.item.value);
+      input.siblings(".parent-name-select").val("");
+      input.siblings("input[name=parent_id]").val(ui.item.value);
+      return false; 
+    }
+  });
+  $(".parent-name-select").change(function(event) {
+    htkLog("parent changed to " + $(this).val());
+    var select = $(this);
+    select.siblings("input[name=parent_name]").val("");
+    select.siblings("input[name=parent_id]").val(select.val());
+  })
 };
 
 DeliverablesController.prototype.updateOrDeleteDeliverable = function(event) {
@@ -105,6 +145,12 @@ DeliverablesController.prototype.editDeliverable = function(e) {
   edit_form.attr("data-id", deliverable.id);
   edit_form.find("input[name=title]").val(deliverable.title);
   edit_form.find("textarea[name=description]").val(deliverable.description);
+  var options = $(this.parentOptionsTemplate({deliverables: _.reject(this.currentDeliverables, function(d) { return d.id == deliverable.id; })}));
+  var parent_select = edit_form.children(".parent-name-select");
+  parent_select.empty().append(options);
+  if (deliverable.parent) {
+    parent_select.val(deliverable.parent.id);
+  }
   view.show();
 };
 
@@ -146,7 +192,10 @@ DeliverablesController.prototype.showDeliverable = function(deliverable) {
 DeliverablesController.prototype.newDeliverable = function(event) {
   $("#htk-col2").children().hide(); $("#htk-col3").children().hide();
   var view = $("#htkv-nd");
-  view.find("form").resetForm();
+  var form = view.find("form");
+  form.resetForm();
+  var options = $(this.parentOptionsTemplate({deliverables: this.currentDeliverables}));
+  form.children("#parent-name-select").empty().append(options);
   view.show();
 }
 

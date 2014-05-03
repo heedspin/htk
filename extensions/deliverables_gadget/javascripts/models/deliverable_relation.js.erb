@@ -1,0 +1,21 @@
+function DeliverableRelation(attributes, deliverables) {
+	HtkModel.call(this, attributes);
+	this.source_deliverable = null;
+	this.target_deliverable = null;
+}
+
+DeliverableRelation.prototype = Object.create(HtkModel.prototype, {
+	api_url : {	
+		value : function() { return "/api/v1/deliverable_relations"; }
+	},
+	root_key : { value : "deliverable_relation" },
+	attribute_keys : { value : <%= DeliverableRelation.columns.map(&:name).to_json %> }
+});
+
+DeliverableRelation.prototype.parent_relation_type = "<%= DeliverableRelationType.parent.cmethod %>";
+
+DeliverableRelation.prototype.set_deliverables = function(deliverables) {
+	var _this = this;
+	this.source_deliverable = _.find(deliverables, function(d) { return d.id == _this.source_deliverable_id; });
+	this.target_deliverable = _.find(deliverables, function(d) { return d.id == _this.target_deliverable_id; });
+}

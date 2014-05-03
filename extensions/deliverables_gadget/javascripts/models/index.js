@@ -2,3 +2,4 @@
 //= require ./deliverable.js.erb
 //= require ./deliverable_user.js
 //= require ./deliverable_comment.js
+//= require ./deliverable_relation.js

@@ -8,17 +8,13 @@
 		<div id="htkv-nd" class="htk-hidden">
 			<h3>New Deliverable</h3>
 			<form>
-				<input type="text" placeholder="Deliverable Title" name="title"/>
-				<textarea class='expanding' placeholder="Description" name="description"></textarea>
-				<button type="button" id="htk-action-cd">Save</button>
+				<%= insert_file 'html/deliverables_form.html.erb' %>
 			</form>
 		</div>
 		<div id="htkv-ed" class="htk-hidden">
 			<h3>Edit Deliverable</h3>
 			<form>
-				<input type="text" placeholder="Deliverable Title" name="title"/>
-				<textarea class='expanding' placeholder="Description" name="description"></textarea>
-				<button type="button">Save</button>
+				<%= insert_file 'html/deliverables_form.html.erb' %>
 				<input type="checkbox" class="htk-action-delete">Delete</input>
 			</form>
 		</div>

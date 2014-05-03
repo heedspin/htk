@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140405164028) do
+ActiveRecord::Schema.define(:version => 20140426183124) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -62,6 +62,14 @@ ActiveRecord::Schema.define(:version => 20140405164028) do
     t.boolean  "is_related",     :default => true
   end
 
+  create_table "deliverable_relations", :force => true do |t|
+    t.integer  "source_deliverable_id"
+    t.integer  "target_deliverable_id"
+    t.integer  "relation_type_id"
+    t.datetime "created_at",            :null => false
+    t.datetime "updated_at",            :null => false
+  end
+
   create_table "deliverable_users", :force => true do |t|
     t.integer  "deliverable_id"
     t.integer  "user_id"
@@ -73,9 +81,8 @@ ActiveRecord::Schema.define(:version => 20140405164028) do
 
   create_table "deliverables", :force => true do |t|
     t.string   "title"
-    t.integer  "parent_deliverable_id"
-    t.datetime "created_at",            :null => false
-    t.datetime "updated_at",            :null => false
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
     t.text     "description"
     t.integer  "deleted_by_id"
     t.integer  "completed_by_id"

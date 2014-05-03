@@ -49,21 +49,25 @@ class Email < ApplicationModel
 		where(thread_id: thread_id)
 	end
 	def self.from_address(from_address)
-		where(from_address: from_address.downcase)
+		where(from_address: from_address.try(:downcase))
 	end
-	def self.epoch_to_date(date)
-		if date.is_a?(String)
+	def self.sanitize_date(date)
+		date = case date
+		when String
 			# Convert GMail epoch time to datetime
 			DateTime.strptime(date[0..9], '%s')
-		else
-			date
+		when DateTime
+			date.change usec: 0
+		when Time
+			date.change usec: 0
 		end
+		date
 	end
 	def self.date(date)
-		where date: epoch_to_date(date)
+		where date: self.sanitize_date(date)
 	end
 	def date=(date)
-		super self.class.epoch_to_date(date)
+		super self.class.sanitize_date(date)
 	end
 	def self.web_id(web_id)
 		where web_id: web_id
