@@ -51,3 +51,10 @@ span.htk-responsible {
 .htk-hidden {
 	display: none;
 }
+
+ul.htk-tool {
+	list-style: : none;
+}
+ul.htk-tool li {
+	display: inline;
+}

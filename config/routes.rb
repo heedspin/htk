@@ -11,6 +11,7 @@ Htk::Application.routes.draw do
       # resources :emails, :only => :create
       resources :users, :only => :show
       resources :messages, only: [:index]
+      resources :emails, only: [:index]
     end
   end 
 

@@ -10,11 +10,16 @@
 		<p>Parent is {{parent.title}}</p>
 		{{/if}}
 		{{simpleFormat description}}
-		<div class="htk-action htk-edit"><%= image_tag 'edit.png' %></div>
-		{{#if completed_by_id}}
-		<div class="htk-action htk-complete"><%= image_tag 'green-check.png' %></div>
-		{{else}}
-		<div class="htk-action htk-complete"><%= image_tag 'check.png' %></div>
-		{{/if}}
+		<ul class="htk-tool">
+			<li class="htk-edit"><%= image_tag 'edit.png' %></li>
+			{{#if completed_by_id}}
+			<li class="htk-action htk-complete"><%= image_tag 'green-check.png' %></li>
+			{{else}}
+			<li class="htk-action htk-complete"><%= image_tag 'check.png' %></li>
+			{{/if}}
+			{{#unless parent}}
+			<li class="htk-action htk-disassociate"><%= image_tag 'cross.png' %></li>
+			{{/unless}}
+		</ul>
 </div>
 {{/with}}
