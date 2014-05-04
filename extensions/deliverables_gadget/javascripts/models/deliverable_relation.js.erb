@@ -8,7 +8,8 @@ DeliverableRelation.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	
 		value : function() { return "/api/v1/deliverable_relations"; }
 	},
-	root_key : { value : "deliverable_relation" },
+	single_key : { value : "deliverable_relation" },
+	collection_key : { value : "deliverable_relations" },
 	attribute_keys : { value : <%= DeliverableRelation.columns.map(&:name).to_json %> }
 });
 

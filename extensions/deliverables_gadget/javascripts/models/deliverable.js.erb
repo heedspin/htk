@@ -11,9 +11,10 @@ function Deliverable(attributes, deliverable_users) {
 
 Deliverable.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function(){ return "/api/v1/deliverables"; } },
-	root_key : { value : "deliverable" },
+	single_key : { value : "deliverable" },
+	collection_key : { value : "deliverables" },
 	attribute_keys : { value : <%= (Deliverable.columns.map(&:name) + ['parent_id']).to_json %> },
-	extract_index : {
+	extract_collection : {
 		value : function(obj) {
 		  var results = {
 		  	email : obj.data['email'],
@@ -104,7 +105,7 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 Deliverable.prototype.recent = function(query_data, callbacks) {
 	var _self = this;
 	htkRequest("GET", this.api_url() + "/recent", query_data, function(obj) {
-		var results = _self.extract_index(obj);
+		var results = _self.extract_collection(obj);
 	  if (obj.rc && obj.rc == 200) {
 	  	if (callbacks && callbacks.success && typeof(callbacks.success) === "function") {  
 	  		callbacks.success(results);

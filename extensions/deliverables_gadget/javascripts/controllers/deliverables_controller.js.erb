@@ -13,7 +13,7 @@ DeliverablesController.prototype.loadDeliverables = function() {
   var _this = this;
   this.setStatusMsg("Loading Deliverables...");
   adjust_window_height();
-  var query_data = htkGetContentMatches(["date_sent", "sender_email", "'message_id"]);
+  var query_data = htkGetContentMatches(["date_sent", "sender_email", "message_id"]);
   htkLog("Load Deliverables Matches: " + JSON.stringify(query_data));
   Deliverable.prototype.all(query_data, {
     success : function(results) {
@@ -51,7 +51,8 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
   var _this = this;
   $("#htk-action-nd").click($.proxy(this.newDeliverable, this));
   $("#htk-col2").on("click", ".htk-edit", $.proxy(this.editDeliverable, this));
-  $("#htkv-nd > form > button").click($.proxy(this.createEvent, this));
+  $("#htkv-nd > form#create-deliverable > button").click($.proxy(this.createEvent, this));
+  $("form#find-deliverable > button").click($.proxy(this.associateEvent, this));
   $("#htkv-ed > form > button").click($.proxy(this.updateOrDeleteEvent, this));
   // Toggle Save / Delete button.
   $("#htkv-ed > form > input.htk-action-delete").click(function() {
@@ -61,6 +62,12 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
     } else {
       save_button.html("Save");     
     }
+  });
+  $(".parent-name-select").change(function(event) {
+    htkLog("parent changed to " + $(this).val());
+    var select = $(this);
+    select.siblings("input[name=parent_name]").val("");
+    select.siblings("input[name=parent_id]").val(select.val());
   });
   $("#htkv-nd > form > input[name='deliverable_name']").autocomplete({
     source: function(request, response) {
@@ -83,12 +90,12 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
       return false; 
     }
   });
-  $(".parent-name-select").change(function(event) {
-    htkLog("parent changed to " + $(this).val());
+  $("#deliverable-name-select").change(function(event) {
+    htkLog("associate deliverable changed to " + $(this).val());
     var select = $(this);
-    select.siblings("input[name=parent_name]").val("");
-    select.siblings("input[name=parent_id]").val(select.val());
-  })
+    select.siblings("input[name=deliverable_name]").val("");
+    select.siblings("input[name=deliverable_id]").val(select.val());
+  });  
 };
 
 DeliverablesController.prototype.updateOrDeleteEvent = function(event) {
@@ -194,6 +201,41 @@ DeliverablesController.prototype.createEvent = function(event) {
     })
   }
 }
+
+DeliverablesController.prototype.associateEvent = function(event) {
+  var _this = this;
+  var form = $(event.target).parent();
+  var deliverable_id = form.find("input[name=deliverable_id]").val();
+  if (deliverable_id) {
+    var matches = htkGetContentMatches(["date_sent", "sender_email", "message_id"]);
+    htkLog("associateDeliverable: " + deliverable_id + " to " + JSON.stringify(matches));
+    Message.prototype.all(matches, {
+      success : function(results) {
+        var message = results.messages[0];
+        htkLog("Found message " + JSON.stringify(message));
+        var thread_deliverable = new ThreadDeliverable({ 
+          deliverable_id : deliverable_id, 
+          message_thread_id : message.message_thread_id
+        });
+        thread_deliverable.save({
+          success : function(results) {
+            htkLog("Association succeeded");
+            Deliverable.prototype.find(deliverable_id, {
+              success : function(results) {
+                _this.deliverableTree.addDeliverable(results.deliverable);
+                _this.showDeliverable(results.deliverable);
+              }
+            });
+          }
+        });
+      },
+      error : function(results) {
+        htkLog("Failed to find message: " + JSON.stringify(results.obj));
+      }
+    });
+  }
+}
+
 DeliverablesController.prototype.deliverableChanged = function(results) {
   var deliverable_update = results.obj.data['deliverable'];
   if (deliverable_update) {

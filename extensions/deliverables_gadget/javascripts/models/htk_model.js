@@ -10,23 +10,6 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	api_url : {
 		value : function() {}
 	},
-	all : {
-		value : function(query_data, callbacks) {
-			var _self = this;
-			htkRequest("GET", this.api_url(), query_data, function(obj) {
-				var results = _self.extract_index(obj);
-	      if (obj.rc && obj.rc == 200) {
-	      	if (callbacks && callbacks.success && typeof(callbacks.success) === "function") {  
-	      		callbacks.success(results);
-					}
-	      } else {
-	      	if (callbacks && callbacks.error && typeof(callbacks.error) === "function") {  
-	      		callbacks.error(results);
-					}
-	      }
-			});
-		}
-	},
 	attributes : {
 		value : function() {
 			var result = new Object();
@@ -81,7 +64,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	    htkRequest(http_method, url, query_data, function(obj) {
 	    	var results = _self.extract_single(obj);
 	      if (obj.rc && obj.rc == 200) {
-	      	// Should be done by extract_single: _self.update_attributes(obj[_self.root_key]);
+	      	// Should be done by extract_single: _self.update_attributes(obj[_self.single_key]);
 	      	if (callbacks && callbacks.success && typeof(callbacks.success) === "function") {  
 	      		callbacks.success(results);
 					}
@@ -103,14 +86,48 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	    this.saveRequest("PUT", this.api_url() + "/" + this.id, this.attributes(), callbacks);
 		}
 	},
-	extract_index : {
+	extract_collection : {
 		value : function(obj) {
-			return null;
+		  var results = new Object( { obj : obj });
+		  results[this.collection_key] = obj.data[this.collection_key]
+		  return results;
 		}
 	},
 	extract_single : {
 		value : function(obj) {
-    	return { obj: obj };
+		  var results = new Object( { obj : obj });
+		  results[this.single_key] = obj.data[this.single_key]
+		  return results;
 		}
 	}
 });
+
+HtkModel.prototype.handle_callbacks = function(results, callbacks) {
+  if (results.obj.rc && results.obj.rc == 200) {
+  	if (callbacks && callbacks.success && typeof(callbacks.success) === "function") {  
+  		callbacks.success(results);
+		}
+  } else {
+  	if (callbacks && callbacks.error && typeof(callbacks.error) === "function") {  
+  		callbacks.error(results);
+		} else {
+	    htkLog("Unhandled error: " + JSON.stringify(results.obj));			
+		}
+  }
+}
+
+HtkModel.prototype.all = function(query_data, callbacks) {
+	var _self = this;
+	htkRequest("GET", this.api_url(), query_data, function(obj) {
+		var results = _self.extract_collection(obj);
+		_self.handle_callbacks(results, callbacks);
+	});
+}
+
+HtkModel.prototype.find = function(id, callbacks) {
+	var _this = this;
+	htkRequest("GET", this.api_url() + "/" + id, null, function(obj) {
+		var results = _this.extract_single(obj);
+		_this.handle_callbacks(results, callbacks);
+	});
+}

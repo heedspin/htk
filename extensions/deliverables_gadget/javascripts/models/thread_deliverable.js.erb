@@ -1,0 +1,10 @@
+function ThreadDeliverable(attributes) {
+	HtkModel.call(this, attributes);
+}
+
+ThreadDeliverable.prototype = Object.create(HtkModel.prototype, {
+	api_url : {	value : function() { return "/api/v1/thread_deliverables"; } },
+	single_key : { value : "thread_deliverables" },
+	collection_key : { value : "thread_deliverables" },
+	attribute_keys : { value : <%= ThreadDeliverable.columns.map(&:name).to_json %> },	
+});

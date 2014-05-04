@@ -11,4 +11,5 @@
 class ThreadDeliverable < ApplicationModel
 	belongs_to :message_thread
 	belongs_to :deliverable
+	attr_accessible :message_thread_id, :deliverable_id
 end

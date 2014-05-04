@@ -10,6 +10,7 @@ Htk::Application.routes.draw do
       resources :thread_deliverables
       # resources :emails, :only => :create
       resources :users, :only => :show
+      resources :messages, only: [:index]
     end
   end 
 

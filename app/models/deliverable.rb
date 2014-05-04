@@ -54,6 +54,10 @@ class Deliverable < ApplicationModel
     user_id = user.is_a?(User) ? user.id : user
     includes(:deliverable_users).where(deliverable_users: { user_id: user_id, access_id: [DeliverableAccess.owner.id, DeliverableAccess.edit.id] })
   end
+  def self.accessible_to(user)
+    user_id = user.is_a?(User) ? user.id : user
+    includes(:deliverable_users).where(deliverable_users: { user_id: user_id, access_id: DeliverableAccess.all.map(&:id) })
+  end
   def self.title_like(text)
     where ['deliverables.title ilike ?', "%#{text}%"]
   end

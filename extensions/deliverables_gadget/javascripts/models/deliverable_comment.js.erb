@@ -6,6 +6,7 @@ DeliverableComment.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	
 		value : function() { return "/api/v1/deliverables/" + this.deliverable_id + "/comments"; }
 	},
-	root_key : { value : "comment" },
+	single_key : { value : "comment" },
+	collection_key : { value : "comments" },
 	attribute_keys : { value : <%= DeliverableComment.columns.map(&:name).to_json %> }
 });

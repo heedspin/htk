@@ -24,7 +24,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	def search_index
 		if @email = Email.user(current_user).from_address(params[:from_address]).date(params[:date]).first
 			if (new_web_id = params[:web_id]) and (@email.web_id != new_web_id)
-				@email.update_attributes(web_id: new_web_id)
+				Email.find(@email.id).update_attributes(web_id: new_web_id)
 			end
 			@deliverables = @email.message.message_thread.deliverables.not_deleted
 			@deliverables, @relations = DeliverableRelation.get_trees(@deliverables)
@@ -99,14 +99,16 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	end
 
 	def show
-		if params[:id] == 'recent'
+		id = params[:id]
+		if id == 'recent'
 			@deliverables = Deliverable.editable_by(current_user).not_deleted.by_created_at_desc.limit(20)
 			if excluding = params[:exclude]
 				@deliverables = @deliverables.excluding(excluding)
 			end
 			render json: @deliverables
 		else
-			render json: { errors: "Not implemented" }, status: 418 # I'm a teapot!
+			@deliverable = Deliverable.accessible_to(current_user).find(id)
+			render json: @deliverable
 		end
 	end
 

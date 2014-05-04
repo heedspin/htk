@@ -12,4 +12,8 @@ class MessageThread < ApplicationModel
 	has_many :messages, dependent: :destroy
 	has_many :thread_deliverables, dependent: :destroy
 	has_many :deliverables, through: :thread_deliverables
+
+	def self.accessible_to(user)
+		joins(:email_account_threads => :email_account).where(['email_accounts.user_id = ?', user.id])
+	end
 end

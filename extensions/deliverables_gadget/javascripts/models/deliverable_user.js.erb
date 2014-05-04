@@ -9,7 +9,8 @@ function DeliverableUser(attributes, users) {
 // DeliverableUser.prototype.user = null;
 
 DeliverableUser.prototype = Object.create(HtkModel.prototype, {
-	api_url : {	value : "/api/v1/deliverables/" + this.deliverabe_id + "/deliverable_users" },
-	root_key : { value : "deliverable_user" },
+	api_url : {	value : function() { return "/api/v1/deliverables/" + this.deliverabe_id + "/deliverable_users"; } },
+	single_key : { value : "deliverable_user" },
+	collection_key : { value : "deliverable_users" },
 	attribute_keys : { value : <%= DeliverableUser.columns.map(&:name).to_json %> },	
 });
