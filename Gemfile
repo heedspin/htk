@@ -41,6 +41,9 @@ group :development do
   gem 'annotate', :git => 'https://github.com/ctran/annotate_models.git'
   gem 'quiet_assets' #, :group => :development
 end
+group :development, :test do
+  gem "qunit-rails"
+end
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
