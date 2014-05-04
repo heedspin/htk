@@ -1,6 +1,7 @@
 //= require ./lib/autogrow.js
 //= require ./lib/handlebars_helpers.js
 //= require ./lib/htk_gadgets.js.erb
+//= require ./lib/deliverable_tree.js
 //= require lib/underscore-min.js
 //= require deliverables_router.js.erb
 //= require ./models

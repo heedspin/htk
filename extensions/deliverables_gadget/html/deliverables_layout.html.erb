@@ -1,13 +1,20 @@
 <div id="htk-dcontainer">
 	<div id="htk-col1">
-		<ul id="htk-dlist">
-			<li class="htk-action" id="htk-action-nd"><%= image_tag 'plus.png' %></li>
-		</ul>
+		<div id="dtree"></div>
+		<span class="htk-action" id="htk-action-nd"><%= image_tag 'plus.png' %></span>
 	</div>
 	<div id="htk-col2">
 		<div id="htkv-nd" class="htk-hidden">
-			<h3>New Deliverable</h3>
-			<form>
+			<h3>Find Deliverable</h3>
+			<form id="find-deliverable">
+				<input type="text" placeholder="Search for Deliverable" name="deliverable_name" />
+				<input type="hidden" name="deliverable_id" value="" />
+				<select id="deliverable-name-select">
+				</select>
+				<button type="button" id="htk-action-ad">Associate</button>
+			</form>
+			<h3>Create Deliverable</h3>
+			<form id="create-deliverable">
 				<%= insert_file 'html/deliverables_form.html.erb' %>
 			</form>
 		</div>

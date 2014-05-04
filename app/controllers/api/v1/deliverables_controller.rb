@@ -98,6 +98,18 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 		end
 	end
 
+	def show
+		if params[:id] == 'recent'
+			@deliverables = Deliverable.editable_by(current_user).not_deleted.by_created_at_desc.limit(20)
+			if excluding = params[:exclude]
+				@deliverables = @deliverables.excluding(excluding)
+			end
+			render json: @deliverables
+		else
+			render json: { errors: "Not implemented" }, status: 418 # I'm a teapot!
+		end
+	end
+
 	protected
 
 		def editable_object

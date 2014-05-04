@@ -26,7 +26,7 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 		  _.each(obj.data['deliverable_users'], function(du) {
 		    results.deliverable_users.push(new DeliverableUser(du, results.users));
 		  });
-		  _.each(obj.data["deliverables"], function(d) {
+		  _.each(obj.data["deliverables"] || obj.data["deliverable"], function(d) {
 		    results.deliverables.push(new Deliverable(d, results.deliverable_users));
 		  });
 		  _.each(obj.data["deliverable_relations"], function(r) {
@@ -100,3 +100,19 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 		}
 	}
 });
+
+Deliverable.prototype.recent = function(query_data, callbacks) {
+	var _self = this;
+	htkRequest("GET", this.api_url() + "/recent", query_data, function(obj) {
+		var results = _self.extract_index(obj);
+	  if (obj.rc && obj.rc == 200) {
+	  	if (callbacks && callbacks.success && typeof(callbacks.success) === "function") {  
+	  		callbacks.success(results);
+			}
+	  } else {
+	  	if (callbacks && callbacks.error && typeof(callbacks.error) === "function") {  
+	  		callbacks.error(results);
+			}
+	  }
+	});
+}

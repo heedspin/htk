@@ -57,4 +57,7 @@ class Deliverable < ApplicationModel
   def self.title_like(text)
     where ['deliverables.title ilike ?', "%#{text}%"]
   end
+  def self.excluding(deliverable_ids)
+    where ['deliverables.id not in (?)', deliverable_ids]
+  end
 end
