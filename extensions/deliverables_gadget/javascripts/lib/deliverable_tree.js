@@ -1,12 +1,17 @@
 function DeliverableTree(deliverablesController) {
   this.deliverablesController = deliverablesController;
-  this.deliverables = null;
-	this.relations = null;
+  this.deliverables = [];
   this.tree = null;
-  // this.deliverableLiTemplate = Handlebars.compile("<%= insert_file('html/deliverable_li.html', :javascript_escape => true) %>");
+  this.message_thread_id = null;
 }
 
 DeliverableTree.prototype = Object.create(null);
+
+DeliverableTree.prototype.setDeliverables = function(deliverables) {
+  var _this = this;
+  this.deliverables = deliverables;
+  _.each(this.deliverables, function(d) { d.tree = _this; });
+}
 
 // var data = [
 //   {
@@ -25,34 +30,37 @@ DeliverableTree.prototype = Object.create(null);
 // ];
 DeliverableTree.prototype.getTreeData = function() {
   var _this = this;
-  var has_parent = new Object();
   var all_children = new Object();
-  _.each(this.relations, function(r) {
-    has_parent[r.target_deliverable_id] = true;
-    if (all_children[r.source_deliverable_id]) {
-      all_children[r.source_deliverable_id].push(r.target_deliverable_id);
+  var all_parents = new Array();
+  _.each(this.deliverables, function(d) {
+    if (!d.parent_relation.source_deliverable_id) {
+      all_parents.push(d);
     } else {
-      all_children[r.source_deliverable_id] = [ r.target_deliverable_id ];
+      if (all_children[d.parent_relation.source_deliverable_id]) {
+        all_children[d.parent_relation.source_deliverable_id].push(d);
+      } else {
+        all_children[d.parent_relation.source_deliverable_id] = [ d ];
+      }
     }
   });
+  var sorted_parents = this.sortSiblings(all_parents);
+  htkLog("DeliverableTree sorted parents = " + JSON.stringify(_.pluck(sorted_parents, "id")));
   var result = [];
-  _.each(this.deliverables, function(d) {
-    if (!has_parent[d.id]) {
-      var subtree = _this.getSubTreeData(all_children, d);
-      result.push(subtree);
-    }
+  _.each(sorted_parents, function(d) {
+    result.push(_this.getSubTreeData(all_children, d));
   });
 	return result;
 }
 
 DeliverableTree.prototype.getSubTreeData = function(all_children, deliverable) {
-  var _this = this;
-  var new_node = this.createNode(deliverable);
   var children = all_children[deliverable.id];
+  htkLog("DeliverableTree.getSubTreeData " + deliverable.id + " children = " + _.pluck(children, "id"));  
+  var _this = this;
+  var new_node = this.newNode(deliverable);
+  children = this.sortSiblings(children);
   if (children) {
     var children_data = [];
-    _.each(children, function(child_id) {
-      var child_deliverable = _this.getDeliverable(child_id);
+    _.each(children, function(child_deliverable) {
       children_data.push(_this.getSubTreeData(all_children, child_deliverable));
     });
     new_node["children"] = children_data;
@@ -60,95 +68,213 @@ DeliverableTree.prototype.getSubTreeData = function(all_children, deliverable) {
   return new_node;
 }
 
-DeliverableTree.prototype.initializeTree = function() {
-  var _this = this;
-  this.tree = $('#dtree').tree({
-    data: this.getTreeData(),
-    dragAndDrop: true
-  }).bind(
-    'tree.select',
-    function(event) {
-      if (event.node) {
-        // node was selected
-        var node = event.node;
-        var deliverable = event.node.deliverable;
-        htkLog(deliverable.title + " " + deliverable.id + " selected");
-        _this.deliverablesController.showDeliverable(deliverable);
-    } else {
-      // event.node is null
-      // a node was deselected
-      // e.previous_node contains the deselected node
+DeliverableTree.prototype.sortSiblings = function(unsorted, sorted, remainingAttempts) {
+  if (typeof(unsorted) === "undefined") {
+    return null;
+  } else if (typeof(remainingAttempts) == "undefined") {
+    remainingAttempts = 30
+  } else {
+    if (--remainingAttempts <= 0) {
+      htkLog("Max attempts reached");
+      return unsorted;
     }
   }
-);
-  // var _this = this;
-  // _.each(this.currentDeliverables, function (deliverable) {
-  //   _this.addDeliverableLi(deliverable);
-  // });  
-  // $("#htk-dlist").on("click", ".htk-action-sd", function(event) {
-  //   _this.showDeliverable(_this.getDeliverable($(event.target).closest("li").attr("data-id")));
-  // });
-}
-
-DeliverableTree.prototype.selectDeliverable = function(deliverable_id) {
-  var node = this.tree.tree('getNodeById', deliverable_id);
-  this.tree.tree('selectNode', node);
-  // $(".htk-d").each(function() {
-  //   var li = $(this);
-  //   if (li.attr("data-id") == deliverable.id) {
-  //     li.addClass("selected");
-  //   } else {
-  //     li.removeClass("selected");
-  //   }
-  // });
-}
-
-DeliverableTree.prototype.addDeliverable = function(deliverable) {
-  this.deliverables.push(deliverable);
-  if (deliverable.parent_id) {
-    var parent_node = this.tree.tree('getNodeById', deliverable.parent_id);    
-    this.tree.tree('appendNode', this.createNode(deliverable), parent_node);
+  if (typeof(sorted) === "undefined") {
+    sorted = new Array();
+    htkLog("Created sorted with unsorted = " + JSON.stringify(_.pluck(unsorted, "id")));
   }
-  // _this.addDeliverableLi(deliverable);
-  // DeliverablesController.prototype.addDeliverableLi = function(deliverable) {
-  //   var list_item = $(this.deliverableLiTemplate({ deliverable: deliverable }));
-  //   deliverable.listItem = list_item;
-  //   list_item.insertBefore($("#htk-action-nd"));
-  // }
+  if (unsorted.length <= 1) {
+    if (unsorted.length == 1) sorted.push(unsorted[0]);
+    htkLog("Sorting done.  Sorted = " + JSON.stringify(_.pluck(sorted, "id")));
+    return sorted;
+  } else {
+    htkLog("DeliverableTree.sortSiblings: Unsorted", unsorted, "\nsorted", sorted);
+    unsorted = _.reject(unsorted, function(ud) { 
+      if (!ud.parent_relation.previous_sibling_id) {
+        sorted.push(ud);
+        htkLog("DeliverableTree.sortSiblings: Found first node ", ud);
+        return true;
+      } else {
+        var nextd = _.find(sorted, function(sd) { return ud.parent_relation.previous_sibling_id == sd.id; });
+        if (nextd) {
+          htkLog("DeliverableTree.sortSiblings: Added next", ud);
+          sorted.push(ud);
+          return true;
+        } else {
+          return false;
+        }
+      } 
+    });    
+    return DeliverableTree.prototype.sortSiblings(unsorted, sorted, remainingAttempts);
+  }
 }
 
-DeliverableTree.prototype.createNode = function(deliverable) {
+DeliverableTree.prototype.newNode = function(deliverable) {
   var new_node = {
     label : deliverable.title,
     id : deliverable.id,
     deliverable : deliverable
   }
+  if (deliverable.parent_relation) {
+    new_node['parent_relation'] = deliverable.parent_relation;
+  }
   return new_node;
 }
 
 DeliverableTree.prototype.deliverableChanged = function(deliverable) {
-  // var list_item = $(this.deliverableLiTemplate({ deliverable: deliverable }));
-  // deliverable.listItem.replaceWith(list_item);
-  // deliverable.listItem = list_item;
+  var node = this.tree.tree('getNodeById', deliverable.id);
+  this.tree.tree('updateNode', node, deliverable.title);
 }
 
-DeliverableTree.prototype.associateRelations = function() {
+DeliverableTree.prototype.initializeTree = function(message_thread_id) {
+  this.message_thread_id = message_thread_id
   var _this = this;
-  _.each(this.relations, function(r) {
-    r.set_deliverables(_this.deliverables);
-  })
-  _.each(this.deliverables, function(d) {
-    d.set_relations(_this.relations);
-  })
+  this.tree = $('#dtree').tree({
+    data: this.getTreeData(),
+    dragAndDrop: true
+  }).bind('tree.select',
+      function(event) {
+        if (event.node) {
+          // node was selected
+          var node = event.node;
+          var deliverable = event.node.deliverable;
+          // htkLog(deliverable.title + " " + deliverable.id + " selected");
+          _this.deliverablesController.showDeliverable(deliverable);
+      } else {
+        // event.node is null
+        // a node was deselected
+        // e.previous_node contains the deselected node
+      }
+    }
+  ).bind(
+    'tree.move',
+    function(event) {
+      event.preventDefault();
+      event.move_info.do_move();
+      _this.writeTree();
+      // _this.handleMove(event.move_info.moved_node, event.move_info.target_node, event.move_info.position, event.move_info.previous_parent);
+    }
+  );
+}
+
+DeliverableTree.prototype.writeTree = function(node) {
+  var _this = this;
+  if (typeof(node) === "undefined") {
+    node = this.tree.tree("getTree");
+  }
+  if (node.deliverable) {
+    var relation = node.deliverable.parent_relation;
+    if (node.parent) {
+      if (node.parent.deliverable) {
+        relation.write_attribute('source_deliverable_id', node.parent.id);
+      } else {
+        relation.write_attribute('source_deliverable_id', null);
+      }
+      var previous_node = node.getPreviousSibling();
+      if (previous_node) {
+        relation.write_attribute('previous_sibling_id', previous_node.id); 
+      } else {
+        relation.write_attribute('previous_sibling_id',null);
+      }
+      relation.save();
+    }
+  }
+  _.each(node.children, function(child) {
+    _this.writeTree(child);
+  });
+}
+
+// DeliverableTree.prototype.handleMove = function(moved_node, target_node, position, previous_parent) {
+//   htkLog("DeliverableTree.handleMove: moved, target, position, previous parent", moved_node, target_node, position, previous_parent);
+//   var old_next_sibling = _.find(previous_parent.children, function(n) { return n.deliverable.parent_relation.previous_sibling_id == moved_node.id });
+//   if (old_next_sibling) {
+//     htkLog("Old next sibling", old_next_sibling.deliverable);
+//     var old_next_sibling_relation = old_next_sibling.deliverable.parent_relation;
+//     old_next_sibling_relation.previous_sibling_id = moved_node.deliverable.parent_relation.previous_sibling_id;
+//     old_next_sibling_relation.save({
+//       success : function(results) {
+//         htkLog("DeliverableTree.handleMove: updated old next sibling", old_next_sibling);
+//       }
+//     });
+//   }
+//   var moved_relation = moved_node.deliverable.parent_relation;
+//   var next_sibling = null;
+//   if (position == "inside") {
+//     moved_relation.source_deliverable_id = target_node.id;
+//     moved_relation.previous_sibling_id = null;
+//     next_sibling = target_node.children[0];
+//   } else { // position == "after"
+//     moved_relation.source_deliverable_id = target_node.deliverable.parent_relation.source_deliverable_id;
+//     moved_relation.previous_sibling_id = target_node.id;
+//     next_sibling = target_node.getNextSibling();
+//   }
+//   moved_relation.save({
+//     success : function() {
+//       htkLog("DeliverableTree.handleMove: updated moved node", moved_relation);
+//     }
+//   })
+//   if (next_sibling) {
+//     var next_sibling_relation = next_sibling.deliverable.parent_relation;
+//     next_sibling_relation.previous_sibling_id = moved_node.id;
+//     next_sibling_relation.save({
+//       success : function(results) {
+//         htkLog("DeliverableTree.handleMove: updated next sibling", next_sibling_relation);
+//       }
+//     })
+//   }
+// }
+
+DeliverableTree.prototype.selectDeliverable = function(deliverable_id) {
+  var node = this.tree.tree('getNodeById', deliverable_id);
+  this.tree.tree('selectNode', node);
+}
+
+DeliverableTree.prototype.createNode = function(parent_id, deliverable, callbacks) {
+  htkLog("DeliverableTree.createNode with deliverable " + deliverable.id);
+  deliverable.tree = this;
+  var relation = new DeliverableRelation({
+    source_deliverable_id : parent_id,
+    target_deliverable_id : deliverable.id,
+    relation_type_id : DeliverableRelation.prototype.parent_relation_type,
+    message_thread_id : this.message_thread_id
+  });
+  var new_node = this.newNode(deliverable);
+  if (this.deliverables.length == 0) {
+    this.tree.tree('appendNode', new_node);
+    htkLog("Tree: added first: " + deliverable.title);
+  } else if (parent_id) {
+    var parent_node = this.tree.tree('getNodeById', parent_id);
+    this.tree.tree('appendNode', new_node, parent_node);
+    htkLog("Tree: added to parent: " + parent_node.deliverable.title + " => " + deliverable.title);
+  } else {
+    var insert_after_node = _.last(this.tree.tree('getTree').children);
+    this.tree.tree('addNodeAfter', new_node, insert_after_node);
+    htkLog("Tree: added top level after: " + insert_after_node.deliverable.title + ", " + deliverable.title);
+  }
+  htkLog("Tree: added node " + JSON.stringify(new_node.label));
+  deliverable.parent_relation = relation;
+  this.deliverables.push(deliverable);
+  new_node = this.tree.tree('getNodeById', new_node.id);
+  var previous_node = new_node.getPreviousSibling();    
+  if (previous_node) {
+    relation.write_attribute('previous_sibling_id', previous_node.id);
+  }
+  relation.save(callbacks);
 }
 
 DeliverableTree.prototype.removeDeliverable = function(deliverable_id) {
-  for (var i=0; i < this.deliverables.length; i++) {
-    var deliverable = this.deliverables[i];
-    if (deliverable.id == deliverable_id) this.deliverables.splice(i,1)
-  }
-  var node = this.tree.tree('getNodeById', deliverable_id);    
+  var node = this.tree.tree('getNodeById', deliverable_id);
+  if (!node) return;
+  this.deliverables = _.reject(this.deliverables, function(d) { return d.id == deliverable_id });
+  var node = this.tree.tree('getNodeById', deliverable_id);
+  var _this = this;
   this.tree.tree('removeNode', node);
+  // deliverable.destroy removes the relation.
+  // node.deliverable.parent_relation.destroy({
+  //   success : function() {
+  //     _this.writeTree();
+  //   }
+  // });
   // $("#htk-dlist").find("li[data-id=" + deliverable_id + "]").remove();
 }
 
@@ -163,3 +289,14 @@ DeliverableTree.prototype.getDeliverable = function(deliverable_id) {
   }
   return deliverable;
 }
+
+DeliverableTree.prototype.lastChild = function(deliverable_id) {
+  htkLog("DeliverableTree.lastChild " + deliverable_id);
+  var node = this.tree.tree('getNodeById', deliverable_id); 
+  return _.last(node.children);
+}
+
+DeliverableTree.prototype.getParent = function(deliverable_id) {
+  return this.tree.tree('getNodeById', deliverable_id).parent.deliverable;
+}
+

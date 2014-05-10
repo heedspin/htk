@@ -14,7 +14,7 @@
 class Deliverable < ApplicationModel
   has_many :deliverable_users, dependent: :destroy
   has_many :users, through: :deliverable_users
-  attr_accessible :title, :status, :status_id, :parent_id, :description, :completed_by_id
+  attr_accessible :title, :status, :status_id, :description, :completed_by_id
   # has_many :deliverable_messages, dependent: :destroy
   # has_many :messages, through: :deliverable_messages
   belongs_to :deleted_by, class_name: 'User', foreign_key: :deleted_by_id
@@ -38,7 +38,7 @@ class Deliverable < ApplicationModel
     deliverable.id = id if id.present?
   	Deliverable.transaction do
   		deliverable.save!
-  		email.message.message_thread.deliverables << deliverable
+  		# email.message.message_thread.deliverables << deliverable
   		User.email_accounts(email.participants).accessible_to(current_user).each do |recipient|
   			access = if recipient.id == current_user.id
   				DeliverableAccess.owner

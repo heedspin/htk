@@ -1,6 +1,7 @@
-function DeliverableUser(attributes, users) {
+function DeliverableUser(attributes, extract_results) {
 	HtkModel.call(this, attributes);
 	var _self = this;
+	var users = extract_results.users; // assumes already populated in results obj.
 	this.user = _.find(users, function(u) {
 		if (u.id == _self.user_id) return true;
 	});
@@ -12,5 +13,6 @@ DeliverableUser.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function() { return "/api/v1/deliverables/" + this.deliverabe_id + "/deliverable_users"; } },
 	single_key : { value : "deliverable_user" },
 	collection_key : { value : "deliverable_users" },
-	attribute_keys : { value : <%= DeliverableUser.columns.map(&:name).to_json %> },	
+	attribute_keys : { value : <%= DeliverableUser.columns.map(&:name).to_json %> },
+	constructor : { value : DeliverableUser }
 });

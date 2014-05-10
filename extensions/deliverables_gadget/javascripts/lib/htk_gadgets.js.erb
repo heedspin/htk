@@ -1,6 +1,6 @@
-function htkLog(text) {
+function htkLog() {
   if (console && console.log) {
-    console.log(text);    
+    console.log.apply(console, arguments);
   }
 }
 function htkRequest(method, path, data, callback) {

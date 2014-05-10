@@ -10,10 +10,9 @@
 class MessageThread < ApplicationModel
 	has_many :email_account_threads, dependent: :destroy
 	has_many :messages, dependent: :destroy
-	has_many :thread_deliverables, dependent: :destroy
-	has_many :deliverables, through: :thread_deliverables
 
 	def self.accessible_to(user)
-		joins(:email_account_threads => :email_account).where(['email_accounts.user_id = ?', user.id])
+    user_id = user.is_a?(User) ? user.id : user
+    joins(:email_account_threads => :email_account).where(email_accounts: { user_id: user_id })
 	end
 end

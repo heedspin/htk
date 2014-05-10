@@ -1,4 +1,4 @@
-// touch2
+// touch23
 function DeliverablesController(router) {
   HtkController.call(this, router);
   this.deliverableTemplate = Handlebars.compile("<%= insert_file('html/deliverable.html.erb', :javascript_escape => true) %>");
@@ -18,12 +18,19 @@ DeliverablesController.prototype.loadDeliverables = function() {
   Deliverable.prototype.all(query_data, {
     success : function(results) {
       htkLog("Load Deliverables: " + JSON.stringify(results.obj.data));
-      _this.deliverableTree.deliverables = results.deliverables;
-      _this.deliverableTree.relations = results.deliverable_relations;
-      _this.deliverableTree.associateRelations();
-      _this.router.currentEmail = results.email;
-      _this.renderDeliverables();
-      adjust_window_height();
+      if (results.deliverables.length == 0) {
+        _this.router.loadCurrentEmail({
+          success : function(results) {
+            _this.renderDeliverables();
+            adjust_window_height();
+          }
+        });
+      } else {
+        _this.deliverableTree.setDeliverables(results.deliverables);
+        _this.router.currentEmail = results.email;
+        _this.renderDeliverables();
+        adjust_window_height();
+      }
     },
     error : function(results) {
       if (results.obj.rc && (results.obj.rc == "404")) {
@@ -42,7 +49,7 @@ DeliverablesController.prototype.removeDeliverable = function(deliverable_id) {
   $(".htk-show > div[data-id=" + deliverable_id + "]").remove();
 }
 DeliverablesController.prototype.renderDeliverables = function() {
-  this.deliverableTree.initializeTree();
+  this.deliverableTree.initializeTree(this.router.currentEmail.message_thread_id);
   this.showDeliverable();
   this.setStatusMsg("EAT-" + this.router.currentEmail.email_account_thread_id + " T-" + this.router.currentEmail.message_thread_id + " M-" + this.router.currentEmail.message_id);
   this.setupDeliverablesEvents();
@@ -52,8 +59,17 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
   $("#htk-action-nd").click($.proxy(this.newDeliverable, this));
   $("#htk-col2").on("click", ".htk-edit", $.proxy(this.editDeliverable, this));
   $("#htkv-nd > form#create-deliverable > button").click($.proxy(this.createEvent, this));
-  $("form#find-deliverable > button").click($.proxy(this.associateEvent, this));
   $("#htkv-ed > form > button").click($.proxy(this.updateOrDeleteEvent, this));
+  $("#htkv-nd,#htkv-ed").bind('keypress', function(e) {
+    // Trap return key and click button.
+    if(e.keyCode == 13) {
+      $(this).find("button").click();
+      e.preventDefault();
+    }
+  });
+  // $("#dtree").bind("keypress"), function(e) {
+  //   htkLog("dtree key: " + e.keyCode);
+  // }
   // Toggle Save / Delete button.
   $("#htkv-ed > form > input.htk-action-delete").click(function() {
     var save_button = $(this).siblings("button");
@@ -119,13 +135,13 @@ DeliverablesController.prototype.editDeliverable = function(e) {
   edit_form.attr("data-id", deliverable.id);
   edit_form.find("input[name=title]").val(deliverable.title);
   edit_form.find("textarea[name=description]").val(deliverable.description);
-  var options = $(this.deliverableOptionsTemplate({placeholder : "Select Parent", deliverables: _.reject(this.deliverableTree.deliverables, function(d) { return d.id == deliverable.id; })}));
-  var parent_select = edit_form.children(".parent-name-select");
-  parent_select.empty().append(options);
-  if (deliverable.parent) {
-    parent_select.val(deliverable.parent.id);
-  }
+  // var options = $(this.deliverableOptionsTemplate({placeholder : "Select Parent", deliverables: _.reject(this.deliverableTree.deliverables, function(d) { return d.id == deliverable.id; })}));
+  // var parent_select = edit_form.children(".parent-name-select");
+  // parent_select.empty().append(options);
+  // var parent = deliverable.parent();
+  // if (parent) parent_select.val(parent.id);
   view.show();
+  view.find("input[name=title]").focus();
 };
 
 DeliverablesController.prototype.showDeliverable = function(deliverable) {
@@ -134,8 +150,9 @@ DeliverablesController.prototype.showDeliverable = function(deliverable) {
     htkLog("showDeliverable called without deliverable.  Searching...");
   }
   if (!deliverable) deliverable = _.find(this.deliverableTree.deliverables, function(d) { return !d.isCompleted(); });
-  if (!deliverable) deliverable = this.deliverableTree.deliverables[0];
-  htkLog("showDeliverable: " + deliverable.title);
+  if (!deliverable && this.deliverableTree.deliverables) deliverable = this.deliverableTree.deliverables[0];
+  if (!deliverable) return;
+  // htkLog("showDeliverable: " + deliverable.title);
   this.deliverableTree.selectDeliverable(deliverable.id);
 
   var need_to_create = true;
@@ -154,6 +171,7 @@ DeliverablesController.prototype.showDeliverable = function(deliverable) {
     deliverable.showView = show_view;
     container.append(show_view);
   }
+  adjust_window_height();
 }
 
 DeliverablesController.prototype.newDeliverable = function(event) {
@@ -176,6 +194,7 @@ DeliverablesController.prototype.newDeliverable = function(event) {
     }
   })
   view.show();
+  view.find("input[name=title]").focus();
 }
 
 DeliverablesController.prototype.createEvent = function(event) {
@@ -183,14 +202,19 @@ DeliverablesController.prototype.createEvent = function(event) {
   var form = $(event.target).parent();
   if (form.find("input[name=title]").val()) {
     var matches = htkGetContentMatches().concat(form.formToNameValues());
+    var parent_id = _.find(matches, function(nv) { return nv.parent_id });
+    if (parent_id) parent_id = parent_id.parent_id;
     htkLog("createDeliverable: " + JSON.stringify(matches));
     var deliverable = new Deliverable(matches);
     deliverable.save({
       success : function(results) {
+        var savedDeliverable = results.deliverable;
         htkLog("Created new deliverable: " + JSON.stringify(results.obj.data));
-        _this.deliverableTree.addDeliverable(deliverable);
-        _this.showDeliverable(deliverable);
-        adjust_window_height();
+        _this.deliverableTree.createNode(parent_id, savedDeliverable, {
+          success : function(results) {
+            _this.showDeliverable(savedDeliverable);            
+          }
+        });
       }, 
       error : function(results) {
         _this.setStatusMsg("Create deliverable failed.");
@@ -201,45 +225,14 @@ DeliverablesController.prototype.createEvent = function(event) {
   }
 }
 
-DeliverablesController.prototype.associateEvent = function(event) {
-  var _this = this;
-  var form = $(event.target).parent();
-  var deliverable_id = form.find("input[name=deliverable_id]").val();
-  if (deliverable_id) {
-    var matches = htkGetContentMatches(["date_sent", "sender_email", "message_id"]);
-    htkLog("associateDeliverable: " + deliverable_id + " to " + JSON.stringify(matches));
-    this.router.getCurrentEmail({
-      success : function(email) {
-        var thread_deliverable = new ThreadDeliverable({ 
-          deliverable_id : deliverable_id, 
-          message_thread_id : email.message_thread_id
-        });
-        thread_deliverable.save({
-          success : function(results) {
-            htkLog("Association succeeded");
-            Deliverable.prototype.find(deliverable_id, {
-              success : function(results) {
-                _this.deliverableTree.addDeliverable(results.deliverable);
-                _this.showDeliverable(results.deliverable);
-              }
-            });
-          }
-        });
-      },
-      error : function(obj) {
-        htkLog("Failed to get current email.  Must not be loaded yet...");
-      }
-    });
-  }
-}
-
 DeliverablesController.prototype.deliverableChanged = function(results) {
   var deliverable_update = results.obj.data['deliverable'];
   if (deliverable_update) {
     var deliverable = this.deliverableTree.getDeliverable(deliverable_update["id"]);
     if (deliverable) {
-      deliverable.update_attributes(deliverable_update);
-      this.deliverableTree.deliverableChanged(deliverable);
+      deliverable.write_attributes(deliverable_update);
+      deliverable.reset_changes();
+      // this.deliverableTree.updateDeliverable(deliverable);
       var show_view = $(this.deliverableTemplate({ current_user: this.router.currentUser, deliverable: deliverable }));
       deliverable.showView.replaceWith(show_view);
       deliverable.showView = show_view;
@@ -251,17 +244,14 @@ DeliverablesController.prototype.updateEvent = function(deliverable_id, form) {
   var nameValues = form.formToNameValues();
   htkLog("updating deliverable " + deliverable_id + " with " + JSON.stringify(nameValues));
   var deliverable = this.deliverableTree.getDeliverable(deliverable_id);
-  deliverable.update_attributes(nameValues);
+  deliverable.write_attributes(nameValues);
   deliverable.save({
     success : function(results) {
       htkLog("Putting deliverable succeeded");
-      $(".htk-show[data-id=" + deliverable_id + "]").remove();
+      _this.deliverableTree.deliverableChanged(deliverable);
       _this.showDeliverable(deliverable);
-    },
-    error : function(results) {
-      htkLog("Updating deliverable failed");
     }
-  })
+  });
 }
 DeliverablesController.prototype.deleteEvent = function(deliverable_id) {
   var _this = this;

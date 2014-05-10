@@ -8,6 +8,8 @@
 #  relation_type_id      :integer
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
+#  previous_sibling_id   :integer
+#  message_thread_id     :integer
 #
 
 require 'test_helper'

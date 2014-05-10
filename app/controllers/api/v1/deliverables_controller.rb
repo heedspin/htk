@@ -26,8 +26,9 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 			if (new_web_id = params[:web_id]) and (@email.web_id != new_web_id)
 				Email.find(@email.id).update_attributes(web_id: new_web_id)
 			end
-			@deliverables = @email.message.message_thread.deliverables.not_deleted
-			@deliverables, @relations = DeliverableRelation.get_trees(@deliverables)
+			@relations = DeliverableRelation.message_thread_id(@email.message.message_thread_id).all
+			deliverable_ids = @relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten
+			@deliverables = Deliverable.not_deleted.where(:id => deliverable_ids)
 			
 			# render json: deliverables
 			# render json: { deliverables: @deliverables, email: EmailSerializer.new(@email, root: false) }
@@ -50,17 +51,10 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 		if email.nil?
   		render json: { result: 'no email' }, status: 422
   	else
-  		Deliverable.transaction do 
-	  		@deliverable = Deliverable.web_create(email: email, 
-	  			current_user: current_user, 
-	  			title: title, 
-	  			description: params[:description])
-	  		if (parent_id = params[:parent_id]).present?
-          DeliverableRelation.create!(source_deliverable_id: parent_id, 
-            target_deliverable_id: @deliverable.id,
-            relation_type_id: DeliverableRelationType.parent.id)
-        end
-	  	end
+  		@deliverable = Deliverable.web_create(email: email, 
+  			current_user: current_user, 
+  			title: title, 
+  			description: params[:description])
 			deliverable_users = @deliverable.deliverable_users.select(&:significant?)
 			render json: { 
 				deliverable: DeliverableSerializer.new(@deliverable, root: false), 
@@ -73,12 +67,6 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	def update
 		if @deliverable = editable_object
 			Deliverable.transaction do
-				if (parent_id = params[:parent_id]).present?
-					@deliverable.parent_relations.map(&:destroy)
-          DeliverableRelation.create!(source_deliverable_id: parent_id, 
-            target_deliverable_id: @deliverable.id,
-            relation_type_id: DeliverableRelationType.parent.id)
-				end					
 				if @deliverable.update_attributes(title: params[:title], description: params[:description])
 					render json: { result: 'success'}
 				else

@@ -6,5 +6,6 @@ Email.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function() { return "/api/v1/emails"; } },
 	single_key : { value : "email" },
 	collection_key : { value : "emails" },
-	attribute_keys : { value : <%= Email.columns.map(&:name).to_json %> },	
+	attribute_keys : { value : <%= Email.columns.map(&:name).to_json %> },
+	constructor : { value : Email }
 });

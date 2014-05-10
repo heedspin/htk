@@ -4,5 +4,5 @@
 //= require ./deliverable_comment.js
 //= require ./deliverable_relation.js
 //= require ./message.js.erb
-//= require ./thread_deliverable.js.erb
 //= require ./email.js.erb
+//= require ./user.js.erb

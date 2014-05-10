@@ -1,7 +1,7 @@
 function DeliverableRelation(attributes, deliverables) {
 	HtkModel.call(this, attributes);
-	this.source_deliverable = null;
-	this.target_deliverable = null;
+	// this.source_deliverable = null;
+	// this.target_deliverable = null;
 }
 
 DeliverableRelation.prototype = Object.create(HtkModel.prototype, {
@@ -10,13 +10,18 @@ DeliverableRelation.prototype = Object.create(HtkModel.prototype, {
 	},
 	single_key : { value : "deliverable_relation" },
 	collection_key : { value : "deliverable_relations" },
-	attribute_keys : { value : <%= DeliverableRelation.columns.map(&:name).to_json %> }
+	attribute_keys : { value : <%= DeliverableRelation.columns.map(&:name).to_json %> },
+	constructor : { value : DeliverableRelation }
 });
 
-DeliverableRelation.prototype.parent_relation_type = "<%= DeliverableRelationType.parent.cmethod %>";
+DeliverableRelation.prototype.parent_relation_type = "<%= DeliverableRelationType.parent.id %>";
 
-DeliverableRelation.prototype.set_deliverables = function(deliverables) {
-	var _this = this;
-	this.source_deliverable = _.find(deliverables, function(d) { return d.id == _this.source_deliverable_id; });
-	this.target_deliverable = _.find(deliverables, function(d) { return d.id == _this.target_deliverable_id; });
-}
+// DeliverableRelation.prototype.set_deliverables = function(deliverables) {
+// 	var _this = this;
+// 	this.source_deliverable = _.find(deliverables, function(d) { return d.id == _this.source_deliverable_id; });
+// 	this.target_deliverable = _.find(deliverables, function(d) { return d.id == _this.target_deliverable_id; });
+// }
+
+// DeliverableRelation.prototype.setParentId = function(parent_id) {
+// 	this.source_deliverable_id = parent_id;
+// }

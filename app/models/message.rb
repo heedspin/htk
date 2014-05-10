@@ -19,15 +19,15 @@ class Message < ApplicationModel
 	attr_accessible :status_id, :status, :envelope_message_id, :source_email_id, :message_thread_id, :message_thread
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'
 	belongs_to :source_email, :class_name => 'Email'
-	has_many :deliverable_messages, dependent: :destroy, conditions: {is_related: true}
-	has_many :deliverables, through: :deliverable_messages
+	# has_many :deliverable_messages, dependent: :destroy, conditions: {is_related: true}
+	# has_many :deliverables, through: :deliverable_messages
 	belongs_to :message_thread
 	has_many :emails
 
-	def self.user(user, party_role=PartyRole.read_only)
-		user_id = user.is_a?(User) ? user.id : user
-		joins(conversation: {party: :party_users}).where(party_users: { user_id: user_id, party_role_id: party_role.same_or_better })
-	end
+	# def self.user(user, party_role=PartyRole.read_only)
+	# 	user_id = user.is_a?(User) ? user.id : user
+	# 	joins(conversation: {party: :party_users}).where(party_users: { user_id: user_id, party_role_id: party_role.same_or_better })
+	# end
 
 	delegate :text_body, to: :source_email
 	delegate :text_body_without_reply, to: :source_email

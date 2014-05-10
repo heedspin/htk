@@ -45,15 +45,16 @@ DeliverablesRouter.prototype.loadGadget = function() {
 DeliverablesRouter.prototype.setupControllers = function() {
   this.deliverablesController = new DeliverablesController(this);
   this.completionCommentsController = new CompletionCommentsController(this);
-  this.disassociateDeliverableController = new DisassociateDeliverableController(this);
+  this.associateDeliverableController = new AssociateDeliverableController(this);
 }
 
-DeliverablesRouter.prototype.getCurrentEmail = function(callbacks) {
+DeliverablesRouter.prototype.loadCurrentEmail = function(callbacks) {
   if (this.currentEmail) {
     if (callbacks.success && (typeof(callbacks.success) === "function")) callbacks.success(this.currentEmail);
   } else {
+    var _this = this;
     var matches = htkGetContentMatches(["date_sent", "sender_email", "message_id"]);
-    htkLog("getCurrentEmail matches: " + deliverable_id + " to " + JSON.stringify(matches));
+    htkLog("getCurrentEmail matches: " + JSON.stringify(matches));
     Email.prototype.all(matches, {
       success : function(results) {
         _this.currentEmail = results.emails[0];

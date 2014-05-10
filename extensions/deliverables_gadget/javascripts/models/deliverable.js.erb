@@ -1,65 +1,17 @@
-function Deliverable(attributes, deliverable_users) {
+function Deliverable(attributes) {
 	HtkModel.call(this, attributes);
 	this.owner = null;
 	this.responsible = null;
-	this.listItem = null;
-	this.showView = null;
-	this.parent = null;
-	this.children = [];
-	this.set_users(deliverable_users);
+	this.tree = null;
+	this.parent_relation = null;
 }
 
 Deliverable.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function(){ return "/api/v1/deliverables"; } },
 	single_key : { value : "deliverable" },
 	collection_key : { value : "deliverables" },
-	attribute_keys : { value : <%= (Deliverable.columns.map(&:name) + ['parent_id']).to_json %> },
-	extract_collection : {
-		value : function(obj) {
-		  var results = {
-		  	email : obj.data['email'],
-		  	users : obj.data['users'],
-		  	deliverable_users : [],
-		  	deliverables : [],
-		  	deliverable_relations : [],
-		  	obj : obj
-		  };
-		  _.each(obj.data['deliverable_users'], function(du) {
-		    results.deliverable_users.push(new DeliverableUser(du, results.users));
-		  });
-		  _.each(obj.data["deliverables"] || obj.data["deliverable"], function(d) {
-		    results.deliverables.push(new Deliverable(d, results.deliverable_users));
-		  });
-		  _.each(obj.data["deliverable_relations"], function(r) {
-		    results.deliverable_relations.push(new DeliverableRelation(r));
-		  });
-		  return results;
-		}
-	},
-	extract_single : {
-		value : function(obj) {
-			htkLog("Deliverable.extract_single: " + JSON.stringify(obj));
-			var _self = this;
-		  var results = {
-		  	email : obj.data['email'],
-		  	users : obj.data['users'],
-		  	deliverable_users : [],
-		  	deliverable : _self,
-		  	deliverable_relations : [],
-		  	obj : obj
-		  };
-		  _.each(obj.data['deliverable_users'], function(du) {
-		    results.deliverable_users.push(new DeliverableUser(du, results.users));
-		  });
-		  _.each(obj.data["deliverable_relations"], function(r) {
-		  	// HOW TO PROPOGATE NEW AND DELETED RELATION?
-		    results.deliverable_relations.push(new DeliverableRelation(r));
-		  });
-		  var deliverable_updates = obj.data['deliverable'];
-		  if (deliverable_updates) results.deliverable.update_attributes(deliverable_updates);
-	    return results;
-		}
-	},
+	attribute_keys : { value : <%= Deliverable.columns.map(&:name).to_json %> },
+	constructor : { value : Deliverable },
 	set_users : {
 		value : function(deliverable_users) {
 			var d = this;
@@ -75,32 +27,60 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 			});
 		}
 	},
-	set_relations : { 
-		value : function(deliverable_relations) {
-			var d = this;
-			_.each(deliverable_relations, function(r) {
-				if (r.source_deliverable_id == d.id && r.relation_type == DeliverableRelation.prototype.parent_relation_type)  {
-					d.children.push(r.target_deliverable);
-				} else if (r.target_deliverable_id == d.id && r.relation_type == DeliverableRelation.prototype.parent_relation_type) {
-					d.parent = r.source_deliverable;
-				}
-			})
-		}
-	},
-	update_attribute : {
-		value : function(key, value) {
-			HtkModel.prototype.update_attribute.apply(this, [key, value]);
-			if (key == 'title') {
-			  $("#htk-dlist").find("li[data-id=" + this.id + "] span.htk-title").html(this.title);
-			}
-		}
-	},
+	// write_attribute : {
+	// 	value : function(key, value) {
+	// 		HtkModel.prototype.write_attribute.apply(this, [key, value]);
+	// 		if (key == 'title') {
+	// 		  $("#htk-dlist").find("li[data-id=" + this.id + "] span.htk-title").html(this.title);
+	// 		}
+	// 	}
+	// },
 	isCompleted : {
 		value : function() {
 			return this.completed_by_id != null;
 		}
+	},
+	extract_collection : {
+		value : function(obj) {
+			var results = new Object( { 
+				obj : obj,
+				deliverables : [] 
+			});
+		  Email.prototype.extract_single(obj, results);
+		  User.prototype.extract_collection(obj, results);
+		  DeliverableUser.prototype.extract_collection(obj, results);
+		  DeliverableRelation.prototype.extract_collection(obj, results);
+		  _.each(obj.data["deliverables"] || obj.data["deliverable"], function(d) {
+			  deliverable = new Deliverable(d);
+			  deliverable.set_users(results.deliverable_users);
+			  deliverable.set_parent_relation(results.deliverable_relations);
+		    results.deliverables.push(deliverable);
+		  });
+		  return results;
+		}
+	},
+	extract_single : {
+		value : function(obj) {
+			// htkLog("Deliverable.extract_single: " + JSON.stringify(obj));
+			var results = HtkModel.prototype.extract_single.apply(this, arguments);
+		  Email.prototype.extract_single(obj, results);
+		  User.prototype.extract_collection(obj, results);
+		  DeliverableUser.prototype.extract_collection(obj, results);
+		  DeliverableRelation.prototype.extract_collection(obj, results);
+		  results.deliverable.set_users(results.deliverable_users);
+		  results.deliverable.set_parent_relation(results.deliverable_relations);
+		  return results;
+		}
 	}
 });
+
+Deliverable.prototype.parent = function() {
+	if (this.parent_relation && this.parent_relation.source_deliverable_id) {
+		return this.tree.getDeliverable(this.parent_relation.source_deliverable_id);
+	} else {
+		return null;
+	}
+}
 
 Deliverable.prototype.recent = function(query_data, callbacks) {
 	var _self = this;
@@ -117,3 +97,10 @@ Deliverable.prototype.recent = function(query_data, callbacks) {
 	  }
 	});
 }
+
+Deliverable.prototype.set_parent_relation = function(relations) {
+	var _this = this;
+	this.parent_relation = _.find(relations, function(r) { return (r.target_deliverable_id == _this.id && r.relation_type == DeliverableRelation.prototype.parent_relation_type); });
+}
+
+

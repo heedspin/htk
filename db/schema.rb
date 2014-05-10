@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140426183124) do
+ActiveRecord::Schema.define(:version => 20140506165100) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -68,6 +68,8 @@ ActiveRecord::Schema.define(:version => 20140426183124) do
     t.integer  "relation_type_id"
     t.datetime "created_at",            :null => false
     t.datetime "updated_at",            :null => false
+    t.integer  "previous_sibling_id"
+    t.integer  "message_thread_id"
   end
 
   create_table "deliverable_users", :force => true do |t|
@@ -195,12 +197,6 @@ ActiveRecord::Schema.define(:version => 20140426183124) do
     t.integer  "creator_id"
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
-  end
-
-  create_table "thread_deliverables", :force => true do |t|
-    t.integer  "message_thread_id"
-    t.integer  "deliverable_id"
-    t.datetime "created_at"
   end
 
   create_table "users", :force => true do |t|

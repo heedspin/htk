@@ -1,0 +1,11 @@
+function User(attributes, extract_results) {
+	HtkModel.call(this, attributes);
+}
+
+User.prototype = Object.create(HtkModel.prototype, {
+	api_url : {	value : function() { return "/api/v1/users"; } },
+	single_key : { value : "user" },
+	collection_key : { value : "users" },
+	attribute_keys : { value : <%= User.columns.map(&:name).to_json %> },
+	constructor : { value : User }
+});

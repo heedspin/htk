@@ -8,5 +8,6 @@ DeliverableComment.prototype = Object.create(HtkModel.prototype, {
 	},
 	single_key : { value : "comment" },
 	collection_key : { value : "comments" },
-	attribute_keys : { value : <%= DeliverableComment.columns.map(&:name).to_json %> }
+	attribute_keys : { value : <%= DeliverableComment.columns.map(&:name).to_json %> },
+	constructor : { value : DeliverableComment }
 });

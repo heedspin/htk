@@ -7,7 +7,7 @@ Htk::Application.routes.draw do
       resources :deliverables do
         resources :comments, controller: 'deliverable_comments'
       end
-      resources :thread_deliverables
+      resources :deliverable_relations
       # resources :emails, :only => :create
       resources :users, :only => :show
       resources :messages, only: [:index]
