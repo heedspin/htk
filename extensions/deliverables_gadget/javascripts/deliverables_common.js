@@ -1,3 +1,6 @@
+//= require jquery
+//= require jquery-ui-1.10.4.custom
+//= require lib/handlebars-v1.3.0.js
 //= require ./lib/autogrow.js
 //= require ./lib/handlebars_helpers.js
 //= require ./lib/htk_gadgets.js.erb

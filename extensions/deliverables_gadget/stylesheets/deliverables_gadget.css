@@ -1,9 +1,12 @@
+/*= require jqtree */
+/*= require_self */
+
 #htk-dcontainer {
 	padding: 5px 5px 5px 10px;
 	background-color: #efefef;
  	overflow: hidden;
 	font-size: .75em;
-	margin: 0 0 0 15px;	
+	/*margin: 0 0 0 15px;	*/
 }
 
 #htk-dcontainer table {
@@ -53,8 +56,12 @@ span.htk-responsible {
 }
 
 ul.htk-tool {
-	list-style: : none;
+	list-style: none;
 }
 ul.htk-tool li {
 	display: inline;
+}
+
+#htk-dcontainer form ul {
+	list-style:none;
 }

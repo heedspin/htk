@@ -7,24 +7,32 @@
 		<div id="htkv-nd" class="htk-hidden">
 			<h3>Find Deliverable</h3>
 			<form id="find-deliverable">
-				<input type="text" placeholder="Search for Deliverable" name="deliverable_name" />
 				<input type="hidden" name="deliverable_id" value="" />
-				<select id="deliverable-name-select">
-				</select>
-				<button type="button">Associate</button>
+				<ul>
+					<li><input type="text" placeholder="Search for Deliverable" name="deliverable_name" /></li>
+					<li><select id="deliverable-name-select"></select></li>
+					<li><button type="button">Associate</button></li>
+				</ul>
 			</form>
 			<h3>Create Deliverable</h3>
 			<form id="create-deliverable">
-				<select class="parent-name-select">
-				</select>
-				<%= insert_file 'html/deliverables_form.html.erb' %>
+				<ul>
+					<li><select class="parent-name-select"></select></li>
+					<%= insert_file 'html/deliverables_form.html.erb' %>
+					<li><button type="button" id="htk-action-cd">Save</button></li>
+				</ul>
 			</form>
 		</div>
 		<div id="htkv-ed" class="htk-hidden">
 			<h3>Edit Deliverable</h3>
 			<form>
-				<%= insert_file 'html/deliverables_form.html.erb' %>
-				<input type="checkbox" class="htk-action-delete">Delete</input>
+				<ul>
+					<%= insert_file 'html/deliverables_form.html.erb' %>
+					<li>
+						<button type="button" id="htk-action-cd">Save</button>
+						<input type="checkbox" class="htk-action-delete">Delete</input>
+					</li>
+				</ul>
 			</form>
 		</div>
 	</div>
@@ -34,8 +42,10 @@
 			<form>
 				<input type="hidden" name="deliverable_id" />
 				<input type="hidden" name="comment_type_id" value="<%= DeliverableCommentType.complete.id %>" />
-				<textarea placeholder="Notes" name="note"></textarea>
-				<button type="button">Mark Complete</button>
+				<ul>
+					<li><textarea placeholder="Notes" name="note"></textarea></li>
+					<li><button type="button">Mark Complete</button></li>
+				</ul>
 			</form>
 		</div>
 		<div id="htkv-incomplete" class="htk-hidden">
@@ -43,16 +53,22 @@
 			<form>
 				<input type="hidden" name="deliverable_id" />
 				<input type="hidden" name="comment_type_id" value="<%= DeliverableCommentType.incomplete.id %>" />
-				<textarea placeholder="Notes" name="note"></textarea>
-				<button type="button">Mark Incomplete</button>
+				<ul>
+					<li><textarea placeholder="Notes" name="note"></textarea></li>
+					<li><button type="button">Mark Incomplete</button></li>
+				</ul>
 			</form>
 		</div>
 		<div id="htkv-disassociate" class="htk-hidden">
 			<h3>Disassociate Deliverable?</h3>
 			<form>
 				<input type="hidden" name="deliverable_id" />
-				<button type="button">Yes Disassociate</button>
-				<button type="button">Cancel</button>
+				<ul>
+					<li>
+						<button type="button">Yes Disassociate</button>
+						<button type="button">Cancel</button>
+					</li>
+				</ul>
 			</form>
 		</div>
 	</div>

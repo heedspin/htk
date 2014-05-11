@@ -1,10 +1,13 @@
 shared: &shared
-  version: 7
+  version: 22
 
 development:
   <<: *shared
   api_hostname: stk.lxdinc.com
+  asset_host: stk.lxdinc.com
+  spec_host: stk-west-assets.s3-us-west-2.amazonaws.com
 
 production:
   <<: *shared
   api_hostname: htk.lxdinc.com
+  asset_host: stk-west-assets.s3-us-west-2.amazonaws.com

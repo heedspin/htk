@@ -1,4 +1,4 @@
-// touch23
+// touch234
 function DeliverablesController(router) {
   HtkController.call(this, router);
   this.deliverableTemplate = Handlebars.compile("<%= insert_file('html/deliverable.html.erb', :javascript_escape => true) %>");
@@ -44,8 +44,8 @@ DeliverablesController.prototype.loadDeliverables = function() {
     }
   })
 }
-DeliverablesController.prototype.removeDeliverable = function(deliverable_id) {
-  this.deliverableTree.removeDeliverable(deliverable_id);
+DeliverablesController.prototype.removeDeliverable = function(deliverable_id, delete_association) {
+  this.deliverableTree.removeDeliverable(deliverable_id, delete_association);
   $(".htk-show > div[data-id=" + deliverable_id + "]").remove();
 }
 DeliverablesController.prototype.renderDeliverables = function() {
@@ -58,8 +58,8 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
   var _this = this;
   $("#htk-action-nd").click($.proxy(this.newDeliverable, this));
   $("#htk-col2").on("click", ".htk-edit", $.proxy(this.editDeliverable, this));
-  $("#htkv-nd > form#create-deliverable > button").click($.proxy(this.createEvent, this));
-  $("#htkv-ed > form > button").click($.proxy(this.updateOrDeleteEvent, this));
+  $("#htkv-nd form#create-deliverable button").click($.proxy(this.createEvent, this));
+  $("#htkv-ed form button").click($.proxy(this.updateOrDeleteEvent, this));
   $("#htkv-nd,#htkv-ed").bind('keypress', function(e) {
     // Trap return key and click button.
     if(e.keyCode == 13) {
@@ -71,8 +71,8 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
   //   htkLog("dtree key: " + e.keyCode);
   // }
   // Toggle Save / Delete button.
-  $("#htkv-ed > form > input.htk-action-delete").click(function() {
-    var save_button = $(this).siblings("button");
+  $("#htkv-ed form input.htk-action-delete").click(function() {
+    var save_button = $(this).closest("form").find("button");
     if ($(this).is(":checked")) {
       save_button.html("Delete");
     } else {
@@ -80,12 +80,13 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
     }
   });
   $(".parent-name-select").change(function(event) {
-    htkLog("parent changed to " + $(this).val());
     var select = $(this);
-    select.siblings("input[name=parent_name]").val("");
-    select.siblings("input[name=parent_id]").val(select.val());
+    htkLog("parent changed to " + select.val());
+    var form = select.closest("form");
+    form.find("input[name=parent_name]").val("");
+    form.find("input[name=parent_id]").val(select.val());
   });
-  $("#htkv-nd > form > input[name='deliverable_name']").autocomplete({
+  $("#htkv-nd form input[name='deliverable_name']").autocomplete({
     source: function(request, response) {
       htkRequest("GET", "/api/v1/deliverables?term=" + request.term, null, function(obj) {
         if (obj.errors.length > 0) {
@@ -100,23 +101,25 @@ DeliverablesController.prototype.setupDeliverablesEvents = function() {
     select: function(event, ui) { 
       var input = $(this);
       input.val(ui.item.label); 
+      var form = input.closest("form");
       htkLog("deliverable selected: " + ui.item.label + " - " + ui.item.value);
-      input.siblings(".parent-name-select").val("");
-      input.siblings("input[name=deliverable_id]").val(ui.item.value);
+      form.find(".parent-name-select").val("");
+      form.find("input[name=deliverable_id]").val(ui.item.value);
       return false; 
     }
   });
   $("#deliverable-name-select").change(function(event) {
     htkLog("associate deliverable changed to " + $(this).val());
     var select = $(this);
-    select.siblings("input[name=deliverable_name]").val("");
-    select.siblings("input[name=deliverable_id]").val(select.val());
+    var form = select.closest("form");
+    form.find("input[name=deliverable_name]").val("");
+    form.find("input[name=deliverable_id]").val(select.val());
   });  
 };
 
 DeliverablesController.prototype.updateOrDeleteEvent = function(event) {
   var button = $(event.target);
-  var form = button.parent();
+  var form = button.closest("form");
   var deliverable_id = form.attr("data-id");
   if (button.html() == "Save") {
     this.updateEvent(deliverable_id, form);
@@ -141,6 +144,7 @@ DeliverablesController.prototype.editDeliverable = function(e) {
   // var parent = deliverable.parent();
   // if (parent) parent_select.val(parent.id);
   view.show();
+  adjust_window_height();
   view.find("input[name=title]").focus();
 };
 
@@ -181,12 +185,12 @@ DeliverablesController.prototype.newDeliverable = function(event) {
   var form = view.find("form");
   form.resetForm();
   var options = $(this.deliverableOptionsTemplate({placeholder : "Select Parent", deliverables: this.deliverableTree.deliverables}));
-  form.children(".parent-name-select").empty().append(options);
+  form.find(".parent-name-select").empty().append(options);
   Deliverable.prototype.recent({ exclude : _.map(this.deliverableTree.deliverables, function(d) { return d.id; }) }, {
     success : function(results) {
       htkLog("deliverables recent: " + JSON.stringify(results.deliverables));
       var options = $(_this.deliverableOptionsTemplate({placeholder : "Choose Recent Deliverable", deliverables: results.deliverables}));
-      form.children("#deliverable-name-select").empty().append(options);
+      form.find("#deliverable-name-select").empty().append(options);
     },
     error : function(results) {
       _this.setStatusMsg("Error");
@@ -194,12 +198,14 @@ DeliverablesController.prototype.newDeliverable = function(event) {
     }
   })
   view.show();
+  adjust_window_height();
   view.find("input[name=title]").focus();
 }
 
 DeliverablesController.prototype.createEvent = function(event) {
+  htkLog("DeliverablesController.createEvent");
   var _this = this;
-  var form = $(event.target).parent();
+  var form = $(event.target).closest("form");
   if (form.find("input[name=title]").val()) {
     var matches = htkGetContentMatches().concat(form.formToNameValues());
     var parent_id = _.find(matches, function(nv) { return nv.parent_id });
@@ -222,6 +228,8 @@ DeliverablesController.prototype.createEvent = function(event) {
         htkLog("Create deliverable response: " + JSON.stringify(results.obj));
       }
     })
+  } else {
+    htkLog("DeliverablesController.createEvent: no title");
   }
 }
 
@@ -260,7 +268,7 @@ DeliverablesController.prototype.deleteEvent = function(deliverable_id) {
     if (obj.rc) rc = obj.rc;
     if (rc == 200) {
       htkLog("Delete deliverable succeeded");
-      _this.removeDeliverable(deliverable_id);
+      _this.removeDeliverable(deliverable_id, false);
       _this.showDeliverable();
     } else {
       log("Deleting comment failed");

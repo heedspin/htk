@@ -262,20 +262,22 @@ DeliverableTree.prototype.createNode = function(parent_id, deliverable, callback
   relation.save(callbacks);
 }
 
-DeliverableTree.prototype.removeDeliverable = function(deliverable_id) {
+DeliverableTree.prototype.removeDeliverable = function(deliverable_id, delete_association) {
   var node = this.tree.tree('getNodeById', deliverable_id);
   if (!node) return;
   this.deliverables = _.reject(this.deliverables, function(d) { return d.id == deliverable_id });
   var node = this.tree.tree('getNodeById', deliverable_id);
   var _this = this;
   this.tree.tree('removeNode', node);
-  // deliverable.destroy removes the relation.
-  // node.deliverable.parent_relation.destroy({
-  //   success : function() {
-  //     _this.writeTree();
-  //   }
-  // });
-  // $("#htk-dlist").find("li[data-id=" + deliverable_id + "]").remove();
+  if (delete_association) {
+    node.deliverable.parent_relation.destroy({
+      success : function() {
+        _this.writeTree();
+      }
+    });
+  } else {
+    _this.writeTree();
+  }
 }
 
 DeliverableTree.prototype.getDeliverable = function(deliverable_id) {

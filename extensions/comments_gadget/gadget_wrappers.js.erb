@@ -18,7 +18,6 @@ function htkAjax(method, path, data, callback) {
       request_data.push(encodeURIComponent(key)+"="+encodeURIComponent(value));
     }
   }
-  request_data = request_data.join("&");
 
   var params = {};
   var url = gadget_host_url + path;

@@ -10,7 +10,7 @@ class Api::V1::ApiController < ActionController::Base
   before_filter :verify_signed_user
   include Plutolib::LoggerUtils
   before_filter :record_current_user
-
+	
   protected
   
     def record_current_user
@@ -39,6 +39,7 @@ class Api::V1::ApiController < ActionController::Base
 					render json: { error: 'Not Allowed' }, status: 403
 		    end
 		  else
+		  	logger.info("ApiController: Denying request.")
 		  	render json: { error: 'No Certificate' }, status: 401
 		  end
 	  end

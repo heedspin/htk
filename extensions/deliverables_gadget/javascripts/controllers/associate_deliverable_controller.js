@@ -64,6 +64,6 @@ AssociateDeliverableController.prototype.disassociateEvent = function(e) {
   htkLog("Do Disassociate");
   var view = $("#htkv-disassociate");
   var deliverable_id = view.find("input[name=deliverable_id]").val();
-  this.router.deliverablesController.removeDeliverable(deliverable_id);
+  this.router.deliverablesController.removeDeliverable(deliverable_id, true);
   this.router.deliverablesController.showDeliverable();
 }

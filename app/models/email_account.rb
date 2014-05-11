@@ -61,6 +61,7 @@ class EmailAccount < ApplicationModel
       args = args.clone
       args[:imap] = imap
       args[:current_folder] = current_folder
+      args[:limit] ||= 10
       if uid = args[:uid]
         return HtkImap::GmailEmail.new(imap: imap, uid: uid, folder: current_folder)
       elsif args.member?(:since_uid)
@@ -76,7 +77,7 @@ class EmailAccount < ApplicationModel
         return HtkImap::GmailEmail.fetch_for_thread(args, &block)
       else
         args[:offset] ||= 0
-        args[:limit] ||= 100
+        args[:limit] ||= 10
         return HtkImap::GmailEmail.fetch_all(args, &block)
       end
     end
@@ -95,7 +96,7 @@ class EmailAccount < ApplicationModel
     emails = if last_email
       self.fetch_raw_emails({since_uid: last_email.try(:uid)}, &proc)
     else
-      self.fetch_raw_emails({limit: 50}, &proc)
+      self.fetch_raw_emails({limit: 10}, &proc)
     end
     deleted_emails = self.purge_emails
     log "Imported #{emails.count} and deleted #{deleted_emails} emails from #{self.username}"
@@ -107,9 +108,9 @@ class EmailAccount < ApplicationModel
     if last_email = self.emails.order('emails.uid desc').offset(500).first
       delete_conditions = ['emails.uid > ?', last_email.uid]
       deleted_emails = self.emails.where(delete_conditions).count
-      do_not_delete = self.emails.in_party.where(delete_conditions)
+      # do_not_delete = self.emails.in_party.where(delete_conditions)
       # Delete all emails that are not in a conversation.
-      to_delete = self.emails.where(delete_conditions).where(['emails.id not in (?)', do_not_delete])
+      to_delete = self.emails.where(delete_conditions)#.where(['emails.id not in (?)', do_not_delete])
       to_delete.each do |email|
         deleted_emails += 1
         email.destroy

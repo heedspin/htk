@@ -26,16 +26,17 @@ HtkLoginController.prototype.promptLogin = function() {
     login_html = "<%= insert_file('html/login.html', :javascript_escape => true) %>"
     this.loginForm = $(login_html);
     this.router.htkContainer.append(this.loginForm);
+    var _this = this;
     $("#login").on('click', function(e) {
       e.preventDefault();
-      this.loginForm.hide();
+      _this.loginForm.hide();
       var email = $("#email");
       var password = $("#password");
       htkRequest("POST", 
         "/api/v1/signed_request_users", 
         { email: email.val(), password: password.val() }, 
-        $.proxy(this.loginResponse, this));
-      this.setStatusMsg("Logging in to HTK as " + email.val()).show();
+        $.proxy(_this.loginResponse, this));
+      _this.setStatusMsg("Logging in to HTK as " + email.val()).show();
       adjust_window_height();
       email.val("");
       password.val("");

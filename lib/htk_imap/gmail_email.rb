@@ -1,12 +1,14 @@
 class HtkImap::GmailEmail < HtkImap::RawEmail
 	def self.fetch_since(args, &block)
+    offset = args[:offset] || 0
+    limit = args[:limit] || 10
 		imap = args[:imap]
 		since_uid = args[:since_uid]
 		imap.send(:send_command, "UID SEARCH UID #{since_uid}:*")
 		uids = imap.responses.delete('SEARCH')[-1]
 		uids.shift # the first one is our
 		if uids.size > 0
-			fetch_uids(imap, uids, args[:current_folder], &block)
+			fetch_uids(imap, uids.reverse[offset..(offset + (limit-1))], args[:current_folder], &block)
 		else
 			[]
 		end

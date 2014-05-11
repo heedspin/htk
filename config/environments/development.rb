@@ -39,6 +39,7 @@ Htk::Application.configure do
   config.action_mailer.default_url_options = { :host => 's3.lxdinc.com' }
 
   config.assets.precompile += %w[deliverables_gmail.js deliverables_web.js deliverables_gadget.css]
+  config.action_controller.asset_host = 'https://stk.lxdinc.com'
 
   # config.ember.variant = :development
 end

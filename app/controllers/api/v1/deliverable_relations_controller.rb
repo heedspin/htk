@@ -1,4 +1,4 @@
-class Api::V1::DeliverableRelationsController < ApplicationController
+class Api::V1::DeliverableRelationsController < Api::V1::ApiController
 	def create
   	@message_thread = MessageThread.accessible_to(current_user).find(params[:message_thread_id])
   	if (source_deliverable_id = params[:source_deliverable_id]).present?

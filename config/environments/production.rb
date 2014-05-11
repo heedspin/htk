@@ -68,5 +68,7 @@ Htk::Application.configure do
   # Devise wants:
   config.action_mailer.default_url_options = { :host => 's3.lxdinc.com' }
 
+  config.action_controller.asset_host = 'https://stk-assets.s3-us-west-2.amazonaws.com'
+
   # config.ember.variant = :production
 end
