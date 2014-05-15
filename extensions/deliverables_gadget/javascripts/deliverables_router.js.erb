@@ -1,6 +1,5 @@
 var htkRouter = null;
 
-// Entry point for web version of gadget.
 function deliverablesGadgetReady() {
   htkRouter = new DeliverablesRouter();
 }
@@ -23,7 +22,6 @@ function DeliverablesRouter() {
 
 DeliverablesRouter.prototype = Object.create(null);
 
-// Entry point for gmail gadget.
 DeliverablesRouter.prototype.loadGadget = function() {
   var _this = this;
   htkRequest("GET", "/api/v1/users/current", null, function(obj) {

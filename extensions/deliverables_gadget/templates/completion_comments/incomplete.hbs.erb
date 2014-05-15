@@ -1,0 +1,11 @@
+<div>
+	<h3>Mark Job Incomplete</h3>
+	<form>
+		<input type="hidden" name="deliverable_id" />
+		<input type="hidden" name="comment_type_id" value="<%= DeliverableCommentType.incomplete.id %>" />
+		<ul>
+			<li><textarea placeholder="Notes" name="note"></textarea></li>
+			<li><button type="button">Mark Incomplete</button></li>
+		</ul>
+	</form>
+</div>

@@ -74,7 +74,7 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 	}
 });
 
-Deliverable.prototype.parent = function() {
+Deliverable.prototype.getParent = function() {
 	if (this.parent_relation && this.parent_relation.source_deliverable_id) {
 		return this.tree.getDeliverable(this.parent_relation.source_deliverable_id);
 	} else {

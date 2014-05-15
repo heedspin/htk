@@ -61,6 +61,7 @@ module Htk
 
     config.assets.paths << Rails.root.join('extensions', 'deliverables_gadget', 'javascripts')
     config.assets.paths << Rails.root.join('extensions', 'deliverables_gadget', 'stylesheets')
+    config.assets.paths << Rails.root.join('extensions', 'deliverables_gadget')
   end
 end
 

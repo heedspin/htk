@@ -2,13 +2,14 @@
 #
 # Table name: deliverables
 #
-#  id              :integer          not null, primary key
-#  title           :string(255)
-#  created_at      :datetime         not null
-#  updated_at      :datetime         not null
-#  description     :text
-#  deleted_by_id   :integer
-#  completed_by_id :integer
+#  id                  :integer          not null, primary key
+#  title               :string(255)
+#  created_at          :datetime         not null
+#  updated_at          :datetime         not null
+#  description         :text
+#  deleted_by_id       :integer
+#  completed_by_id     :integer
+#  deliverable_type_id :integer
 #
 
 class Deliverable < ApplicationModel
@@ -25,6 +26,9 @@ class Deliverable < ApplicationModel
   has_many :children_relations, class_name: 'DeliverableRelation', foreign_key: :target_deliverable_id
   has_many :children, class_name: 'Deliverable', through: :children_relations, source: 'source_deliverable'
   has_many :parent_relations, class_name: 'DeliverableRelation', foreign_key: :target_deliverable_id, conditions: { relation_type_id: DeliverableRelationType.parent.id }
+  belongs_to :deliverable_type
+  # validates :deliverable_type_id, presence: true
+  validates :title, presence: true
 
   scope :not_deleted, where(deleted_by_id: nil)
   scope :by_created_at_desc, order('deliverables.created_at desc')

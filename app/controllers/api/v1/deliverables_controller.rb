@@ -54,7 +54,8 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   		@deliverable = Deliverable.web_create(email: email, 
   			current_user: current_user, 
   			title: title, 
-  			description: params[:description])
+  			description: params[:description],
+  			deliverable_type_id: params[:deliverable_type_id])
 			deliverable_users = @deliverable.deliverable_users.select(&:significant?)
 			render json: { 
 				deliverable: DeliverableSerializer.new(@deliverable, root: false), 

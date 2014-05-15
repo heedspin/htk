@@ -1,33 +1,53 @@
 function CompletionCommentsController(router) {
   HtkController.call(this, router);
+  this.completeView = null;
+  this.incompleteView = null;
   $("#htk-col2").on("click", ".htk-complete", $.proxy(this.newCompletionComment, this));
-  $("#htkv-complete > form > button").click($.proxy(this.createCompletionComment, this));  
   $("#htkv-incomplete > form > button").click($.proxy(this.createCompletionComment, this));  
 }
 CompletionCommentsController.prototype = Object.create(HtkController.prototype);
+
+CompletionCommentsController.prototype.getCompleteView = function() {
+  if (!this.completeView) {
+    this.completeView = $(HandlebarsTemplates['completion_comments/complete'](this));
+    $("#htk-col3").append(this.completeView);
+    this.completeView.find("button").click($.proxy(this.createCompletionComment, this));  
+  }
+  return this.completeView.resetForm("[name=comment_type_id]");
+}
+
+CompletionCommentsController.prototype.getIncompleteView = function() {
+  if (!this.incompleteView) {
+    this.incompleteView = $(HandlebarsTemplates['completion_comments/incomplete'](this));
+    $("#htk-col3").append(this.incompleteView);
+    this.incompleteView.find("button").click($.proxy(this.createCompletionComment, this));  
+  }
+  return this.incompleteView.resetForm("[name=comment_type_id]");
+}
 
 CompletionCommentsController.prototype.newCompletionComment = function(event) {
   $("#htk-col3").children().hide();
   var deliverable = this.router.deliverablesController.deliverableTree.getDeliverable($(event.target).closest(".htk-show").attr("data-id"));
   var view = null;
   if (deliverable.isCompleted()) {
-    view = $("#htkv-incomplete");
+    view = this.getIncompleteView();
   } else {
-    view = $("#htkv-complete");
+    view = this.getCompleteView();
   }
   view.find("input[name=deliverable_id]").val(deliverable.id);
   view.show();
 }
 CompletionCommentsController.prototype.createCompletionComment = function(event) {
   var _this = this;
-  var form = $(event.target).parent();
+  var form = $(event.target).closest("form");
+  var deliverable = this.router.deliverablesController.deliverableTree.getDeliverable(form.find("input[name=deliverable_id]").val());
   var values = form.formToNameValues();
   var comment = new DeliverableComment(values);
   htkLog("createCompletionComment: " + JSON.stringify(comment));
   comment.save({
     success: function(results) {
       _this.router.deliverablesController.deliverableChanged(results);
-      _this.router.deliverablesController.showDeliverable();
+      _this.router.deliverablesController.showDeliverable(deliverable);
       htkLog("Deliverable marked complete");
     },
     error: function(results) {

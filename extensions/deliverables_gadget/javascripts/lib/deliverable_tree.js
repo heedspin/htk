@@ -184,46 +184,6 @@ DeliverableTree.prototype.writeTree = function(node) {
   });
 }
 
-// DeliverableTree.prototype.handleMove = function(moved_node, target_node, position, previous_parent) {
-//   htkLog("DeliverableTree.handleMove: moved, target, position, previous parent", moved_node, target_node, position, previous_parent);
-//   var old_next_sibling = _.find(previous_parent.children, function(n) { return n.deliverable.parent_relation.previous_sibling_id == moved_node.id });
-//   if (old_next_sibling) {
-//     htkLog("Old next sibling", old_next_sibling.deliverable);
-//     var old_next_sibling_relation = old_next_sibling.deliverable.parent_relation;
-//     old_next_sibling_relation.previous_sibling_id = moved_node.deliverable.parent_relation.previous_sibling_id;
-//     old_next_sibling_relation.save({
-//       success : function(results) {
-//         htkLog("DeliverableTree.handleMove: updated old next sibling", old_next_sibling);
-//       }
-//     });
-//   }
-//   var moved_relation = moved_node.deliverable.parent_relation;
-//   var next_sibling = null;
-//   if (position == "inside") {
-//     moved_relation.source_deliverable_id = target_node.id;
-//     moved_relation.previous_sibling_id = null;
-//     next_sibling = target_node.children[0];
-//   } else { // position == "after"
-//     moved_relation.source_deliverable_id = target_node.deliverable.parent_relation.source_deliverable_id;
-//     moved_relation.previous_sibling_id = target_node.id;
-//     next_sibling = target_node.getNextSibling();
-//   }
-//   moved_relation.save({
-//     success : function() {
-//       htkLog("DeliverableTree.handleMove: updated moved node", moved_relation);
-//     }
-//   })
-//   if (next_sibling) {
-//     var next_sibling_relation = next_sibling.deliverable.parent_relation;
-//     next_sibling_relation.previous_sibling_id = moved_node.id;
-//     next_sibling_relation.save({
-//       success : function(results) {
-//         htkLog("DeliverableTree.handleMove: updated next sibling", next_sibling_relation);
-//       }
-//     })
-//   }
-// }
-
 DeliverableTree.prototype.selectDeliverable = function(deliverable_id) {
   var node = this.tree.tree('getNodeById', deliverable_id);
   this.tree.tree('selectNode', node);

@@ -94,6 +94,11 @@ GEM
     fastercsv (1.5.5)
     formtastic (2.2.1)
       actionpack (>= 3.0)
+    handlebars_assets (0.15)
+      execjs (>= 1.2.9)
+      multi_json
+      sprockets (>= 2.0.3)
+      tilt
     has_scope (0.6.0.rc)
       actionpack (>= 3.2, < 5)
       activesupport (>= 3.2, < 5)
@@ -201,6 +206,7 @@ DEPENDENCIES
   coffee-rails (~> 3.2.1)
   debugger
   devise (= 3.0.2)
+  handlebars_assets
   html_press
   jquery-rails (< 3.0.0)
   json

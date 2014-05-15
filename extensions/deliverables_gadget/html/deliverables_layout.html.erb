@@ -1,75 +1,10 @@
 <div id="htk-dcontainer">
 	<div id="htk-col1">
 		<div id="dtree"></div>
-		<span class="htk-action" id="htk-action-nd"><%= image_tag 'plus.png' %></span>
+		<span class="htk-action htka-nd"><%= image_tag 'plus.png' %></span>
 	</div>
 	<div id="htk-col2">
-		<div id="htkv-nd" class="htk-hidden">
-			<h3>Find Deliverable</h3>
-			<form id="find-deliverable">
-				<input type="hidden" name="deliverable_id" value="" />
-				<ul>
-					<li><input type="text" placeholder="Search for Deliverable" name="deliverable_name" /></li>
-					<li><select id="deliverable-name-select"></select></li>
-					<li><button type="button">Associate</button></li>
-				</ul>
-			</form>
-			<h3>Create Deliverable</h3>
-			<form id="create-deliverable">
-				<ul>
-					<li><select class="parent-name-select"></select></li>
-					<%= insert_file 'html/deliverables_form.html.erb' %>
-					<li><button type="button" id="htk-action-cd">Save</button></li>
-				</ul>
-			</form>
-		</div>
-		<div id="htkv-ed" class="htk-hidden">
-			<h3>Edit Deliverable</h3>
-			<form>
-				<ul>
-					<%= insert_file 'html/deliverables_form.html.erb' %>
-					<li>
-						<button type="button" id="htk-action-cd">Save</button>
-						<input type="checkbox" class="htk-action-delete">Delete</input>
-					</li>
-				</ul>
-			</form>
-		</div>
 	</div>
 	<div id="htk-col3">
-		<div id="htkv-complete" class="htk-hidden">
-			<h3>Mark Job Complete</h3>
-			<form>
-				<input type="hidden" name="deliverable_id" />
-				<input type="hidden" name="comment_type_id" value="<%= DeliverableCommentType.complete.id %>" />
-				<ul>
-					<li><textarea placeholder="Notes" name="note"></textarea></li>
-					<li><button type="button">Mark Complete</button></li>
-				</ul>
-			</form>
-		</div>
-		<div id="htkv-incomplete" class="htk-hidden">
-			<h3>Mark Job Incomplete</h3>
-			<form>
-				<input type="hidden" name="deliverable_id" />
-				<input type="hidden" name="comment_type_id" value="<%= DeliverableCommentType.incomplete.id %>" />
-				<ul>
-					<li><textarea placeholder="Notes" name="note"></textarea></li>
-					<li><button type="button">Mark Incomplete</button></li>
-				</ul>
-			</form>
-		</div>
-		<div id="htkv-disassociate" class="htk-hidden">
-			<h3>Disassociate Deliverable?</h3>
-			<form>
-				<input type="hidden" name="deliverable_id" />
-				<ul>
-					<li>
-						<button type="button">Yes Disassociate</button>
-						<button type="button">Cancel</button>
-					</li>
-				</ul>
-			</form>
-		</div>
 	</div>
 </div>

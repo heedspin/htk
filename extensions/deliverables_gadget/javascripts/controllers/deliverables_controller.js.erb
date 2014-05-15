@@ -1,10 +1,10 @@
 // touch234
 function DeliverablesController(router) {
   HtkController.call(this, router);
-  this.deliverableTemplate = Handlebars.compile("<%= insert_file('html/deliverable.html.erb', :javascript_escape => true) %>");
-  this.deliverableOptionsTemplate = Handlebars.compile("<option value=\"\">{{placeholder}}</option>{{#each deliverables}}<option value=\"{{id}}\">{{title}}</option>{{/each}}");
   this.deliverableTree = new DeliverableTree(this);
   this.loadDeliverables();
+  this.newView = null;
+  this.editView = null;
 }
 
 DeliverablesController.prototype = Object.create(HtkController.prototype);
@@ -52,70 +52,33 @@ DeliverablesController.prototype.renderDeliverables = function() {
   this.deliverableTree.initializeTree(this.router.currentEmail.message_thread_id);
   this.showDeliverable();
   this.setStatusMsg("EAT-" + this.router.currentEmail.email_account_thread_id + " T-" + this.router.currentEmail.message_thread_id + " M-" + this.router.currentEmail.message_id);
-  this.setupDeliverablesEvents();
-}
-DeliverablesController.prototype.setupDeliverablesEvents = function() {
-  var _this = this;
-  $("#htk-action-nd").click($.proxy(this.newDeliverable, this));
+  $("#htk-dcontainer").on("click", ".htka-nd", $.proxy(this.newDeliverable, this));
   $("#htk-col2").on("click", ".htk-edit", $.proxy(this.editDeliverable, this));
-  $("#htkv-nd form#create-deliverable button").click($.proxy(this.createEvent, this));
-  $("#htkv-ed form button").click($.proxy(this.updateOrDeleteEvent, this));
-  $("#htkv-nd,#htkv-ed").bind('keypress', function(e) {
-    // Trap return key and click button.
-    if(e.keyCode == 13) {
-      $(this).find("button").click();
-      e.preventDefault();
-    }
-  });
-  // $("#dtree").bind("keypress"), function(e) {
-  //   htkLog("dtree key: " + e.keyCode);
-  // }
-  // Toggle Save / Delete button.
-  $("#htkv-ed form input.htk-action-delete").click(function() {
-    var save_button = $(this).closest("form").find("button");
-    if ($(this).is(":checked")) {
-      save_button.html("Delete");
-    } else {
-      save_button.html("Save");     
-    }
-  });
-  $(".parent-name-select").change(function(event) {
-    var select = $(this);
-    htkLog("parent changed to " + select.val());
-    var form = select.closest("form");
-    form.find("input[name=parent_name]").val("");
-    form.find("input[name=parent_id]").val(select.val());
-  });
-  $("#htkv-nd form input[name='deliverable_name']").autocomplete({
-    source: function(request, response) {
-      htkRequest("GET", "/api/v1/deliverables?term=" + request.term, null, function(obj) {
-        if (obj.errors.length > 0) {
-          _this.statusMsg.empty().append("Error").show();
-          htkLog("Error response: " + JSON.stringify(obj));
-        } else {
-          htkLog("deliverables autocomplete: " + JSON.stringify(obj.data));
-          response(obj.data);
-        }    
-      });
-    },
-    select: function(event, ui) { 
-      var input = $(this);
-      input.val(ui.item.label); 
-      var form = input.closest("form");
-      htkLog("deliverable selected: " + ui.item.label + " - " + ui.item.value);
-      form.find(".parent-name-select").val("");
-      form.find("input[name=deliverable_id]").val(ui.item.value);
-      return false; 
-    }
-  });
-  $("#deliverable-name-select").change(function(event) {
-    htkLog("associate deliverable changed to " + $(this).val());
-    var select = $(this);
-    var form = select.closest("form");
-    form.find("input[name=deliverable_name]").val("");
-    form.find("input[name=deliverable_id]").val(select.val());
-  });  
-};
+}
+DeliverablesController.prototype.handleKeypress = function(e) {
+  // Trap return key and click button.
+  if(e.keyCode == 13) {
+    $(this).find("button").click();
+    e.preventDefault();
+  }
+}
+
+DeliverablesController.prototype.getNewView = function() {
+  if (!this.newView) {
+    this.newView = $(HandlebarsTemplates['deliverables/new'](this));
+    $("#htk-col2").append(this.newView);
+    this.newView.find("form#create-deliverable button").click($.proxy(this.createEvent, this));
+    this.newView.find(".parent-name-select").change(function(event) {
+      var select = $(this);
+      htkLog("parent changed to " + select.val());
+      var form = select.closest("form");
+      form.find("input[name=parent_name]").val("");
+      form.find("input[name=parent_id]").val(select.val());
+    });
+    this.newView.bind('keypress', this.handleKeypress);
+  }
+  return this.newView;
+}
 
 DeliverablesController.prototype.updateOrDeleteEvent = function(event) {
   var button = $(event.target);
@@ -128,9 +91,28 @@ DeliverablesController.prototype.updateOrDeleteEvent = function(event) {
   }
 }
 
+DeliverablesController.prototype.getEditView = function() {
+  if (!this.editView) {
+    this.editView = $(HandlebarsTemplates['deliverables/edit'](this));
+    $("#htk-col2").append(this.editView);
+    this.editView.find("form button").click($.proxy(this.updateOrDeleteEvent, this));
+    // Toggle Save / Delete button.
+    this.editView.find("form input.htk-action-delete").click(function() {
+      var save_button = $(this).closest("form").find("button");
+      if ($(this).is(":checked")) {
+        save_button.html("Delete");
+      } else {
+        save_button.html("Save");     
+      }
+    });
+    this.editView.bind('keypress', this.handleKeypress);
+  }
+  return this.editView;
+}
+
 DeliverablesController.prototype.editDeliverable = function(e) {
   $("#htk-col2").children().hide(); $("#htk-col3").children().hide();
-  var view = $("#htkv-ed");
+  var view = this.getEditView();
   var edit_form = view.find("form");
   edit_form.resetForm();
   edit_form.find("button").html("Save");
@@ -138,11 +120,6 @@ DeliverablesController.prototype.editDeliverable = function(e) {
   edit_form.attr("data-id", deliverable.id);
   edit_form.find("input[name=title]").val(deliverable.title);
   edit_form.find("textarea[name=description]").val(deliverable.description);
-  // var options = $(this.deliverableOptionsTemplate({placeholder : "Select Parent", deliverables: _.reject(this.deliverableTree.deliverables, function(d) { return d.id == deliverable.id; })}));
-  // var parent_select = edit_form.children(".parent-name-select");
-  // parent_select.empty().append(options);
-  // var parent = deliverable.parent();
-  // if (parent) parent_select.val(parent.id);
   view.show();
   adjust_window_height();
   view.find("input[name=title]").focus();
@@ -171,8 +148,7 @@ DeliverablesController.prototype.showDeliverable = function(deliverable) {
     }
   });
   if (need_to_create) {
-    var show_view = $(this.deliverableTemplate({ current_user: this.router.currentUser, deliverable: deliverable }));
-    deliverable.showView = show_view;
+    var show_view = $(HandlebarsTemplates['deliverables/show']({ current_user: this.router.currentUser, deliverable: deliverable, parent: deliverable.getParent() }));
     container.append(show_view);
   }
   adjust_window_height();
@@ -181,22 +157,11 @@ DeliverablesController.prototype.showDeliverable = function(deliverable) {
 DeliverablesController.prototype.newDeliverable = function(event) {
   var _this = this;
   $("#htk-col2").children().hide(); $("#htk-col3").children().hide();
-  var view = $("#htkv-nd");
+  var view = this.getNewView();
   var form = view.find("form");
   form.resetForm();
-  var options = $(this.deliverableOptionsTemplate({placeholder : "Select Parent", deliverables: this.deliverableTree.deliverables}));
+  var options = $(HandlebarsTemplates["deliverables/options"]({placeholder : "Select Parent", deliverables: this.deliverableTree.deliverables}));
   form.find(".parent-name-select").empty().append(options);
-  Deliverable.prototype.recent({ exclude : _.map(this.deliverableTree.deliverables, function(d) { return d.id; }) }, {
-    success : function(results) {
-      htkLog("deliverables recent: " + JSON.stringify(results.deliverables));
-      var options = $(_this.deliverableOptionsTemplate({placeholder : "Choose Recent Deliverable", deliverables: results.deliverables}));
-      form.find("#deliverable-name-select").empty().append(options);
-    },
-    error : function(results) {
-      _this.setStatusMsg("Error");
-      htkLog("Error response: " + JSON.stringify(results.obj));
-    }
-  })
   view.show();
   adjust_window_height();
   view.find("input[name=title]").focus();
@@ -240,10 +205,8 @@ DeliverablesController.prototype.deliverableChanged = function(results) {
     if (deliverable) {
       deliverable.write_attributes(deliverable_update);
       deliverable.reset_changes();
-      // this.deliverableTree.updateDeliverable(deliverable);
-      var show_view = $(this.deliverableTemplate({ current_user: this.router.currentUser, deliverable: deliverable }));
-      deliverable.showView.replaceWith(show_view);
-      deliverable.showView = show_view;
+      var show_view = $(HandlebarsTemplates['deliverables/show']({ current_user: this.router.currentUser, deliverable: deliverable }));
+      $("#htk-col2").children("[data-id=" + deliverable.id + "]").replaceWith(show_view);
     }
   }
 }

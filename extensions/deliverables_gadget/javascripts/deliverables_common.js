@@ -1,6 +1,7 @@
 //= require jquery
 //= require jquery-ui-1.10.4.custom
 //= require lib/handlebars-v1.3.0.js
+//# require handlebars.runtime
 //= require ./lib/autogrow.js
 //= require ./lib/handlebars_helpers.js
 //= require ./lib/htk_gadgets.js.erb
@@ -14,3 +15,4 @@
 //= require lib/jquery.resetForm.js
 //= require helpers/simple_format.js.coffee
 //= require lib/tree.jquery.js
+//= require_tree ../templates
