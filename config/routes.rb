@@ -12,6 +12,7 @@ Htk::Application.routes.draw do
       resources :users, :only => :show
       resources :messages, only: [:index]
       resources :emails, only: [:index]
+      resources :deliverable_types, :only => :index
     end
   end 
 

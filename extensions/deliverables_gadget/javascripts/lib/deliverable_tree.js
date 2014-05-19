@@ -44,7 +44,7 @@ DeliverableTree.prototype.getTreeData = function() {
     }
   });
   var sorted_parents = this.sortSiblings(all_parents);
-  htkLog("DeliverableTree sorted parents = " + JSON.stringify(_.pluck(sorted_parents, "id")));
+  // htkLog("DeliverableTree sorted parents = " + JSON.stringify(_.pluck(sorted_parents, "id")));
   var result = [];
   _.each(sorted_parents, function(d) {
     result.push(_this.getSubTreeData(all_children, d));
@@ -54,7 +54,7 @@ DeliverableTree.prototype.getTreeData = function() {
 
 DeliverableTree.prototype.getSubTreeData = function(all_children, deliverable) {
   var children = all_children[deliverable.id];
-  htkLog("DeliverableTree.getSubTreeData " + deliverable.id + " children = " + _.pluck(children, "id"));  
+  // htkLog("DeliverableTree.getSubTreeData " + deliverable.id + " children = " + _.pluck(children, "id"));  
   var _this = this;
   var new_node = this.newNode(deliverable);
   children = this.sortSiblings(children);
@@ -75,29 +75,29 @@ DeliverableTree.prototype.sortSiblings = function(unsorted, sorted, remainingAtt
     remainingAttempts = 30
   } else {
     if (--remainingAttempts <= 0) {
-      htkLog("Max attempts reached");
+      // htkLog("Max attempts reached");
       return unsorted;
     }
   }
   if (typeof(sorted) === "undefined") {
     sorted = new Array();
-    htkLog("Created sorted with unsorted = " + JSON.stringify(_.pluck(unsorted, "id")));
+    // htkLog("Created sorted with unsorted = " + JSON.stringify(_.pluck(unsorted, "id")));
   }
   if (unsorted.length <= 1) {
     if (unsorted.length == 1) sorted.push(unsorted[0]);
-    htkLog("Sorting done.  Sorted = " + JSON.stringify(_.pluck(sorted, "id")));
+    // htkLog("Sorting done.  Sorted = " + JSON.stringify(_.pluck(sorted, "id")));
     return sorted;
   } else {
-    htkLog("DeliverableTree.sortSiblings: Unsorted", unsorted, "\nsorted", sorted);
+    // htkLog("DeliverableTree.sortSiblings: Unsorted", unsorted, "\nsorted", sorted);
     unsorted = _.reject(unsorted, function(ud) { 
       if (!ud.parent_relation.previous_sibling_id) {
         sorted.push(ud);
-        htkLog("DeliverableTree.sortSiblings: Found first node ", ud);
+        // htkLog("DeliverableTree.sortSiblings: Found first node ", ud);
         return true;
       } else {
         var nextd = _.find(sorted, function(sd) { return ud.parent_relation.previous_sibling_id == sd.id; });
         if (nextd) {
-          htkLog("DeliverableTree.sortSiblings: Added next", ud);
+          // htkLog("DeliverableTree.sortSiblings: Added next", ud);
           sorted.push(ud);
           return true;
         } else {
@@ -190,7 +190,7 @@ DeliverableTree.prototype.selectDeliverable = function(deliverable_id) {
 }
 
 DeliverableTree.prototype.createNode = function(parent_id, deliverable, callbacks) {
-  htkLog("DeliverableTree.createNode with deliverable " + deliverable.id);
+  // htkLog("DeliverableTree.createNode with deliverable " + deliverable.id);
   deliverable.tree = this;
   var relation = new DeliverableRelation({
     source_deliverable_id : parent_id,
@@ -201,17 +201,17 @@ DeliverableTree.prototype.createNode = function(parent_id, deliverable, callback
   var new_node = this.newNode(deliverable);
   if (this.deliverables.length == 0) {
     this.tree.tree('appendNode', new_node);
-    htkLog("Tree: added first: " + deliverable.title);
+    // htkLog("Tree: added first: " + deliverable.title);
   } else if (parent_id) {
     var parent_node = this.tree.tree('getNodeById', parent_id);
     this.tree.tree('appendNode', new_node, parent_node);
-    htkLog("Tree: added to parent: " + parent_node.deliverable.title + " => " + deliverable.title);
+    // htkLog("Tree: added to parent: " + parent_node.deliverable.title + " => " + deliverable.title);
   } else {
     var insert_after_node = _.last(this.tree.tree('getTree').children);
     this.tree.tree('addNodeAfter', new_node, insert_after_node);
-    htkLog("Tree: added top level after: " + insert_after_node.deliverable.title + ", " + deliverable.title);
+    // htkLog("Tree: added top level after: " + insert_after_node.deliverable.title + ", " + deliverable.title);
   }
-  htkLog("Tree: added node " + JSON.stringify(new_node.label));
+  // htkLog("Tree: added node " + JSON.stringify(new_node.label));
   deliverable.parent_relation = relation;
   this.deliverables.push(deliverable);
   new_node = this.tree.tree('getNodeById', new_node.id);
@@ -245,15 +245,15 @@ DeliverableTree.prototype.getDeliverable = function(deliverable_id) {
     return (d.id == deliverable_id);
   });
   if (deliverable) {
-    htkLog("getDeliverable " + deliverable_id + " = " + deliverable.title);    
+    // htkLog("getDeliverable " + deliverable_id + " = " + deliverable.title);    
   } else {
-    htkLog("getDeliverable no deliverable for " + deliverable_id);
+    // htkLog("getDeliverable no deliverable for " + deliverable_id);
   }
   return deliverable;
 }
 
 DeliverableTree.prototype.lastChild = function(deliverable_id) {
-  htkLog("DeliverableTree.lastChild " + deliverable_id);
+  // htkLog("DeliverableTree.lastChild " + deliverable_id);
   var node = this.tree.tree('getNodeById', deliverable_id); 
   return _.last(node.children);
 }

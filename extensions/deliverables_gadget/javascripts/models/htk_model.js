@@ -146,10 +146,10 @@ HtkModel.prototype = Object.create(Object.prototype, {
 });
 
 HtkModel.prototype.all = function(query_data, callbacks) {
-	var _self = this;
+	var _this = this;
 	htkRequest("GET", this.api_url(), query_data, function(obj) {
-		var results = _self.extract_collection(obj);
-		_self.handle_callbacks(results, callbacks);
+		var results = _this.extract_collection(obj);
+		_this.handle_callbacks(results, callbacks);
 	});
 }
 

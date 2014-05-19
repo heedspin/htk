@@ -5,6 +5,9 @@ function DeliverablesController(router) {
   this.loadDeliverables();
   this.newView = null;
   this.editView = null;
+  this.deliverableTypeControllers = new Object({
+    DeliverablesController : this
+  });
 }
 
 DeliverablesController.prototype = Object.create(HtkController.prototype);
@@ -61,23 +64,6 @@ DeliverablesController.prototype.handleKeypress = function(e) {
     $(this).find("button").click();
     e.preventDefault();
   }
-}
-
-DeliverablesController.prototype.getNewView = function() {
-  if (!this.newView) {
-    this.newView = $(HandlebarsTemplates['deliverables/new'](this));
-    $("#htk-col2").append(this.newView);
-    this.newView.find("form#create-deliverable button").click($.proxy(this.createEvent, this));
-    this.newView.find(".parent-name-select").change(function(event) {
-      var select = $(this);
-      htkLog("parent changed to " + select.val());
-      var form = select.closest("form");
-      form.find("input[name=parent_name]").val("");
-      form.find("input[name=parent_id]").val(select.val());
-    });
-    this.newView.bind('keypress', this.handleKeypress);
-  }
-  return this.newView;
 }
 
 DeliverablesController.prototype.updateOrDeleteEvent = function(event) {
@@ -154,17 +140,87 @@ DeliverablesController.prototype.showDeliverable = function(deliverable) {
   adjust_window_height();
 }
 
-DeliverablesController.prototype.newDeliverable = function(event) {
-  var _this = this;
-  $("#htk-col2").children().hide(); $("#htk-col3").children().hide();
-  var view = this.getNewView();
-  var form = view.find("form");
+DeliverablesController.prototype.createNewForm = function(newView, deliverable_type) {
+  var newContainer = newView.find("div").first();
+  var standardView = $(HandlebarsTemplates["deliverables/new"]({ deliverable_type : deliverable_type }));
+  newContainer.append(standardView.hide());
+  newView.on("click", "button#htk-action-cd", $.proxy(this.createEvent, this));
+  newView.on("change", ".parent-name-select", function(event) {
+    var select = $(this);
+    htkLog("parent changed to " + select.val());
+    var form = select.closest("form");
+    form.find("input[name=parent_name]").val("");
+    form.find("input[name=parent_id]").val(select.val());
+  });
+  newView.bind('keypress', this.handleKeypress);
+}
+
+DeliverablesController.prototype.getNewView = function(callbacks) {
+  if (!this.newView) {
+    this.newView = $(HandlebarsTemplates['deliverables/new_selection'](this));
+    $("#htk-col2").append(this.newView);
+    var _this = this;
+    DeliverableType.prototype.all(null, {
+      success : function(results) {
+        _.each(results.deliverable_types, function(dt) {
+          var controller = _this.getController(dt);
+          if (controller) {
+            controller.createNewForm(_this.newView, dt);
+          }
+        });
+        var options = $(HandlebarsTemplates["deliverables/type_options"]({deliverable_types: results.deliverable_types}));
+        _this.newView.find(".deliverable-type-select").empty().append(options).change(function(event) {
+          var select = $(this);
+          var container = _this.newView.find("div").first();
+          container.children().each(function(index, div) {
+            div = $(div);
+            if (div.attr("data-id") == select.val()) {
+              div.show();
+            } else {
+              div.hide();
+            }
+          });
+        }).change();
+        _this.prepareNewViews(callbacks);
+      }
+    });
+  } else {
+    this.prepareNewViews(callbacks);
+  }
+}
+
+DeliverablesController.prototype.getController = function(deliverable_type) {
+  var result = this.deliverableTypeControllers[deliverable_type.key];
+  if (!result) {
+    var newControllerProto = window[deliverable_type.key];
+    if (!newControllerProto) {
+      htkLog("No controller prototype for " + deliverable_type.key);
+    } else {
+      result = new newControllerProto(this.router);
+      this.deliverableTypeControllers[deliverable_type.key] = result;
+    }
+  }
+  return result;
+}
+
+DeliverablesController.prototype.prepareNewViews = function(callbacks) {
+  var form = this.newView.find("form");
   form.resetForm();
   var options = $(HandlebarsTemplates["deliverables/options"]({placeholder : "Select Parent", deliverables: this.deliverableTree.deliverables}));
   form.find(".parent-name-select").empty().append(options);
-  view.show();
-  adjust_window_height();
-  view.find("input[name=title]").focus();
+  // this.newView.find("input[name=title]").focus();
+  callbacks.success(this.newView);
+}
+
+DeliverablesController.prototype.newDeliverable = function(event) {
+  var _this = this;
+  $("#htk-col2").children().hide(); $("#htk-col3").children().hide();
+  this.getNewView({
+    success : function(view) {
+      view.show();
+      adjust_window_height();      
+    }
+  });
 }
 
 DeliverablesController.prototype.createEvent = function(event) {

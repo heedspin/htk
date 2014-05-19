@@ -6,3 +6,4 @@
 //= require ./message.js.erb
 //= require ./email.js.erb
 //= require ./user.js.erb
+//= require ./deliverable_type.js.erb
