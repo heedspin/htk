@@ -1,15 +1,13 @@
 {{#with deliverable}}
 <div class="htk-show" data-id="{{id}}">
-	<p>{{title}}<br />
-		Created by: {{owner.first_name}}<br />
-		{{#if responsible}}
-		Assigned to: {{responsible.first_name}}
+	<p>Created: {{owner.first_name}} <span title="{{datetime created_at}}">{{fromNow created_at}}</span><br />
+		{{#if responsible_users}}
+			Assigned to: 
+			{{#join responsible_users ", "}}{{user.first_name}}{{/join}}
 		{{/if}}
 	</p>
+	<h1>{{title}}</h1>
 {{/with}}
-	{{#if parent}}
-	<p>Parent is {{parent.title}}</p>
-	{{/if}}
 {{#with deliverable}}
 	{{simpleFormat description}}
 	<ul class="htk-tool">

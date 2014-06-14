@@ -41,7 +41,7 @@ DeliverablesRouter.prototype.loadGadget = function() {
 }
 
 DeliverablesRouter.prototype.setupControllers = function() {
-  this.deliverablesController = new DeliverablesController(this);
+  this.deliverableTreeController = new DeliverableTreeController(this);
   this.completionCommentsController = new CompletionCommentsController(this);
   this.associateDeliverableController = new AssociateDeliverableController(this);
 }
@@ -65,4 +65,8 @@ DeliverablesRouter.prototype.loadCurrentEmail = function(callbacks) {
       }
     });
   }
+}
+
+DeliverablesRouter.prototype.deliverables = function() {
+  return this.deliverableTreeController.deliverableTree.deliverables;
 }

@@ -1,18 +1,18 @@
-function DeliverableUser(attributes, extract_results) {
+function DeliverableUser(attributes) {
 	HtkModel.call(this, attributes);
-	var _self = this;
-	var users = extract_results.users; // assumes already populated in results obj.
-	this.user = _.find(users, function(u) {
-		if (u.id == _self.user_id) return true;
-	});
 }
 
 // DeliverableUser.prototype.user = null;
 
 DeliverableUser.prototype = Object.create(HtkModel.prototype, {
-	api_url : {	value : function() { return "/api/v1/deliverables/" + this.deliverabe_id + "/deliverable_users"; } },
-	single_key : { value : "deliverable_user" },
-	collection_key : { value : "deliverable_users" },
+	api_url : {	value : function() { return "/api/v1/deliverables/" + this.deliverable_id + "/users"; } },
+	type_key : { value : "deliverable_user" },
 	attribute_keys : { value : <%= DeliverableUser.columns.map(&:name).to_json %> },
-	constructor : { value : DeliverableUser }
+	registry_hook : { 
+		value : function() {
+			this.user = User.prototype.find_cached(this.user_id);
+		}
+	}
 });
+
+DeliverableUser.prototype.edit_access_id = "<%= DeliverableAccess.edit.id %>";

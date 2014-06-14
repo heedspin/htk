@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140511180202) do
+ActiveRecord::Schema.define(:version => 20140520143605) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -75,9 +75,9 @@ ActiveRecord::Schema.define(:version => 20140511180202) do
   create_table "deliverable_types", :force => true do |t|
     t.string   "name"
     t.text     "description"
-    t.string   "key"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
+    t.integer  "deliverable_type_config_id"
   end
 
   create_table "deliverable_users", :force => true do |t|
@@ -91,12 +91,13 @@ ActiveRecord::Schema.define(:version => 20140511180202) do
 
   create_table "deliverables", :force => true do |t|
     t.string   "title"
-    t.datetime "created_at",          :null => false
-    t.datetime "updated_at",          :null => false
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
     t.text     "description"
     t.integer  "deleted_by_id"
     t.integer  "completed_by_id"
-    t.integer  "deliverable_type_id"
+    t.string   "type"
+    t.text     "data"
   end
 
   create_table "email_account_threads", :force => true do |t|

@@ -1,0 +1,20 @@
+HtkModelRegistry = function() {}
+
+HtkModelRegistry.prototype = Object.create(Object.prototype);
+
+HtkModelRegistry.prototype.registry = new Object();
+
+HtkModelRegistry.prototype.register = function() {
+	var model_constructor = arguments[0];
+	for(var i = 1; i < arguments.length; i++) {
+    HtkModelRegistry.prototype.registry[arguments[i]] = model_constructor;
+  }
+}
+
+HtkModelRegistry.prototype.constructor_for = function(key) {
+	return HtkModelRegistry.prototype.registry[key];
+}
+
+<% %w(Deliverable DeliverableComment DeliverableUser DeliverableRelation DeliverableType Email Message User).each do |class_name| %>
+HtkModelRegistry.prototype.register(<%= class_name %>, '<%= class_name.underscore %>', '<%= class_name.underscore.pluralize %>');
+<% end %>

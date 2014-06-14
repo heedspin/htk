@@ -30,6 +30,7 @@ ActiveAdmin.register User do
 	    f.has_many :email_accounts, :allow_destroy => true do |eaf|
 	  		eaf.input :username
 	  		eaf.input :authentication_string
+	  		eaf.input :status_id
 	  		eaf.input :server
 	  		eaf.input :port
 	    end

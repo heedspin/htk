@@ -1,0 +1,2 @@
+class LxdOpportunity < Deliverable
+end

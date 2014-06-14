@@ -15,6 +15,7 @@ ActiveAdmin.register EmailAccount do
   	f.inputs do 
   		f.input :username
   		f.input :authentication_string
+  		f.input :status_id
   		f.input :server
   		f.input :port
   	end

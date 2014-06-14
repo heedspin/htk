@@ -8,10 +8,8 @@ DeliverableRelation.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	
 		value : function() { return "/api/v1/deliverable_relations"; }
 	},
-	single_key : { value : "deliverable_relation" },
-	collection_key : { value : "deliverable_relations" },
-	attribute_keys : { value : <%= DeliverableRelation.columns.map(&:name).to_json %> },
-	constructor : { value : DeliverableRelation }
+	type_key : { value : "deliverable_relation" },
+	attribute_keys : { value : <%= DeliverableRelation.columns.map(&:name).to_json %> }
 });
 
 DeliverableRelation.prototype.parent_relation_type = "<%= DeliverableRelationType.parent.id %>";
@@ -25,3 +23,12 @@ DeliverableRelation.prototype.parent_relation_type = "<%= DeliverableRelationTyp
 // DeliverableRelation.prototype.setParentId = function(parent_id) {
 // 	this.source_deliverable_id = parent_id;
 // }
+
+DeliverableRelation.prototype.find_cached_parent = function(deliverable) {
+	var cached = HtkObjectCache.prototype.types[DeliverableRelation.prototype.type_key];
+	for (var property in cached) {
+		var relation = cached[property];
+		if (relation && relation.target_deliverable_id == deliverable.id && relation.relation_type == DeliverableRelation.prototype.parent_relation_type)
+			return relation;
+	}
+}

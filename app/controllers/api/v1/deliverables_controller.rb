@@ -29,16 +29,18 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 			@relations = DeliverableRelation.message_thread_id(@email.message.message_thread_id).all
 			deliverable_ids = @relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten
 			@deliverables = Deliverable.not_deleted.where(:id => deliverable_ids)
+			@deliverable_types = DeliverableType.deliverable_types(@deliverables.map(&:type)).all
 			
 			# render json: deliverables
 			# render json: { deliverables: @deliverables, email: EmailSerializer.new(@email, root: false) }
-			deliverable_users = @deliverables.map(&:deliverable_users).flatten.uniq.select(&:significant?)
+			deliverable_users = @deliverables.map(&:significant_users).flatten.uniq
 			render json: { 
 				deliverables: @deliverables.map { |d| DeliverableSerializer.new(d, root: false) }, 
 				email: EmailSerializer.new(@email, root: false),
 				deliverable_users: deliverable_users.map { |du| DeliverableUserSerializer.new(du, root: false) },
 				users: deliverable_users.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
-				deliverable_relations: @relations.map { |r| DeliverableRelationSerializer.new(r, root: false) }
+				deliverable_relations: @relations.map { |r| DeliverableRelationSerializer.new(r, root: false) },
+				deliverable_types: @deliverable_types.map { |t| DeliverableTypeSerializer.new(t, root: false) }
 			}
 		else
 			render json: { result: 'no email' }, status: 404
@@ -46,21 +48,19 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   end
   
   def create
-  	title = params[:title] || 'Deliverable'
   	email = Email.user(current_user).from_address(params[:from_address]).date(params[:date]).first
 		if email.nil?
   		render json: { result: 'no email' }, status: 422
   	else
   		@deliverable = Deliverable.web_create(email: email, 
-  			current_user: current_user, 
-  			title: title, 
-  			description: params[:description],
-  			deliverable_type_id: params[:deliverable_type_id])
+  			current_user: current_user,  
+  			params: params)
 			deliverable_users = @deliverable.deliverable_users.select(&:significant?)
 			render json: { 
 				deliverable: DeliverableSerializer.new(@deliverable, root: false), 
 				deliverable_users: deliverable_users.map { |du| DeliverableUserSerializer.new(du, root: false) },
-				users: deliverable_users.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) }
+				users: deliverable_users.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
+				deliverable_type: DeliverableTypeSerializer.new(@deliverable.deliverable_type , root: false)
 			}
 	  end
 	end
@@ -69,7 +69,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 		if @deliverable = editable_object
 			Deliverable.transaction do
 				if @deliverable.update_attributes(title: params[:title], description: params[:description])
-					render json: { result: 'success'}
+					render json: { deliverable: DeliverableSerializer.new(@deliverable, root: false) }
 				else
 					render json: { errors: @deliverable.errors }, status: 422
 				end
@@ -80,7 +80,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	def destroy
 		if @deliverable = editable_object
 			if @deliverable.destroy
-				render json: { result: 'success'}
+				render json: { result: 'success' }
 			else
 				render json: { errors: @deliverable.errors }, status: 422
 			end	
@@ -94,10 +94,17 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 			if excluding = params[:exclude]
 				@deliverables = @deliverables.excluding(excluding)
 			end
-			render json: @deliverables
+			@deliverable_types = DeliverableType.deliverable_types(@deliverables.map(&:type)).all
+			render json: { 
+				deliverables: @deliverables.map { |d| DeliverableSerializer.new(d, root: false) }, 
+				deliverable_types: @deliverable_types.map { |t| DeliverableTypeSerializer.new(t, root: false) }
+			}
 		else
 			@deliverable = Deliverable.accessible_to(current_user).find(id)
-			render json: @deliverable
+			render json: { 
+				deliverable: DeliverableSerializer.new(@deliverable, root: false),
+				deliverable_type: DeliverableTypeSerializer.new(@deliverable.deliverable_type , root: false)
+			}
 		end
 	end
 

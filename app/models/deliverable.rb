@@ -2,17 +2,21 @@
 #
 # Table name: deliverables
 #
-#  id                  :integer          not null, primary key
-#  title               :string(255)
-#  created_at          :datetime         not null
-#  updated_at          :datetime         not null
-#  description         :text
-#  deleted_by_id       :integer
-#  completed_by_id     :integer
-#  deliverable_type_id :integer
+#  id              :integer          not null, primary key
+#  title           :string(255)
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  description     :text
+#  deleted_by_id   :integer
+#  completed_by_id :integer
+#  type            :string(255)
+#  data            :text
 #
 
+require 'plutolib/serialized_attributes'
+
 class Deliverable < ApplicationModel
+  include Plutolib::SerializedAttributes
   has_many :deliverable_users, dependent: :destroy
   has_many :users, through: :deliverable_users
   attr_accessible :title, :status, :status_id, :description, :completed_by_id
@@ -26,9 +30,17 @@ class Deliverable < ApplicationModel
   has_many :children_relations, class_name: 'DeliverableRelation', foreign_key: :target_deliverable_id
   has_many :children, class_name: 'Deliverable', through: :children_relations, source: 'source_deliverable'
   has_many :parent_relations, class_name: 'DeliverableRelation', foreign_key: :target_deliverable_id, conditions: { relation_type_id: DeliverableRelationType.parent.id }
-  belongs_to :deliverable_type
+  # belongs_to :deliverable_type
   # validates :deliverable_type_id, presence: true
   validates :title, presence: true
+
+  def deliverable_type
+    DeliverableTypeConfig.where(ar_type: self.class.name).first.deliverable_type
+  end
+
+  def significant_users
+    self.deliverable_users.all.select(&:significant?)
+  end
 
   scope :not_deleted, where(deleted_by_id: nil)
   scope :by_created_at_desc, order('deliverables.created_at desc')
@@ -36,10 +48,17 @@ class Deliverable < ApplicationModel
   def self.web_create(args)
   	email = args[:email] || (raise ':email required')
   	current_user = args[:current_user] || (raise ':current_user required')
-  	title = args[:title] || (raise ':title required')
-    id = args[:id]
-  	deliverable = new(title: title, description: args[:description])
-    deliverable.id = id if id.present?
+    params = args[:params]
+    deliverable_type = if config_id = params[:config_id]
+      DeliverableTypeConfig.find(config_id).ar_type_class
+    else
+      DeliverableTypeConfig.standard.ar_type_class
+    end
+  	deliverable = deliverable_type.new
+    accessible_attributes = deliverable_type.accessible_attributes.select(&:present?)
+    deliverable.update_attributes(params.select { |k,v| accessible_attributes.include?(k) })
+    # id = args[:id]
+    # deliverable.id = id if id.present?
   	Deliverable.transaction do
   		deliverable.save!
   		# email.message.message_thread.deliverables << deliverable

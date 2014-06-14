@@ -8,9 +8,8 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	gadget_keys : {
 		value : ["opensocial_owner_id", "from_address", "to_addresses", "cc_addresses", "date", "subject", "web_id"]
 	},
-	api_url : {
-		value : function() {}
-	},
+	api_url : { value : function() {} },
+	type_key : { value : null },
 	attributes : {
 		value : function() {
 			var result = new Object();
@@ -24,15 +23,8 @@ HtkModel.prototype = Object.create(Object.prototype, {
 			return result;
 		}
 	},
-	constructor : { value : HtkModel },
-	build_without_changes : {
-		value : function(attributes, results) {
-			var new_object = new this.constructor(attributes, results);
-			new_object.reset_changes();
-			return new_object;
-		}
-	},
 	reset_changes : { value : function() { this.changes = []; }},
+	changed : { value : function() { return (this.changes.length > 0); } },
 	write_attribute : {
 		value : function(key, value) {
 			if ((typeof(this[key]) === "undefined") || (this[key] != value)) {
@@ -78,8 +70,10 @@ HtkModel.prototype = Object.create(Object.prototype, {
 		value : function(callbacks) {
 	    var _this = this;
 	    htkRequest("POST", this.api_url(), this.attributes(), function(obj) {
-	    	_this.changes = [];
-	    	_this.handle_callbacks(_this.update_single(obj), callbacks);
+	    	var results = _this.update_single(obj);
+	    	_this.reset_changes();
+				HtkModel.prototype.cache.set(_this.type_key, _this);
+	    	_this.handle_callbacks(results, callbacks);
 	    });
 		}
 	},
@@ -87,50 +81,67 @@ HtkModel.prototype = Object.create(Object.prototype, {
 		value : function(callbacks) {
 	    var _this = this;
 	    htkRequest("PUT", this.api_url() + "/" + this.id, this.attributes(), function(obj) {
-	    	_this.changes = [];
-	    	_this.handle_callbacks(_this.update_single(obj), callbacks);
+	    	var results = _this.update_single(obj);
+	    	_this.reset_changes();
+	    	_this.handle_callbacks(results, callbacks);
 	    });
 		}
 	},
-	extract_collection : {
-		value : function(obj, results) {
-			if (typeof(results) === "undefined") {
-			  results = new Object( { obj : obj });
+	receive_object : {
+		value : function(model_constructor, data) {
+			var object = HtkModel.prototype.cache.get(model_constructor.prototype.type_key, data.id);
+			if (object) {
+				object.write_attributes(data);
+			} else {
+				object = new model_constructor(data);
+				HtkModel.prototype.cache.set(model_constructor.prototype.type_key, object);
 			}
-			var _this = this;
-			if (typeof(results[this.collection_key]) === "undefined") {
-			  results[this.collection_key] = _.map(obj.data[this.collection_key], function(d) { return _this.build_without_changes(d, results); });
-			}
-		  return results;
+			object.reset_changes();
+			return object;
 		}
 	},
-	extract_single : {
-		value : function(obj, results) {
-			if (typeof(results) === "undefined") {
-			  results = new Object( { obj : obj });
+	extract : {
+		value : function(obj) {
+			var _this = this;
+			var created = [];
+			var results = new Object( { obj : obj });
+			for (var property in obj.data) {
+				var model_constructor = HtkModelRegistry.prototype.constructor_for(property);
+				if (model_constructor) {
+					var v = obj.data[property];
+					if (v instanceof Array) {
+						results[property] = _.map(v, function(d) { 
+							var new_object = _this.receive_object(model_constructor, d);
+							created.push(new_object);
+							return new_object;
+						});
+					} else {
+						var new_object = this.receive_object(model_constructor, v);
+						created.push(new_object);
+						results[property] = new_object
+					}
+				}
 			}
-			if (typeof(results[this.single_key]) === "undefined") {
-			  results[this.single_key] = this.build_without_changes(obj.data[this.single_key], results);
-			}
-		  return results;
+			_.each(created, function(o) { o.registry_hook() });
+			return results;
 		}
 	},
 	update_single : {
-		value : function(obj, results) {
-			if (typeof(results) === "undefined") {
-			  results = new Object( { obj : obj });
-			}
-			if (typeof(results[this.single_key]) === "undefined") {
-			  results[this.single_key] = this;
-			  this.write_attributes(obj.data[this.single_key]);
-			  this.reset_changes();
-			}
+		value : function(obj) {
+			var results = new Object( { obj : obj });
+			results[this.type_key] = this;
+		  this.write_attributes(obj.data[this.type_key]);
+		  this.reset_changes();
+		  this.registry_hook();
 		  return results;
 		}
 	},
+	registry_hook : {
+		value : function() {}
+	},
 	handle_callbacks : {
 		value : function(results, callbacks) {
-		  if (results.obj.rc && results.obj.rc == 200) {
+		  if (!results.obj || (results.obj.rc && results.obj.rc == 200)) {
 		  	if (callbacks && callbacks.success && typeof(callbacks.success) === "function") {  
 		  		callbacks.success(results);
 				}
@@ -142,35 +153,61 @@ HtkModel.prototype = Object.create(Object.prototype, {
 				}
 		  }
 		}
+	},
+	all : {
+		value : function(query_data, callbacks) {
+			var _this = this;
+			htkRequest("GET", this.api_url(), query_data, function(obj) {
+				var results = _this.extract(obj);
+				_this.handle_callbacks(results, callbacks);
+			});
+		}
+	},
+	cache : {
+		value : (new HtkObjectCache())
+	},
+	find_cached : {
+		value : function(id) {
+			return HtkModel.prototype.cache.get(this.type_key, id);
+		}
+	},
+	all_cached : {
+		value : function(query) {
+			return HtkModel.prototype.cache.all(this.type_key, query);
+		}
+	},
+	find : {
+		value : function(id, callbacks) {
+			var cached = this.find_cached(id);
+			if (cached) {
+				var results = new Object();
+				results[this.type_key] = cached;
+				this.handle_callbacks(results, callbacks);
+			} else {
+				var _this = this;
+				htkRequest("GET", this.api_url() + "/" + id, null, function(obj) {
+					var results = _this.extract(obj);
+					_this.handle_callbacks(results, callbacks);
+				});
+			}
+		}
+	},
+	destroy : {
+		value : function(callbacks) {
+			var _this = this;
+		  htkRequest("DELETE", this.api_url() + "/" + this.id, null, function(obj) {
+		    var rc = "";
+		    if (obj.rc) rc = obj.rc;
+		    if (rc == 200) {
+					HtkModel.prototype.cache.clear(_this.type_key, _this.id);
+		      htkLog("Delete relation succeeded");
+			    if (callbacks.success && (typeof(callbacks.success) === "function")) callbacks.success(obj);
+		    } else {
+		      htkLog("Delete relation failed");
+			    if (callbacks.error && (typeof(callbacks.error) === "function")) callbacks.error(obj);
+		    }
+		  });	
+		}
 	}
 });
 
-HtkModel.prototype.all = function(query_data, callbacks) {
-	var _this = this;
-	htkRequest("GET", this.api_url(), query_data, function(obj) {
-		var results = _this.extract_collection(obj);
-		_this.handle_callbacks(results, callbacks);
-	});
-}
-
-HtkModel.prototype.find = function(id, callbacks) {
-	var _this = this;
-	htkRequest("GET", this.api_url() + "/" + id, null, function(obj) {
-		var results = _this.extract_single(obj);
-		_this.handle_callbacks(results, callbacks);
-	});
-}
-
-HtkModel.prototype.destroy = function(callbacks) {
-  htkRequest("DELETE", this.api_url() + "/" + this.id, null, function(obj) {
-    var rc = "";
-    if (obj.rc) rc = obj.rc;
-    if (rc == 200) {
-      htkLog("Delete relation succeeded");
-	    if (callbacks.success && (typeof(callbacks.success) === "function")) callbacks.success(obj);
-    } else {
-      htkLog("Delete relation failed");
-	    if (callbacks.error && (typeof(callbacks.error) === "function")) callbacks.error(obj);
-    }
-  });	
-}

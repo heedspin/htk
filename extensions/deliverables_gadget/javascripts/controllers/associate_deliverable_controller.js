@@ -1,8 +1,9 @@
 function AssociateDeliverableController(router) {
   HtkController.call(this, router);
-  this.deliverableTree = router.deliverablesController.deliverableTree;
+  this.deliverableTree = router.deliverableTreeController.deliverableTree;
   $("#htk-col2").on("click", ".htk-disassociate", $.proxy(this.showDisassociateEvent, this));
-  $("#htk-dcontainer").on("click", ".htka-fd", $.proxy(this.showAssociateEvent, this));
+  // $("#htk-dcontainer").on("click", ".htka-fd", $.proxy(this.showAssociateEvent, this));
+  this.disassociateViewContainer = $("#htk-col3");
   this.associateView = null;
   this.disassociateView = null;
 }
@@ -19,7 +20,7 @@ AssociateDeliverableController.prototype.associateEvent = function(event) {
       success : function(results) {
         _this.deliverableTree.createNode(null, results.deliverable, {
           success : function() {
-            _this.router.deliverablesController.showDeliverable(results.deliverable);
+            _this.router.deliverableTreeController.showDeliverable(results.deliverable);
           }
         });
       }
@@ -27,10 +28,26 @@ AssociateDeliverableController.prototype.associateEvent = function(event) {
   }
 }
 
-AssociateDeliverableController.prototype.getAssociateView = function() {
+AssociateDeliverableController.prototype.getDisassociateView = function() {
+  if (!this.disassociateView) {
+    this.disassociateView = $(HandlebarsTemplates['associate_deliverable/disassociate'](this));
+    this.disassociateViewContainer.append(this.disassociateView);
+    var _this = this;
+    this.disassociateViewContainer.on("click", "#htkv-disassociate button", function(e) {
+      if ($(this).text() == "Cancel") {
+        _this.cancelEvent(e);
+      } else {
+        _this.disassociateEvent(e);
+      }
+    });
+  }
+  return this.disassociateView;
+}
+
+AssociateDeliverableController.prototype.getAssociateView = function(container) {
   if (!this.associateView) {
     this.associateView = $(HandlebarsTemplates['associate_deliverable/associate'](this));
-    $("#htk-col2").append(this.associateView);
+    container.append(this.associateView);
     this.associateView.find("button").click($.proxy(this.associateEvent, this));
     this.associateView.find("input[name='deliverable_name']").autocomplete({
       source: function(request, response) {
@@ -62,33 +79,13 @@ AssociateDeliverableController.prototype.getAssociateView = function() {
       form.find("input[name=deliverable_id]").val(select.val());
     });
   }
-  return this.associateView;
-}
 
-AssociateDeliverableController.prototype.getDisassociateView = function() {
-  if (!this.disassociateView) {
-    this.disassociateView = $(HandlebarsTemplates['associate_deliverable/disassociate'](this));
-    $("#htk-col3").append(this.disassociateView);
-    var _this = this;
-    $("#htk-col3").on("click", "#htkv-disassociate button", function(e) {
-      if ($(this).text() == "Cancel") {
-        _this.cancelEvent(e);
-      } else {
-        _this.disassociateEvent(e);
-      }
-    });
-  }
-  return this.disassociateView;
-}
-
-AssociateDeliverableController.prototype.showAssociateEvent = function(e) {
-  $("#htk-col2").children().hide();
-  var view = this.getAssociateView();
-  view.find("input[name=deliverable_id]").val(deliverable.id);
-  var form = view.find("form");
+  // view.find("input[name=deliverable_id]").val(deliverable.id);
+  var form = this.associateView.find("form");
+  var _this = this;
   Deliverable.prototype.recent({ exclude : _.map(this.deliverableTree.deliverables, function(d) { return d.id; }) }, {
     success : function(results) {
-      htkLog("deliverables recent: " + JSON.stringify(results.deliverables));
+      htkLog("deliverables recent:", results.deliverables);
       var options = $(HandlebarsTemplates['deliverables/options']({placeholder : "Choose Recent Deliverable", deliverables: results.deliverables}));
       form.find("#deliverable-name-select").empty().append(options);
     },
@@ -97,11 +94,11 @@ AssociateDeliverableController.prototype.showAssociateEvent = function(e) {
       htkLog("Error response: " + JSON.stringify(results.obj));
     }
   });
-  view.show();
+  return this.associateView;
 }
 
 AssociateDeliverableController.prototype.showDisassociateEvent = function(e) {
-  $("#htk-col3").children().hide();
+  // $("#htk-col3").children().hide();
   var deliverable = this.deliverableTree.getDeliverable($(e.target).closest(".htk-show").attr("data-id"));
   var view = this.getDisassociateView(); // $("#htkv-disassociate");
   view.find("input[name=deliverable_id]").val(deliverable.id);
@@ -118,6 +115,6 @@ AssociateDeliverableController.prototype.disassociateEvent = function(e) {
   htkLog("Do Disassociate");
   var view = this.getDisassociateView();
   var deliverable_id = view.find("input[name=deliverable_id]").val();
-  this.router.deliverablesController.removeDeliverable(deliverable_id, true);
-  this.router.deliverablesController.showDeliverable();
+  this.router.deliverableTreeController.removeDeliverable(deliverable_id, true);
+  this.router.deliverableTreeController.showDeliverable();
 }

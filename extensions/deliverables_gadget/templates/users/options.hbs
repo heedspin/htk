@@ -1,0 +1,5 @@
+{{#each users}}
+<option value="{{id}}" {{selected_by_member ../assigned id}}>
+	{{first_name}} {{last_name}}
+</option>
+{{/each}}

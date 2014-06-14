@@ -4,9 +4,7 @@ function DeliverableType(attributes) {
 
 DeliverableType.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function(){ return "/api/v1/deliverable_types"; } },
-	single_key : { value : "deliverable_type" },
-	collection_key : { value : "deliverable_types" },
-	attribute_keys : { value : <%= DeliverableType.columns.map(&:name).to_json %> },
-	constructor : { value : DeliverableType }
+	type_key : { value : "deliverable_type" },
+	attribute_keys : { value : <%= DeliverableType.columns.map(&:name).to_json %> }
 });
 

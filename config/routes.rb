@@ -6,10 +6,11 @@ Htk::Application.routes.draw do
       resources :signed_request_users, only: [:create]
       resources :deliverables do
         resources :comments, controller: 'deliverable_comments'
+        resources :users, controller: 'deliverable_users', only: [:create, :destroy, :update]
       end
       resources :deliverable_relations
       # resources :emails, :only => :create
-      resources :users, :only => :show
+      resources :users, only: [:index, :show]
       resources :messages, only: [:index]
       resources :emails, only: [:index]
       resources :deliverable_types, :only => :index

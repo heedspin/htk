@@ -17,6 +17,14 @@ class DeliverableUser < ApplicationModel
   belongs_to_active_hash :access, :class_name => 'DeliverableAccess'
   attr_accessible :user_id, :access_id, :responsible
   def significant?
-  	self.access.owner? || self.responsible
+  	self.access.try(:owner?) || self.responsible
   end
+
+  protected
+
+	 	before_save :ensure_read_access
+	 	def ensure_read_access
+	 		# To remove read access, you should delete the record or create a noaccess access value.
+	 		self.access_id ||= DeliverableAccess.read.id
+	 	end
 end

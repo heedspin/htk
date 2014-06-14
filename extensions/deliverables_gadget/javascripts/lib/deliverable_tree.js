@@ -1,5 +1,5 @@
-function DeliverableTree(deliverablesController) {
-  this.deliverablesController = deliverablesController;
+function DeliverableTree(deliverableTreeController) {
+  this.deliverableTreeController = deliverableTreeController;
   this.deliverables = [];
   this.tree = null;
   this.message_thread_id = null;
@@ -133,17 +133,15 @@ DeliverableTree.prototype.initializeTree = function(message_thread_id) {
     data: this.getTreeData(),
     dragAndDrop: true
   }).bind('tree.select',
-      function(event) {
-        if (event.node) {
-          // node was selected
-          var node = event.node;
-          var deliverable = event.node.deliverable;
-          // htkLog(deliverable.title + " " + deliverable.id + " selected");
-          _this.deliverablesController.showDeliverable(deliverable);
+    function(event) {
+      if (event.node) {
+        // node was selected
+        var deliverable = event.node.deliverable;
+        htkLog(deliverable.title + " " + deliverable.id + " selected");
+        _this.deliverableTreeController.showDeliverable(deliverable);
       } else {
-        // event.node is null
-        // a node was deselected
-        // e.previous_node contains the deselected node
+        // var deliverable = event.previous_node.deliverable;
+        // htkLog(deliverable.title + " " + deliverable.id + " deselected");
       }
     }
   ).bind(
@@ -154,7 +152,16 @@ DeliverableTree.prototype.initializeTree = function(message_thread_id) {
       _this.writeTree();
       // _this.handleMove(event.move_info.moved_node, event.move_info.target_node, event.move_info.position, event.move_info.previous_parent);
     }
-  );
+  ).bind( 
+    'tree.click',
+    function(event) { // Prevent deselect.  Implement re-select.
+      if (_this.tree.tree('isNodeSelected', event.node)) {
+        var deliverable = event.node.deliverable;
+        _this.deliverableTreeController.showDeliverable(deliverable);        
+        event.preventDefault();
+      }
+    }
+);
 }
 
 DeliverableTree.prototype.writeTree = function(node) {

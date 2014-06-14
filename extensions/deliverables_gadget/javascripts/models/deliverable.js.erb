@@ -1,32 +1,15 @@
 function Deliverable(attributes) {
 	HtkModel.call(this, attributes);
 	this.owner = null;
-	this.responsible = null;
+	this.responsible_users = [];
 	this.tree = null;
 	this.parent_relation = null;
 }
 
 Deliverable.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function(){ return "/api/v1/deliverables"; } },
-	single_key : { value : "deliverable" },
-	collection_key : { value : "deliverables" },
-	attribute_keys : { value : <%= Deliverable.columns.map(&:name).to_json %> },
-	constructor : { value : Deliverable },
-	set_users : {
-		value : function(deliverable_users) {
-			var d = this;
-			_.each(deliverable_users, function(du) {
-				if (du.deliverable_id == d.id) {
-					if (du.access == "owner") {
-						d.owner = du.user;
-					}
-					if (du.responsible) {
-						d.responsible = du.user;
-					}
-				}
-			});
-		}
-	},
+	type_key : { value : "deliverable" },
+	attribute_keys : { value : <%= (Deliverable.columns.map(&:name) + ['config_id']).to_json %> },
 	// write_attribute : {
 	// 	value : function(key, value) {
 	// 		HtkModel.prototype.write_attribute.apply(this, [key, value]);
@@ -40,38 +23,22 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 			return this.completed_by_id != null;
 		}
 	},
-	extract_collection : {
-		value : function(obj) {
-			var results = new Object( { 
-				obj : obj,
-				deliverables : [] 
+	registry_hook : {
+		value : function() {
+			var _this = this;
+			this.responsible_users = [];
+			_.each(DeliverableUser.prototype.all_cached({ deliverable_id : this.id }), function(du) {
+				if (du.access == "owner") {
+					_this.owner = du.user;
+				}
+				if (du.responsible) {
+					_this.responsible_users.push(du);
+				}
 			});
-		  Email.prototype.extract_single(obj, results);
-		  User.prototype.extract_collection(obj, results);
-		  DeliverableUser.prototype.extract_collection(obj, results);
-		  DeliverableRelation.prototype.extract_collection(obj, results);
-		  _.each(obj.data["deliverables"] || obj.data["deliverable"], function(d) {
-			  deliverable = new Deliverable(d);
-			  deliverable.set_users(results.deliverable_users);
-			  deliverable.set_parent_relation(results.deliverable_relations);
-		    results.deliverables.push(deliverable);
-		  });
-		  return results;
+			this.parent_relation = DeliverableRelation.prototype.find_cached_parent(this);
+			this.deliverable_type = DeliverableType.prototype.find_cached(this.deliverable_type_id);
 		}
-	},
-	extract_single : {
-		value : function(obj) {
-			// htkLog("Deliverable.extract_single: " + JSON.stringify(obj));
-			var results = HtkModel.prototype.extract_single.apply(this, arguments);
-		  Email.prototype.extract_single(obj, results);
-		  User.prototype.extract_collection(obj, results);
-		  DeliverableUser.prototype.extract_collection(obj, results);
-		  DeliverableRelation.prototype.extract_collection(obj, results);
-		  results.deliverable.set_users(results.deliverable_users);
-		  results.deliverable.set_parent_relation(results.deliverable_relations);
-		  return results;
-		}
-	}
+	}	
 });
 
 Deliverable.prototype.getParent = function() {
@@ -83,24 +50,10 @@ Deliverable.prototype.getParent = function() {
 }
 
 Deliverable.prototype.recent = function(query_data, callbacks) {
-	var _self = this;
+	var _this = this;
 	htkRequest("GET", this.api_url() + "/recent", query_data, function(obj) {
-		var results = _self.extract_collection(obj);
-	  if (obj.rc && obj.rc == 200) {
-	  	if (callbacks && callbacks.success && typeof(callbacks.success) === "function") {  
-	  		callbacks.success(results);
-			}
-	  } else {
-	  	if (callbacks && callbacks.error && typeof(callbacks.error) === "function") {  
-	  		callbacks.error(results);
-			}
-	  }
+		var results = _this.extract(obj);
+		_this.handle_callbacks(results, callbacks);
 	});
 }
-
-Deliverable.prototype.set_parent_relation = function(relations) {
-	var _this = this;
-	this.parent_relation = _.find(relations, function(r) { return (r.target_deliverable_id == _this.id && r.relation_type == DeliverableRelation.prototype.parent_relation_type); });
-}
-
 

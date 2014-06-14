@@ -1,11 +1,35 @@
 function User(attributes, extract_results) {
 	HtkModel.call(this, attributes);
+	this.full_name = null;
 }
 
 User.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function() { return "/api/v1/users"; } },
-	single_key : { value : "user" },
-	collection_key : { value : "users" },
+	type_key : { value : "user" },
 	attribute_keys : { value : <%= User.columns.map(&:name).to_json %> },
-	constructor : { value : User }
+	cached_users : { value : null },
+	all : {
+		value : function(query_data, callbacks) {
+			if (!User.prototype.cached_users) {
+				HtkModel.prototype.all.call(this, query_data, {
+					success : function(results) {
+						User.prototype.cached_users = results.users;
+						callbacks.success(results);
+					},
+					error : function(results) {
+						callbacks.error(results);
+					}
+				});
+			} else {
+				callbacks.success({ users : User.prototype.cached_users });
+			}
+		}
+	}
 });
+
+User.prototype.name = function() {
+	if (!this.full_name) {
+		this.full_name = _.compact([this.first_name, this.last_name]).join(" ");
+	}
+	return this.full_name;
+}

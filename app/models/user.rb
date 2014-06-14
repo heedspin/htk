@@ -30,7 +30,7 @@ class User < ApplicationModel
   # Setup accessible (or protected) attributes for your model
   attr_accessible :first_name, :last_name, :email, :password, :password_confirmation, :remember_me, :email_accounts_attributes
 
-	has_many :email_accounts
+	has_many :email_accounts, dependent: :destroy
 	accepts_nested_attributes_for :email_accounts
 
 	has_many :signed_request_users

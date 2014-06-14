@@ -1,0 +1,2 @@
+class StandardDeliverable < Deliverable
+end

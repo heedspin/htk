@@ -2,6 +2,7 @@
 //= require jquery-ui-1.10.4.custom
 //= require lib/handlebars-v1.3.0.js
 //# require handlebars.runtime
+//= require ./lib/array_synchronizer.js
 //= require ./lib/autogrow.js
 //= require ./lib/handlebars_helpers.js
 //= require ./lib/htk_gadgets.js.erb
@@ -16,3 +17,6 @@
 //= require helpers/simple_format.js.coffee
 //= require lib/tree.jquery.js
 //= require_tree ../templates
+//= require lib/jquery.multiselect.js
+//= require lib/jquery.multiselect.filter.js
+//= require lib/moment.js

@@ -65,3 +65,10 @@ ul.htk-tool li {
 #htk-dcontainer form ul {
 	list-style:none;
 }
+
+select[name=assigned_users] {
+	width: 15em;
+}
+div.htk-show p {
+	width: 30em;
+}

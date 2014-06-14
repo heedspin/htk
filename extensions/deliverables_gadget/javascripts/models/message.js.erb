@@ -4,8 +4,6 @@ function Message(attributes) {
 
 Message.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function() { return "/api/v1/messages"; } },
-	single_key : { value : "message" },
-	collection_key : { value : "messages" },
-	attribute_keys : { value : <%= Message.columns.map(&:name).to_json %> },
-	constructor : { value : Message }
+	type_key : { value : "message" },
+	attribute_keys : { value : <%= Message.columns.map(&:name).to_json %> }
 });

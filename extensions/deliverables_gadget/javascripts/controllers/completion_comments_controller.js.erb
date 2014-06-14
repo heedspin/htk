@@ -2,6 +2,7 @@ function CompletionCommentsController(router) {
   HtkController.call(this, router);
   this.completeView = null;
   this.incompleteView = null;
+  this.deliverableTreeController = router.deliverableTreeController;
   $("#htk-col2").on("click", ".htk-complete", $.proxy(this.newCompletionComment, this));
   $("#htkv-incomplete > form > button").click($.proxy(this.createCompletionComment, this));  
 }
@@ -27,7 +28,7 @@ CompletionCommentsController.prototype.getIncompleteView = function() {
 
 CompletionCommentsController.prototype.newCompletionComment = function(event) {
   $("#htk-col3").children().hide();
-  var deliverable = this.router.deliverablesController.deliverableTree.getDeliverable($(event.target).closest(".htk-show").attr("data-id"));
+  var deliverable = this.deliverableTreeController.getDeliverable($(event.target).closest(".htk-show").attr("data-id"));
   var view = null;
   if (deliverable.isCompleted()) {
     view = this.getIncompleteView();
@@ -40,14 +41,17 @@ CompletionCommentsController.prototype.newCompletionComment = function(event) {
 CompletionCommentsController.prototype.createCompletionComment = function(event) {
   var _this = this;
   var form = $(event.target).closest("form");
-  var deliverable = this.router.deliverablesController.deliverableTree.getDeliverable(form.find("input[name=deliverable_id]").val());
+  var deliverable = this.deliverableTreeController.getDeliverable(form.find("input[name=deliverable_id]").val());
   var values = form.formToNameValues();
   var comment = new DeliverableComment(values);
   htkLog("createCompletionComment: " + JSON.stringify(comment));
   comment.save({
     success: function(results) {
-      _this.router.deliverablesController.deliverableChanged(results);
-      _this.router.deliverablesController.showDeliverable(deliverable);
+      deliverable.write_attributes(results.deliverable);
+      if (deliverable.changed()) {
+        deliverable.reset_changes();
+        _this.deliverableTreeController.showDeliverable(deliverable, true);
+      }
       htkLog("Deliverable marked complete");
     },
     error: function(results) {
