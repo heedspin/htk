@@ -125,13 +125,14 @@ DeliverableTreeController.prototype.getNewView = function(callbacks) {
           if (selected_val == "associate") {
             _this.router.associateDeliverableController.getAssociateView(newFormContainer).show();
           } else {
-            _this.getController($(this).val()).getNewForm(newFormContainer).show();            
+            _this.getController($(this).val()).getNewView(newFormContainer).show();            
           }
         }).change();
         callbacks.success(_this.newView);
       }
     });
   } else {
+    this.newView.find("form").resetForm();
     callbacks.success(this.newView);
   }
 }

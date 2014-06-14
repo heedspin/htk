@@ -11,7 +11,10 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
 	synchronize_assigned_users : {
 		value : function(new_assigned_users) {
 			var _this = this;
-			var objects = _.map(_this.deliverable.responsible_users, function(du) { return { id : du.user_id, deliverable_user : du } });
+			var objects = [];
+			if (_this.deliverable) {
+				objects = _.map(_this.deliverable.responsible_users, function(du) { return { id : du.user_id, deliverable_user : du } });
+			}
       ArraySynchronizer.prototype.synchronize(objects, new_assigned_users,
       	{
       		added : function(id, donebacks) {
@@ -102,6 +105,26 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
 			}
 			show_view.show();
 		}	 
+	},
+	populateAssignedUsersSelect : {
+		value : function(edit_form) {
+		  var _this = this;
+		  User.prototype.all(null, {
+		  	success : function(results) {
+		  		var assigned = new Object();
+		  		if (_this.deliverable) {
+			  		_.each(_this.deliverable.responsible_users, function(du) { assigned[du.user_id] = true; });		  			
+		  		}
+		      var options = $(HandlebarsTemplates['users/options']({assigned: assigned,  users: results.users}));
+		      var select = edit_form.find("select[name=assigned_users]");
+		      select.empty().append(options);
+				  select.multiselect({
+						selectedText: "# Assigned",
+						noneSelectedText: "Assign Users"
+					});//.multiselectfilter();
+		  	}
+		  });
+		}
 	}
 });
 
