@@ -6,11 +6,13 @@ function CompletionCommentsController(router) {
   $("#htk-col2").on("click", ".htk-complete", $.proxy(this.newCompletionComment, this));
   $("#htkv-incomplete > form > button").click($.proxy(this.createCompletionComment, this));  
 }
-CompletionCommentsController.prototype = Object.create(HtkController.prototype);
+CompletionCommentsController.prototype = Object.create(CommentsController.prototype, {
+  template_directory : { value : "completion_comments" },
+});
 
 CompletionCommentsController.prototype.getCompleteView = function() {
   if (!this.completeView) {
-    this.completeView = $(HandlebarsTemplates['completion_comments/complete'](this));
+    this.completeView = $(HandlebarsTemplates[this.template_directory + '/complete'](this));
     $("#htk-col3").append(this.completeView);
     this.completeView.find("button").click($.proxy(this.createCompletionComment, this));  
   }
@@ -19,7 +21,7 @@ CompletionCommentsController.prototype.getCompleteView = function() {
 
 CompletionCommentsController.prototype.getIncompleteView = function() {
   if (!this.incompleteView) {
-    this.incompleteView = $(HandlebarsTemplates['completion_comments/incomplete'](this));
+    this.incompleteView = $(HandlebarsTemplates[this.template_directory + '/incomplete'](this));
     $("#htk-col3").append(this.incompleteView);
     this.incompleteView.find("button").click($.proxy(this.createCompletionComment, this));  
   }
@@ -48,10 +50,8 @@ CompletionCommentsController.prototype.createCompletionComment = function(event)
   comment.save({
     success: function(results) {
       deliverable.write_attributes(results.deliverable);
-      if (deliverable.changed()) {
-        deliverable.reset_changes();
-        _this.deliverableTreeController.showDeliverable(deliverable, true);
-      }
+      deliverable.reset_changes();
+      _this.deliverableTreeController.showDeliverable(deliverable, true);
       htkLog("Deliverable marked complete");
     },
     error: function(results) {

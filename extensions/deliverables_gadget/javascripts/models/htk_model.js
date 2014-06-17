@@ -128,7 +128,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	update_single : {
 		value : function(obj) {
-			var results = new Object( { obj : obj });
+			var results = this.extract(obj);
 			results[this.type_key] = this;
 		  this.write_attributes(obj.data[this.type_key]);
 		  this.reset_changes();

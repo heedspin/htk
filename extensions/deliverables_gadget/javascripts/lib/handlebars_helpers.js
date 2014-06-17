@@ -42,3 +42,7 @@ Handlebars.registerHelper('simple_format', function(text) {
   text = Handlebars.Utils.escapeExpression(text);
 	return new Handlebars.SafeString(text.replace(/\n/g, '<br />'));
 });
+
+Handlebars.registerHelper('completion_comment_title', function(comment_type) {
+	return new Handlebars.SafeString(comment_type.name);
+});

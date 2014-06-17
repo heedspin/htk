@@ -57,3 +57,17 @@ Deliverable.prototype.recent = function(query_data, callbacks) {
 	});
 }
 
+Deliverable.prototype.bindComments = function(router, container) {
+	var _this = this;
+	DeliverableComment.prototype.all(this.id, {
+		success : function(results) {
+			_.each(results.comments, function(comment) {
+				var controller = router.getCommentsController(comment);
+				if (controller) {
+					controller.showComment(_this, container, comment);					
+				}
+			});
+		}
+	});
+}
+

@@ -2,6 +2,7 @@
 //= require ./htk_model.js
 //= require ./deliverable.js.erb
 //= require ./deliverable_user.js
+//= require ./deliverable_comment_type.js
 //= require ./deliverable_comment.js
 //= require ./deliverable_relation.js
 //= require ./message.js.erb

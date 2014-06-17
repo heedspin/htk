@@ -17,6 +17,7 @@ function DeliverablesRouter() {
   this.statusMsg = $("<p>Loading Deliverables...</p>");
   this.htkContainer.append(this.statusMsg);
   adjust_window_height();
+  this.commentsControllers = new Object();  
   this.loadGadget();
 }
 
@@ -44,6 +45,7 @@ DeliverablesRouter.prototype.setupControllers = function() {
   this.deliverableTreeController = new DeliverableTreeController(this);
   this.completionCommentsController = new CompletionCommentsController(this);
   this.associateDeliverableController = new AssociateDeliverableController(this);
+  this.commentsController = new CommentsController(this);
 }
 
 DeliverablesRouter.prototype.loadCurrentEmail = function(callbacks) {
@@ -69,4 +71,30 @@ DeliverablesRouter.prototype.loadCurrentEmail = function(callbacks) {
 
 DeliverablesRouter.prototype.deliverables = function() {
   return this.deliverableTreeController.deliverableTree.deliverables;
+}
+
+DeliverablesRouter.prototype.getCommentsController = function(thing) {
+  htkLog("DeliverablesRouter.getCommentsController: ", thing);
+  var comment = null;
+  var comment_type = null;
+  if (thing instanceof DeliverableComment) {
+    comment = thing;
+    comment_type = comment.comment_type;
+  } else if (thing instanceof CommentType) {
+    comment_type = thing;
+  } 
+  // else if (typeof(thing) == "string") {
+  //   comment_type = this.commentTypes[thing];
+  // }
+  var controller = this.commentsControllers[comment_type.js_controller];
+  if (!controller) {
+    var newControllerProto = window[comment_type.js_controller];
+    if (!newControllerProto) {
+      htkLog("No controller prototype for " + comment_type.js_controller);
+    } else {
+      controller = new newControllerProto(this);
+      this.commentsControllers[comment_type.js_controller] = controller;
+    }
+  }
+  return controller;
 }

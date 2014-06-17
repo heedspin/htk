@@ -72,3 +72,12 @@ select[name=assigned_users] {
 div.htk-show p {
 	width: 30em;
 }
+
+div.comment {
+	border-top: 1px dotted #000000;
+}
+
+.hiddenedit {
+	display: none;
+	float:right;
+}

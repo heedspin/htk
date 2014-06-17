@@ -6,7 +6,7 @@
 			{{#join responsible_users ", "}}{{user.first_name}}{{/join}}
 		{{/if}}
 	</p>
-	<h1>{{title}}</h1>
+	<h2>{{title}}</h2>
 {{/with}}
 {{#with deliverable}}
 	{{simpleFormat description}}
@@ -21,5 +21,10 @@
 		<li class="htk-action htk-disassociate"><%= image_tag 'cross.png' %></li>
 		{{/unless}}
 	</ul>
-</div>
 {{/with}}
+
+	<div class="comments">
+	</div>
+
+</div>
+

@@ -1,0 +1,8 @@
+function DeliverableCommentType(attributes) {
+	HtkModel.call(this, attributes);
+}
+
+DeliverableCommentType.prototype = Object.create(HtkModel.prototype, {
+	attribute_keys : { value : <%= DeliverableCommentType.columns.map(&:name).to_json %> }
+});
+

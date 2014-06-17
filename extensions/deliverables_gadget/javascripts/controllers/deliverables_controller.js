@@ -81,15 +81,19 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
 		  // });
 		}
 	},
-	createShowView : {
-		value : function() {
+	getShowView : {
+		value : function(container) {
 			var show_view = $(HandlebarsTemplates[this.template_directory + '/show']({ 
 		  	current_user: this.router.currentUser, 
 		  	deliverable: this.deliverable, 
-		  	parent: this.deliverable.getParent() 
+		  	parent: this.deliverable.getParent()
 		  }));
-		  this.showViews[this.deliverable.id] = show_view;
-		  return show_view;
+			container.append(show_view);
+			var comments_container = show_view.find("div.comments");
+			if (comments_container.length > 0) {
+				this.deliverable.bindComments(this.router, comments_container);				
+			}
+			return show_view;
 		},
 	},
 	showDeliverable : {
@@ -97,13 +101,16 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
 			var show_view = this.showViews[this.deliverable.id];
 			if (show_view) {
 				if (update) {
-					show_view.replaceWith(this.createShowView());
+					show_view.remove();
+					show_view = this.getShowView(container);
+				  this.showViews[this.deliverable.id] = show_view;
+				} else {
+					show_view.show();					
 				}
 			} else {
-				show_view = this.createShowView();
-				container.append(show_view);
+				show_view = this.getShowView(container);
+			  this.showViews[this.deliverable.id] = show_view;
 			}
-			show_view.show();
 		}	 
 	},
 	populateAssignedUsersSelect : {

@@ -7,5 +7,20 @@ DeliverableComment.prototype = Object.create(HtkModel.prototype, {
 		value : function() { return "/api/v1/deliverables/" + this.deliverable_id + "/comments"; }
 	},
 	type_key : { value : "comment" },
-	attribute_keys : { value : <%= DeliverableComment.columns.map(&:name).to_json %> }
+	attribute_keys : { value : <%= DeliverableComment.columns.map(&:name).to_json %> },
+	registry_hook : {
+		value : function() {
+			this.comment_type = DeliverableCommentType.prototype.find_cached(this.comment_type_id);
+			this.creator = User.prototype.find_cached(this.creator_id);
+		}
+	},
+	all : {
+		value : function(deliverable_id, callbacks) {
+			var _this = this;
+			htkRequest("GET", this.api_url.apply({deliverable_id : deliverable_id}), null, function(obj) {
+				var results = _this.extract(obj);
+				_this.handle_callbacks(results, callbacks);
+			});
+		}
+	},
 });
