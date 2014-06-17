@@ -77,6 +77,10 @@ DeliverableTreeController.prototype.showDeliverable = function(deliverable, upda
   var container = $("#htk-col2");
   container.children().hide();
   this.getController(deliverable).showDeliverable(container, update);
+  if (update) {
+    // TODO: convert to event model.
+    this.deliverableTree.deliverableChanged(deliverable);
+  }
   adjust_window_height();
 }
 

@@ -131,7 +131,12 @@ DeliverableTree.prototype.initializeTree = function(message_thread_id) {
   var _this = this;
   this.tree = $('#dtree').tree({
     data: this.getTreeData(),
-    dragAndDrop: true
+    dragAndDrop: true,
+    onCreateLi: function(node, $li) {
+      if (!node.deliverable.isCompleted()) {
+        $li.find('.jqtree-title').wrap('<strong></strong>');
+      }
+    }
   }).bind('tree.select',
     function(event) {
       if (event.node) {
