@@ -81,3 +81,7 @@ div.comment {
 	display: none;
 	float:right;
 }
+
+span.assigned {
+	font-style: italic;
+}

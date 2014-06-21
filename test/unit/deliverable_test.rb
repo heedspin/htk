@@ -11,6 +11,7 @@
 #  completed_by_id :integer
 #  type            :string(255)
 #  data            :text
+#  abbreviation    :string(255)
 #
 
 require 'test_helper'

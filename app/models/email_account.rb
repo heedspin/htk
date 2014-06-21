@@ -15,9 +15,11 @@
 
 require 'htk_imap/htk_imap'
 require 'plutolib/logger_utils'
+require 'import_single_email'
 
 class EmailAccount < ApplicationModel
   include Plutolib::LoggerUtils
+  include ImportSingleEmail
   attr_accessible :authentication_string, :port, :server, :username, :status
   attr_protected :user_id
   belongs_to :user
@@ -28,6 +30,10 @@ class EmailAccount < ApplicationModel
   has_many :signed_request_users, :primary_key => :user_id, :foreign_key => :user_id
 
   alias_attribute :email, :username
+
+  def mailbox_all
+    '[Gmail]/All Mail'
+  end
 
   def self.username(txt)
     where username: txt.downcase
@@ -49,14 +55,14 @@ class EmailAccount < ApplicationModel
   	where(:user_id => user.id)
   end
 
-  def imap_connection
-    HtkImap::GmailImap.imap_connect(self)
+  def imap_connection(&block)
+    HtkImap::GmailImap.imap_connect(self, &block)
   end
 
   def fetch_raw_emails(args={}, &block)
-    HtkImap::GmailImap.imap_connect(self) do |imap|
-      current_folder = '[Gmail]/All Mail'
-      imap.examine(current_folder)
+    self.imap_connection do |imap|
+      current_folder = self.mailbox_all
+      imap.examine(current_folder) # readonly
       args = args.clone
       args[:imap] = imap
       args[:current_folder] = current_folder
@@ -87,7 +93,7 @@ class EmailAccount < ApplicationModel
     proc = Proc.new do |raw_email|
       begin
         email = self.emails.build(raw_email: raw_email)
-        email.bring_in!
+        import_single_email(email)
       rescue ActiveRecord::StatementInvalid
         log_error "Failed to save email:", $!
       end
@@ -132,4 +138,36 @@ class EmailAccount < ApplicationModel
       obj.email_account_cache = email_account_cache
     end
   end
+
+  def folder_map(imap)
+    result = {}
+    imap.list('', '*').each do |mbl|
+      unless (mbl.attr.include?(:Noselect))
+        result[mbl.name] = mbl
+      end
+    end
+    result
+  end
+
+  def ensure_folder(imap, folder_path_array)
+    folders = folder_map(imap)
+    folder_path = nil
+    folder_path_array.each_with_index do |name, index|
+      folder_path = folder_path_array[0..index].join('/')
+      unless folders.member? folder_path
+        imap.create folder_path
+      end
+    end
+    folder_path
+  end
+
+  def assign_folder(folder_path_array, emails)
+    self.imap_connection do |imap|
+      imap.select(self.mailbox_all)
+      folder_path = self.ensure_folder(imap, folder_path_array)
+      emails = [ emails ] if emails.is_a?(Email)
+      imap.uid_copy(emails.map(&:uid).map(&:to_i), folder_path)
+    end
+  end
+
 end

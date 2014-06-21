@@ -70,8 +70,11 @@ StandardDeliverablesController.prototype.createEvent = function(event) {
     this.deliverable.save({
       success : function(results) {
 			  htkLog("Created new deliverable: ", results.obj.data);
-	    	_this.synchronize_assigned_users(form.find("select[name=assigned_users]").val());
-        _this.deliverableTreeController.deliverableCreated(parent_id, results.deliverable);
+        _this.deliverableTreeController.addDeliverable(parent_id, results.deliverable, {
+        	success : function(results) {
+			    	_this.synchronize_assigned_users(form.find("select[name=assigned_users]").val());
+        	}
+        });
       }, 
       error : function(results) {
         _this.setStatusMsg("Create deliverable failed.");

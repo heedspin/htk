@@ -152,13 +152,8 @@ DeliverableTreeController.prototype.newDeliverable = function(event) {
   });
 }
 
-DeliverableTreeController.prototype.deliverableCreated = function(parent_id, deliverable) {
-  var _this = this;
-  _this.deliverableTree.createNode(parent_id, deliverable, {
-    success : function(results) {
-      _this.showDeliverable(deliverable);
-    }
-  });
+DeliverableTreeController.prototype.addDeliverable = function(parent_id, deliverable, callbacks) {
+  this.deliverableTree.createNode(parent_id, deliverable, callbacks);
 }
 
 DeliverableTreeController.prototype.getDeliverable = function(deliverable_id){

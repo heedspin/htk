@@ -35,4 +35,14 @@ class DeliverableRelation < ApplicationModel
   def self.message_thread_id(mti)
     where :message_thread_id => mti
   end
+  def self.top_level
+    where relation_type_id: DeliverableRelationType.parent.id, source_deliverable_id: nil
+  end
+
+  after_save :copy_to_folders
+  def copy_to_folders
+    if (self.relation_type.try(:parent?) and self.source_deliverable_id.nil?)
+      CopyToDeliverableFolder.new(self).delay.copy_all_to_folder
+    end
+  end
 end

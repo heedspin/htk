@@ -51,4 +51,8 @@ class User < ApplicationModel
     self.email.split('@').last
   end
 
+  def preferences
+    UserGroupConfig.find
+  end
+
 end

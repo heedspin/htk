@@ -133,8 +133,15 @@ DeliverableTree.prototype.initializeTree = function(message_thread_id) {
     data: this.getTreeData(),
     dragAndDrop: true,
     onCreateLi: function(node, $li) {
-      if (!node.deliverable.isCompleted()) {
-        $li.find('.jqtree-title').wrap('<strong></strong>');
+      var deliverable = node.deliverable;
+      var title = $li.find('.jqtree-title')
+      if (!deliverable.isCompleted()) {
+        title.wrap('<strong></strong>');
+        title = title.parent();
+      }
+      if (deliverable.responsible_users.length > 0) {
+        var first_names = _.map(deliverable.responsible_users, function(du) { return du.user.first_name; } );
+        title.after("<span class=\"assigned\"> - " + first_names.join(", ") + "</span>");
       }
     }
   }).bind('tree.select',

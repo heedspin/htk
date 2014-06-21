@@ -180,40 +180,4 @@ class Email < ApplicationModel
 		(self.to_addresses.try(:sort) == email.to_addresses.try(:sort)) && 
 		(self.cc_addresses.try(:sort) == email.cc_addresses.try(:sort))
 	end
-
-	def bring_in!
-		Email.transaction do
-  		message = Message.find_or_create(self)
-			# TODO: ensure MessageThread always created.
-  		self.message = message
-  		if message.message_thread
-  			eat = message.message_thread.email_account_threads.email_account(self.email_account).first
-  			if eat.nil?
-  				eat = self.create_email_account_thread!(email_account: self.email_account, 
-  					message_thread: message.message_thread, 
-  					subject: self.subject, 
-  					start_time: self.date,
-  					thread_id: thread_id)
-  			elsif self.date < eat.start_time
-  				eat.update_attributes! start_time: self.date
-  			end
-				self.email_account_thread = eat
-  		else # New message.
-  			message_thread = nil
-  			if self.email_account_thread = EmailAccountThread.find_by_thread_id(self.thread_id)
-  				message_thread = self.email_account_thread.message_thread
-  			else
-  				message_thread = MessageThread.create!
-  				eat = self.create_email_account_thread!(email_account: self.email_account, 
-  					message_thread: message_thread, 
-  					subject: self.subject, 
-  					start_time: self.date,
-  					thread_id: thread_id)
-  			end
-  			message.update_attributes! message_thread: message_thread
-  		end
-  		self.save!
-  	end
-  	self
- 	end
 end

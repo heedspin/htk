@@ -11,6 +11,7 @@
 #  completed_by_id :integer
 #  type            :string(255)
 #  data            :text
+#  abbreviation    :string(255)
 #
 
 require 'plutolib/serialized_attributes'
@@ -86,5 +87,9 @@ class Deliverable < ApplicationModel
   end
   def self.excluding(deliverable_ids)
     where ['deliverables.id not in (?)', deliverable_ids]
+  end
+
+  def folder_name
+    self.abbreviation.present? ? self.abbreviation : self.title
   end
 end
