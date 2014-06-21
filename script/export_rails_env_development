@@ -1,0 +1,3 @@
+export RAILS_ENV=development
+export HOME=/home/ubuntu 
+export PATH=/usr/local/bin:/usr/bin:$PATH

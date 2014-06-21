@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/ctran/annotate_models.git
-  revision: cca21f23c9925f21cdc444c24e6338721656b924
+  revision: 9634ea6e67851d4a9a4d0b89597a6a9d3fc4d1f4
   specs:
-    annotate (2.6.0.beta2)
+    annotate (2.6.5)
       activerecord (>= 2.3.0)
       rake (>= 0.8.7)
 
@@ -78,12 +78,18 @@ GEM
       csspool-st (= 3.1.2)
       json
     csspool-st (3.1.2)
+    daemons (1.1.9)
     debugger (1.6.3)
       columnize (>= 0.3.1)
       debugger-linecache (~> 1.2.0)
       debugger-ruby_core_source (~> 1.2.4)
     debugger-linecache (1.2.0)
     debugger-ruby_core_source (1.2.4)
+    delayed_job (4.0.1)
+      activesupport (>= 3.0, < 4.2)
+    delayed_job_active_record (4.0.1)
+      activerecord (>= 3.0, < 4.2)
+      delayed_job (>= 3.0, < 4.1)
     devise (3.0.2)
       bcrypt-ruby (~> 3.0)
       orm_adapter (~> 0.1)
@@ -204,7 +210,9 @@ DEPENDENCIES
   activeadmin
   annotate!
   coffee-rails (~> 3.2.1)
+  daemons
   debugger
+  delayed_job_active_record
   devise (= 3.0.2)
   handlebars_assets
   html_press

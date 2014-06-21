@@ -38,10 +38,15 @@ gem 'oauth'
 gem 'html_press'
 gem 'active_model_serializers'
 
+# http://stackoverflow.com/questions/1226302/how-to-monitor-delayed-job-with-monit
+gem 'delayed_job_active_record'
+gem 'daemons'
+
 group :development do
   gem 'annotate', :git => 'https://github.com/ctran/annotate_models.git'
   gem 'quiet_assets' #, :group => :development
 end
+
 group :development, :test do
   gem "qunit-rails"
 end
