@@ -55,7 +55,7 @@ end
 class HtkImap::GmailImap
   def self.imap_connect(email_account, &block)
     Net::IMAP.debug = true
-    imap = Net::IMAP.new(email_account.server, email_account.port, true)
+    imap = HtkImap.new(email_account.server, email_account.port, true)
     MonkeyPatchGmailImap.patch(imap)
     imap.login(email_account.username, email_account.authentication_string)
     if block_given?

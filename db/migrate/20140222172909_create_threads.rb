@@ -12,7 +12,5 @@ class CreateThreads < ActiveRecord::Migration
   		t.datetime :start_time
   		t.timestamps
   	end
-
-  	add_column :emails, :email_account_thread_id, :integer
   end
 end

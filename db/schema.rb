@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140619141516) do
+ActiveRecord::Schema.define(:version => 20140622164056) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -86,6 +86,7 @@ ActiveRecord::Schema.define(:version => 20140619141516) do
     t.datetime "updated_at",            :null => false
     t.integer  "previous_sibling_id"
     t.integer  "message_thread_id"
+    t.integer  "status_id"
   end
 
   create_table "deliverable_types", :force => true do |t|
@@ -110,11 +111,11 @@ ActiveRecord::Schema.define(:version => 20140619141516) do
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
     t.text     "description"
-    t.integer  "deleted_by_id"
-    t.integer  "completed_by_id"
     t.string   "type"
     t.text     "data"
     t.string   "abbreviation"
+    t.integer  "completed_by_id"
+    t.integer  "status_id"
   end
 
   create_table "email_account_threads", :force => true do |t|
@@ -158,19 +159,19 @@ ActiveRecord::Schema.define(:version => 20140619141516) do
 
   create_table "emails", :force => true do |t|
     t.integer  "email_account_id"
-    t.string   "thread_id"
-    t.string   "folder"
-    t.datetime "date"
-    t.string   "uid"
-    t.string   "guid"
-    t.string   "subject"
-    t.text     "encoded_mail"
-    t.datetime "created_at"
-    t.text     "data"
-    t.string   "from_address"
-    t.string   "web_id"
     t.integer  "message_id"
     t.integer  "email_account_thread_id"
+    t.string   "thread_id"
+    t.string   "web_id"
+    t.string   "folder"
+    t.datetime "date"
+    t.integer  "uid"
+    t.string   "guid"
+    t.string   "from_address"
+    t.string   "subject"
+    t.text     "encoded_mail"
+    t.text     "data"
+    t.datetime "created_at"
   end
 
   create_table "integrations", :force => true do |t|

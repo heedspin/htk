@@ -1,5 +1,8 @@
+require 'import_single_email'
+
 class EmailFactory
 	class << self
+	  include ImportSingleEmail
 		def create_email(args)
 			from_email = args[:email]
 			for_thread = args[:thread]
@@ -15,9 +18,10 @@ class EmailFactory
 				to_addresses: args[:to_addresses] || from_email.try(:to_addresses) || for_thread.try(:to_addresses) || ['to-nobody@nowhere.com'],
 				cc_addresses: args[:cc_addresses] || from_email.try(:cc_addresses) || for_thread.try(:cc_addresses) || ['cc-nobody@nowhere.com'],
 				web_id: args[:web_id] || "web-id-#{Email.count + 1}",
-				from_address: args[:from_address] || (from_email.try(:from_address) || email_account.username)
+				from_address: args[:from_address] || (from_email.try(:from_address) || email_account.username),
+				thread_id: for_thread.try(:thread_id) || "thread-id-#{EmailAccountThread.count + 1}"
 			)
-  		email.bring_in!
+			import_single_email(email)
   		if include_participants
   			email.participants.select { |a| a != email_account.username }.each do |email_address|
 		   		create_email(email_account: email_address, email: email)

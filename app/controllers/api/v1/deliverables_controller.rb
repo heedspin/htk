@@ -15,7 +15,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	end
 
 	def autocomplete_index(search_term)
-		results = Deliverable.editable_by(current_user).title_like(search_term).by_created_at_desc.limit(20).all.map do |d|
+		results = Deliverable.editable_by(current_user).title_like(search_term).not_deleted.by_created_at_desc.limit(20).all.map do |d|
     	{ :label => d.title, :value => d.id }
 		end
     render :json => results.to_json
@@ -26,7 +26,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 			if (new_web_id = params[:web_id]) and (@email.web_id != new_web_id)
 				Email.find(@email.id).update_attributes(web_id: new_web_id)
 			end
-			@relations = DeliverableRelation.message_thread_id(@email.message.message_thread_id).all
+			@relations = DeliverableRelation.message_thread_id(@email.message.message_thread_id).not_deleted.all
 			deliverable_ids = @relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten
 			@deliverables = Deliverable.not_deleted.where(:id => deliverable_ids)
 			@deliverable_types = DeliverableType.deliverable_types(@deliverables.map(&:type)).all

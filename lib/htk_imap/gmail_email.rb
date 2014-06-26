@@ -4,9 +4,10 @@ class HtkImap::GmailEmail < HtkImap::RawEmail
     limit = args[:limit] || 10
 		imap = args[:imap]
 		since_uid = args[:since_uid]
-		imap.send(:send_command, "UID SEARCH UID #{since_uid}:*")
+		# Add one so we do not reload the past email.  IMAP gaurantees always increasing.
+		imap.send(:send_command, "UID SEARCH UID #{since_uid+1}:*")
 		uids = imap.responses.delete('SEARCH')[-1]
-		uids.shift # the first one is our
+		# uids.shift # the first one is our
 		if uids.size > 0
 			fetch_uids(imap, uids.reverse[offset..(offset + (limit-1))], args[:current_folder], &block)
 		else

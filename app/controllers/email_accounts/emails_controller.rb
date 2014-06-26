@@ -13,7 +13,7 @@ class EmailAccounts::EmailsController < ApplicationController
 		offset = (params[:offset] || 0).to_i
 		page = (params[:page] || 1).to_i
 		@email_account = parent_object
-		@emails = @email_account.emails.uid_desc.limit(limit)
+		@emails = @email_account.emails.date_desc.limit(limit)
     EmailAccount.attach_to(@emails)
 		if page != 1
 			@emails = @emails.offset((page.to_i-1) * limit)

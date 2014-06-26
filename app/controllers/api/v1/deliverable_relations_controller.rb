@@ -13,7 +13,8 @@ class Api::V1::DeliverableRelationsController < Api::V1::ApiController
 			source_deliverable_id: @source_deliverable.try(:id),
 			target_deliverable_id: @target_deliverable.id,
 			previous_sibling_id: @previous_sibling.try(:id),
-			relation_type_id: params[:relation_type_id])
+			relation_type_id: params[:relation_type_id],
+			status_id: params[:status_id] || LifeStatus.active.id)
 		if @relation.save
 			render json: @relation
 		else

@@ -10,15 +10,17 @@
 #  updated_at            :datetime         not null
 #  previous_sibling_id   :integer
 #  message_thread_id     :integer
+#  status_id             :integer
 #
 
 class DeliverableRelation < ApplicationModel
   belongs_to_active_hash :relation_type, :class_name => 'DeliverableRelationType'
 	belongs_to :source_deliverable, class_name: 'Deliverable', foreign_key: :source_deliverable_id
 	belongs_to :target_deliverable, class_name: 'Deliverable', foreign_key: :target_deliverable_id
-  attr_accessible :source_deliverable_id, :target_deliverable_id, :relation_type_id, :previous_sibling_id, :message_thread_id
+  attr_accessible :source_deliverable_id, :target_deliverable_id, :relation_type_id, :previous_sibling_id, :message_thread_id, :status_id
   belongs_to :previous_sibling, class_name: 'DeliverableRelation', foreign_key: :previous_sibling_id
   belongs_to :message_thread
+  belongs_to_active_hash :status, :class_name => 'LifeStatus'
 
   def self.deliverables(deliverables)
     ids = deliverables.map(&:id)
@@ -32,6 +34,7 @@ class DeliverableRelation < ApplicationModel
   #   includes(:source_deliverable => :deliverable_users).includes(:target_deliverable => :deliverable_users).where(['deliverable_users.user_id = ? and deliverable_users.access_id in (?)', user_id, access_ids])
   # end
 
+  scope :not_deleted, where(['deliverable_relations.status_id != ?', LifeStatus.deleted.id])
   def self.message_thread_id(mti)
     where :message_thread_id => mti
   end
@@ -39,10 +42,32 @@ class DeliverableRelation < ApplicationModel
     where relation_type_id: DeliverableRelationType.parent.id, source_deliverable_id: nil
   end
 
-  after_save :copy_to_folders
+  def is_top_level?
+    self.relation_type.try(:parent?) && self.source_deliverable_id.nil?
+  end
+
+  after_create :copy_to_folders
   def copy_to_folders
-    if (self.relation_type.try(:parent?) and self.source_deliverable_id.nil?)
-      CopyToDeliverableFolder.new(self).delay.copy_all_to_folder
+    if is_top_level?
+      DeliverableFolder.new(self).delay.copy_all_to_folder
     end
+  end
+
+  def remove_all_from_folder
+    if self.is_top_level?
+      DeliverableFolder.new(self).delay.remove_all_from_folder
+    end
+  end
+
+  def rename_folder_from(from_deliverable_path)
+    if self.is_top_level?
+      DeliverableFolder.new(self).delay.rename_folder(from_deliverable_path)
+    end
+  end
+
+  def destroy
+    self.status_id = LifeStatus.deleted.id
+    self.save!
+    self.remove_all_from_folder
   end
 end

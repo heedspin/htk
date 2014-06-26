@@ -7,11 +7,11 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  description     :text
-#  deleted_by_id   :integer
-#  completed_by_id :integer
 #  type            :string(255)
 #  data            :text
 #  abbreviation    :string(255)
+#  completed_by_id :integer
+#  status_id       :integer
 #
 
 require 'test_helper'
@@ -25,13 +25,12 @@ class DeliverableTest < ActiveSupport::TestCase
     	subject: 'subject',
     	to_addresses: [user2.email])
    	assert_equal 0, email1_user1.message.message_thread.deliverables.count
-		assert_not_nil deliverable = DeliverableFactory.create_deliverable(email: email1_user1, current_user: user1)
+		assert_not_nil deliverable = DeliverableFactory.create(email: email1_user1, current_user: user1)
    	assert_equal 1, email1_user1.message.message_thread.deliverables.count
     assert_not_nil email1_user2 = EmailFactory.create_email(email_account: user2.email_accounts.first, email: email1_user1)
    	assert_equal 1, email1_user2.message.message_thread.deliverables.count
     assert deliverables = email1_user2.message.message_thread.deliverables.not_deleted
    	assert_equal deliverable, deliverables.first
-
     assert_not_nil email2_user2 = EmailFactory.create_email(email_account: user2.email_accounts.first, thread: email1_user1)
     assert deliverables = email2_user2.message.message_thread.deliverables.not_deleted
     assert_equal deliverable, deliverables.first

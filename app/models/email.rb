@@ -4,19 +4,19 @@
 #
 #  id                      :integer          not null, primary key
 #  email_account_id        :integer
-#  thread_id               :string(255)
-#  folder                  :string(255)
-#  date                    :datetime
-#  uid                     :string(255)
-#  guid                    :string(255)
-#  subject                 :string(255)
-#  encoded_mail            :text
-#  created_at              :datetime
-#  data                    :text
-#  from_address            :string(255)
-#  web_id                  :string(255)
 #  message_id              :integer
 #  email_account_thread_id :integer
+#  thread_id               :string(255)
+#  web_id                  :string(255)
+#  folder                  :string(255)
+#  date                    :datetime
+#  uid                     :integer
+#  guid                    :string(255)
+#  from_address            :string(255)
+#  subject                 :string(255)
+#  encoded_mail            :text
+#  data                    :text
+#  created_at              :datetime
 #
 
 require 'htk_imap/htk_imap'
@@ -26,7 +26,7 @@ class Email < ApplicationModel
 	include EmailAccountCache	
 	include HtkImap::MailUtils
 	include ActionView::Helpers::TextHelper
-	attr_accessible :folder, :date, :uid, :guid, :subject, :mail, :thread_id, :raw_email, :from_address, :web_id, :message
+	attr_accessible :folder, :date, :uid, :guid, :subject, :from_address, :mail, :thread_id, :raw_email, :message, :web_id
 	belongs_to :email_account
 	belongs_to :message
 	belongs_to :email_account_thread
@@ -34,6 +34,7 @@ class Email < ApplicationModel
 	# TODO: rake db:migrate:down VERSION=20130817143155
 	scope :by_uid, order(:uid)
 	scope :uid_desc, order('emails.uid desc')
+	scope :date_desc, order('emails.date desc')
 
 	# delegate :message_id, to: :mail
 	delegate :in_reply_to, to: :mail

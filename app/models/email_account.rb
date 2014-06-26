@@ -90,10 +90,15 @@ class EmailAccount < ApplicationModel
 
   def import_emails
     last_email = self.emails.by_uid.last
+    existing_uids = Set.new self.emails.select(:uid).map(&:uid)
     proc = Proc.new do |raw_email|
       begin
-        email = self.emails.build(raw_email: raw_email)
-        import_single_email(email)
+        if existing_uids.member?(raw_email.uid.to_i)
+          log "UID #{raw_email.uid} already loaded!!!"
+        else
+          email = self.emails.build(raw_email: raw_email)
+          import_single_email(email)
+        end
       rescue ActiveRecord::StatementInvalid
         log_error "Failed to save email:", $!
       end
@@ -139,35 +144,37 @@ class EmailAccount < ApplicationModel
     end
   end
 
-  def folder_map(imap)
-    result = {}
-    imap.list('', '*').each do |mbl|
-      unless (mbl.attr.include?(:Noselect))
-        result[mbl.name] = mbl
-      end
-    end
-    result
-  end
-
-  def ensure_folder(imap, folder_path_array)
-    folders = folder_map(imap)
-    folder_path = nil
-    folder_path_array.each_with_index do |name, index|
-      folder_path = folder_path_array[0..index].join('/')
-      unless folders.member? folder_path
-        imap.create folder_path
-      end
-    end
-    folder_path
-  end
-
   def assign_folder(folder_path_array, emails)
     self.imap_connection do |imap|
+      folder_path = imap.ensure_folder(folder_path_array)
       imap.select(self.mailbox_all)
-      folder_path = self.ensure_folder(imap, folder_path_array)
       emails = [ emails ] if emails.is_a?(Email)
-      imap.uid_copy(emails.map(&:uid).map(&:to_i), folder_path)
+      imap.uid_copy(emails.map(&:uid), folder_path)
     end
   end
 
+  def unassign_folder(folder_path_array, emails)
+    self.imap_connection do |imap|
+      folder_path = folder_path_array.join('/')
+      imap.select(self.mailbox_all)
+      emails = [ emails ] if emails.is_a?(Email)
+      imap.uid_store(emails.map(&:uid), "-X-GM-LABELS", folder_path)
+      imap.delete_if_empty(folder_path_array)
+    end
+  end
+
+  def rename_folder(from_array, to_array)
+    to_path = to_array.join('/')
+    self.imap_connection do |imap|
+      imap.ensure_folder(to_array[0..to_array.length-2])
+      from_path = from_array.join('/')
+      log "EmailAccount.rename_folder #{from_path} => #{to_path}"
+      imap.rename(from_path, to_path)
+      # from_array.pop
+      # while from_array.size > 0
+      #   self.delete_if_empty(from_array.join('/'))
+      #   from_array.pop
+      # end
+    end
+  end
 end

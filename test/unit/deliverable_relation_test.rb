@@ -10,6 +10,7 @@
 #  updated_at            :datetime         not null
 #  previous_sibling_id   :integer
 #  message_thread_id     :integer
+#  status_id             :integer
 #
 
 require 'test_helper'
@@ -39,7 +40,7 @@ class DeliverableRelationTest < ActiveSupport::TestCase
 		].each do |target, source|
 			[target, source].each do |did|
 				unless created.member?(did)
-					DeliverableFactory.create_deliverable(id: did, current_user: current_user)
+					DeliverableFactory.create(id: did, current_user: current_user)
 					created.add did
 				end
 			end

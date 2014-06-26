@@ -10,6 +10,8 @@
 class MessageThread < ApplicationModel
 	has_many :email_account_threads, dependent: :destroy
 	has_many :messages, dependent: :destroy
+	has_many :deliverable_relations, dependent: :destroy
+	has_many :deliverables, through: :deliverable_relations, source: :target_deliverable
 
 	def self.accessible_to(user)
     user_id = user.is_a?(User) ? user.id : user

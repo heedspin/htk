@@ -4,19 +4,19 @@
 #
 #  id                      :integer          not null, primary key
 #  email_account_id        :integer
-#  thread_id               :string(255)
-#  folder                  :string(255)
-#  date                    :datetime
-#  uid                     :string(255)
-#  guid                    :string(255)
-#  subject                 :string(255)
-#  encoded_mail            :text
-#  created_at              :datetime
-#  data                    :text
-#  from_address            :string(255)
-#  web_id                  :string(255)
 #  message_id              :integer
 #  email_account_thread_id :integer
+#  thread_id               :string(255)
+#  web_id                  :string(255)
+#  folder                  :string(255)
+#  date                    :datetime
+#  uid                     :integer
+#  guid                    :string(255)
+#  from_address            :string(255)
+#  subject                 :string(255)
+#  encoded_mail            :text
+#  data                    :text
+#  created_at              :datetime
 #
 
 require 'test_helper'

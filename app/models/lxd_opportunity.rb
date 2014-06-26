@@ -7,11 +7,11 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  description     :text
-#  deleted_by_id   :integer
-#  completed_by_id :integer
 #  type            :string(255)
 #  data            :text
 #  abbreviation    :string(255)
+#  completed_by_id :integer
+#  status_id       :integer
 #
 
 class LxdOpportunity < Deliverable

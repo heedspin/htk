@@ -24,4 +24,7 @@ class EmailAccountThread < ApplicationModel
 	def self.subject(txt)
 		where :subject => txt
 	end
+	def self.accessible_to_deliverable(deliverable)
+		joins(:email_account).where(email_accounts: { user_id: deliverable.user_ids})
+	end
 end

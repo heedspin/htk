@@ -5,6 +5,7 @@ require 'plutolib/plutobug'
 require 'lib/factories/thread_factory'
 require 'lib/factories/email_factory'
 require 'lib/factories/deliverable_factory'
+require 'lib/factories/deliverable_relation_factory'
 
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in alphabetical order.

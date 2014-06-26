@@ -11,7 +11,7 @@ module ImportSingleEmail
   					message_thread: message.message_thread, 
   					subject: email.subject, 
   					start_time: email.date,
-  					thread_id: message.message_thread.id)
+  					thread_id: email.thread_id)
   			elsif email.date < eat.start_time
   				eat.update_attributes! start_time: email.date
   			end
@@ -26,15 +26,17 @@ module ImportSingleEmail
   					message_thread: message_thread, 
   					subject: email.subject, 
   					start_time: email.date,
-  					thread_id: message_thread.id)
+  					thread_id: email.thread_id)
   			end
   			message.update_attributes! message_thread: message_thread
   		end
   		email.save!
   		# Label the email.
-  		DeliverableRelation.top_level.message_thread_id(message.message_thread_id).each do |dr|
-  			CopyToDeliverableFolder.new(dr).copy_email_to_folder(email)
-  		end
+      unless Rails.env.test?
+    		DeliverableRelation.top_level.message_thread_id(message.message_thread_id).each do |dr|
+    			DeliverableFolder.new(dr).copy_email_to_folder(email)
+    		end
+      end
   	end
   	email
  	end
