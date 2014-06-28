@@ -71,11 +71,13 @@ DeliverableTreeController.prototype.showDeliverable = function(deliverable, upda
   if (!deliverable) htkLog("showDeliverable called without deliverable.  Searching...");
   if (!deliverable) deliverable = _.find(this.deliverableTree.deliverables, function(d) { return !d.isCompleted(); });
   if (!deliverable && this.deliverableTree.deliverables) deliverable = this.deliverableTree.deliverables[0];
-  if (!deliverable) return;
-  this.deliverableTree.selectDeliverable(deliverable.id);
 
   var container = $("#htk-col2");
   container.children().hide();
+
+  if (!deliverable) return;
+  this.deliverableTree.selectDeliverable(deliverable.id);
+
   this.getController(deliverable).showDeliverable(container, update);
   if (update) {
     // TODO: convert to event model.
