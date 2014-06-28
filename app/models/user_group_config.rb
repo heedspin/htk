@@ -7,6 +7,10 @@ class UserGroupConfig
 		AppConfig.root_deliverable_label
 	end
 
+	def root_todo_label
+		AppConfig.root_todo_label || 'To Do'
+	end
+
 	def folder_path_for(thing)
 		deliverable_folder_path = if thing.is_a?(Deliverable)
 			self.deliverable_folder_path(thing)

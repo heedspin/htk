@@ -27,4 +27,26 @@ class DeliverableUser < ApplicationModel
 	 		# To remove read access, you should delete the record or create a noaccess access value.
 	 		self.access_id ||= DeliverableAccess.read.id
 	 	end
+
+	 	after_create :create_todo_folder
+	  def create_todo_folder
+	  	if self.responsible
+	  		log "Creating TODO"
+		    TodoFolder.new(self).delay.create_todo
+		  end
+	  end
+
+	  before_update :update_todo_folder
+	  def update_todo_folder
+	  	if self.responsible_changed?
+	  		if self.responsible
+	  			log "Creating TODO"
+	  			TodoFolder.new(self).delay.create_todo
+	  		else
+	  			log "Removing TODO"
+	  			TodoFolder.new(self).delay.remove_todo
+	  		end
+	  	end
+	  end
+
 end

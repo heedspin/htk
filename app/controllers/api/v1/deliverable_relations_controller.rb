@@ -10,6 +10,7 @@ class Api::V1::DeliverableRelationsController < Api::V1::ApiController
 	  end
 		@relation = DeliverableRelation.new(
 			message_thread_id: @message_thread.id,
+			message_id: params[:message_id],
 			source_deliverable_id: @source_deliverable.try(:id),
 			target_deliverable_id: @target_deliverable.id,
 			previous_sibling_id: @previous_sibling.try(:id),

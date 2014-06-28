@@ -18,6 +18,7 @@
 #  updated_at             :datetime         not null
 #  first_name             :string(255)
 #  last_name              :string(255)
+#  short_name             :string(255)
 #
 
 class User < ApplicationModel
@@ -26,9 +27,10 @@ class User < ApplicationModel
   # :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
+  validates_uniqueness_of :short_name
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :first_name, :last_name, :email, :password, :password_confirmation, :remember_me, :email_accounts_attributes
+  attr_accessible :first_name, :last_name, :email, :password, :password_confirmation, :remember_me, :email_accounts_attributes, :short_name
 
 	has_many :email_accounts, dependent: :destroy
 	accepts_nested_attributes_for :email_accounts
@@ -52,7 +54,16 @@ class User < ApplicationModel
   end
 
   def preferences
-    UserGroupConfig.find
+    UserPreferences.new(self)
   end
+
+  protected
+
+    before_save :set_short_name
+    def set_short_name
+      unless self.short_name.present?
+        self.short_name = "#{self.first_name} #{self.last_name[0]}"
+      end
+    end
 
 end

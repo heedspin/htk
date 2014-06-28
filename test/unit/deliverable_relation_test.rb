@@ -3,14 +3,16 @@
 # Table name: deliverable_relations
 #
 #  id                    :integer          not null, primary key
+#  status_id             :integer
+#  integer               :integer
 #  source_deliverable_id :integer
 #  target_deliverable_id :integer
 #  relation_type_id      :integer
+#  message_thread_id     :integer
+#  previous_sibling_id   :integer
+#  message_id            :integer
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
-#  previous_sibling_id   :integer
-#  message_thread_id     :integer
-#  status_id             :integer
 #
 
 require 'test_helper'

@@ -18,6 +18,7 @@
 #  updated_at             :datetime         not null
 #  first_name             :string(255)
 #  last_name              :string(255)
+#  short_name             :string(255)
 #
 
 require 'test_helper'

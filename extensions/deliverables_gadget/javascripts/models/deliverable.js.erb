@@ -9,7 +9,7 @@ function Deliverable(attributes) {
 Deliverable.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function(){ return "/api/v1/deliverables"; } },
 	type_key : { value : "deliverable" },
-	attribute_keys : { value : <%= (Deliverable.columns.map(&:name) + ['config_id']).to_json %> },
+	attribute_keys : { value : <%= (Deliverable.columns.map(&:name) + ['config_id', 'email_id']).to_json %> },
 	// write_attribute : {
 	// 	value : function(key, value) {
 	// 		HtkModel.prototype.write_attribute.apply(this, [key, value]);

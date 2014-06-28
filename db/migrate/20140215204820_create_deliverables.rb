@@ -2,7 +2,6 @@ class CreateDeliverables < ActiveRecord::Migration
   def change
   	create_table :deliverables do |t|
   		t.string :title
-  		t.integer :parent_deliverable_id
       t.timestamps
   	end
 

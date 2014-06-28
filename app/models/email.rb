@@ -82,6 +82,10 @@ class Email < ApplicationModel
 	def self.web_id(txt)
 		where :web_id => txt
 	end
+	def self.message(message)
+		message_id = message.is_a?(Message) ? message.id : message
+		where(message_id: message_id)
+	end
 
 	def participants
 		@participants ||= ((to_addresses || []) + [from_address] + (cc_addresses || [])).compact.uniq

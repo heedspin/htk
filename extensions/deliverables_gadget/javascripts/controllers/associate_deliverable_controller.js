@@ -18,7 +18,7 @@ AssociateDeliverableController.prototype.associateEvent = function(event) {
     htkLog("associateDeliverable: " + deliverable_id);
     Deliverable.prototype.find(deliverable_id, {
       success : function(results) {
-        _this.deliverableTree.createNode(null, results.deliverable, {
+        _this.deliverableTree.createNode(_this.router.currentEmail.message_id, null, results.deliverable, {
           success : function() {
             _this.router.deliverableTreeController.showDeliverable(results.deliverable);
           }

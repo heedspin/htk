@@ -60,13 +60,13 @@ StandardDeliverablesController.prototype.createEvent = function(event) {
   var _this = this;
   var form = $(event.target).closest("form");
   if (form.find("input[name=title]").val()) {
-    var matches = htkGetContentMatches().concat(form.formToNameValues());
-    var deliverable_type = new Object({ config_id : $("#deliverable-type-select").val() });
-    matches.push(deliverable_type);
-    var parent_id = _.find(matches, function(nv) { return nv.parent_id });
+    var params = form.formToNameValues();
+    params.push({ config_id : $("#deliverable-type-select").val() });
+    params.push({ email_id : this.router.currentEmail.id })
+    var parent_id = _.find(params, function(nv) { return nv.parent_id });
     if (parent_id) parent_id = parent_id.parent_id;
-    htkLog("createDeliverable: ", matches);
-    this.deliverable = new Deliverable(matches);
+    htkLog("createDeliverable: ", params);
+    this.deliverable = new Deliverable(params);
     this.deliverable.save({
       success : function(results) {
 			  htkLog("Created new deliverable: ", results.obj.data);

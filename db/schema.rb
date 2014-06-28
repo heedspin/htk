@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140622164056) do
+ActiveRecord::Schema.define(:version => 20140628161431) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -79,14 +79,16 @@ ActiveRecord::Schema.define(:version => 20140622164056) do
   end
 
   create_table "deliverable_relations", :force => true do |t|
+    t.integer  "status_id"
+    t.integer  "integer"
     t.integer  "source_deliverable_id"
     t.integer  "target_deliverable_id"
     t.integer  "relation_type_id"
+    t.integer  "message_thread_id"
+    t.integer  "previous_sibling_id"
+    t.integer  "message_id"
     t.datetime "created_at",            :null => false
     t.datetime "updated_at",            :null => false
-    t.integer  "previous_sibling_id"
-    t.integer  "message_thread_id"
-    t.integer  "status_id"
   end
 
   create_table "deliverable_types", :force => true do |t|
@@ -250,6 +252,7 @@ ActiveRecord::Schema.define(:version => 20140622164056) do
     t.datetime "updated_at",                             :null => false
     t.string   "first_name"
     t.string   "last_name"
+    t.string   "short_name"
   end
 
   add_index "users", ["email"], :name => "index_users_on_email", :unique => true

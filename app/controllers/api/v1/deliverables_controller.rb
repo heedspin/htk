@@ -48,21 +48,18 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   end
   
   def create
-  	email = Email.user(current_user).from_address(params[:from_address]).date(params[:date]).first
-		if email.nil?
-  		render json: { result: 'no email' }, status: 422
-  	else
-  		@deliverable = Deliverable.web_create(email: email, 
-  			current_user: current_user,  
-  			params: params)
-			deliverable_users = @deliverable.deliverable_users.select(&:significant?)
-			render json: { 
-				deliverable: DeliverableSerializer.new(@deliverable, root: false), 
-				deliverable_users: deliverable_users.map { |du| DeliverableUserSerializer.new(du, root: false) },
-				users: deliverable_users.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
-				deliverable_type: DeliverableTypeSerializer.new(@deliverable.deliverable_type , root: false)
-			}
-	  end
+  	# email = Email.user(current_user).from_address(params[:from_address]).date(params[:date]).first
+  	email = Email.user(current_user).find(params[:email_id])
+		@deliverable = Deliverable.web_create(email: email, 
+			current_user: current_user,  
+			params: params)
+		deliverable_users = @deliverable.deliverable_users.select(&:significant?)
+		render json: { 
+			deliverable: DeliverableSerializer.new(@deliverable, root: false), 
+			deliverable_users: deliverable_users.map { |du| DeliverableUserSerializer.new(du, root: false) },
+			users: deliverable_users.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
+			deliverable_type: DeliverableTypeSerializer.new(@deliverable.deliverable_type , root: false)
+		}
 	end
 
 	def update

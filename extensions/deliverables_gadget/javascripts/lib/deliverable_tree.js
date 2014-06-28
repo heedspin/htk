@@ -208,14 +208,15 @@ DeliverableTree.prototype.selectDeliverable = function(deliverable_id) {
   this.tree.tree('selectNode', node);
 }
 
-DeliverableTree.prototype.createNode = function(parent_id, deliverable, callbacks) {
+DeliverableTree.prototype.createNode = function(message_id, parent_id, deliverable, callbacks) {
   // htkLog("DeliverableTree.createNode with deliverable " + deliverable.id);
   deliverable.tree = this;
   var relation = new DeliverableRelation({
     source_deliverable_id : parent_id,
     target_deliverable_id : deliverable.id,
     relation_type_id : DeliverableRelation.prototype.parent_relation_type,
-    message_thread_id : this.message_thread_id
+    message_thread_id : this.message_thread_id,
+    message_id : message_id
   });
   var new_node = this.newNode(deliverable);
   if (this.deliverables.length == 0) {

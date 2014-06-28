@@ -3,23 +3,26 @@
 # Table name: deliverable_relations
 #
 #  id                    :integer          not null, primary key
+#  status_id             :integer
+#  integer               :integer
 #  source_deliverable_id :integer
 #  target_deliverable_id :integer
 #  relation_type_id      :integer
+#  message_thread_id     :integer
+#  previous_sibling_id   :integer
+#  message_id            :integer
 #  created_at            :datetime         not null
 #  updated_at            :datetime         not null
-#  previous_sibling_id   :integer
-#  message_thread_id     :integer
-#  status_id             :integer
 #
 
 class DeliverableRelation < ApplicationModel
   belongs_to_active_hash :relation_type, :class_name => 'DeliverableRelationType'
 	belongs_to :source_deliverable, class_name: 'Deliverable', foreign_key: :source_deliverable_id
 	belongs_to :target_deliverable, class_name: 'Deliverable', foreign_key: :target_deliverable_id
-  attr_accessible :source_deliverable_id, :target_deliverable_id, :relation_type_id, :previous_sibling_id, :message_thread_id, :status_id
+  attr_accessible :source_deliverable_id, :target_deliverable_id, :relation_type_id, :previous_sibling_id, :message_thread_id, :message_id, :status_id
   belongs_to :previous_sibling, class_name: 'DeliverableRelation', foreign_key: :previous_sibling_id
   belongs_to :message_thread
+  belongs_to :message
   belongs_to_active_hash :status, :class_name => 'LifeStatus'
 
   def self.deliverables(deliverables)
@@ -41,6 +44,8 @@ class DeliverableRelation < ApplicationModel
   def self.top_level
     where relation_type_id: DeliverableRelationType.parent.id, source_deliverable_id: nil
   end
+  scope :by_date, order(:created_at)
+  scope :tree, where(relation_type_id: DeliverableRelationType.parent.id)
 
   def is_top_level?
     self.relation_type.try(:parent?) && self.source_deliverable_id.nil?

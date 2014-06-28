@@ -115,4 +115,11 @@ class Deliverable < ApplicationModel
       end
     end
   end
+
+  def complete?
+    self.completed_by_id.present?
+  end
+  def incomplete?
+    self.completed_by_id.nil?
+  end
 end

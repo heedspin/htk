@@ -22,6 +22,7 @@ ActiveAdmin.register User do
 		f.inputs do
 			f.input :first_name
 			f.input :last_name
+			f.input :short_name
 			f.input :email
 			f.input :password
 			f.input :password_confirmation
@@ -40,6 +41,7 @@ ActiveAdmin.register User do
 	show do |ad|
     attributes_table do
     	row :name
+    	row :short_name
       row :email
       row :sign_in_count
       row :current_sign_in_at

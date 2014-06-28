@@ -153,7 +153,7 @@ DeliverableTreeController.prototype.newDeliverable = function(event) {
 }
 
 DeliverableTreeController.prototype.addDeliverable = function(parent_id, deliverable, callbacks) {
-  this.deliverableTree.createNode(parent_id, deliverable, callbacks);
+  this.deliverableTree.createNode(this.router.currentEmail.message_id, parent_id, deliverable, callbacks);
 }
 
 DeliverableTreeController.prototype.getDeliverable = function(deliverable_id){
