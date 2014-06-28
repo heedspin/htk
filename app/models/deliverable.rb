@@ -20,7 +20,7 @@ class Deliverable < ApplicationModel
   include Plutolib::SerializedAttributes
   has_many :deliverable_users, dependent: :destroy
   has_many :users, through: :deliverable_users
-  attr_accessible :title, :status, :status_id, :description
+  attr_accessible :title, :status, :status_id, :description, :completed_by_id
   # has_many :deliverable_messages, dependent: :destroy
   # has_many :messages, through: :deliverable_messages
   belongs_to :completed_by, class_name: 'User', foreign_key: :completed_by_id
@@ -102,18 +102,10 @@ class Deliverable < ApplicationModel
     self.status_id = LifeStatus.deleted.id
     self.target_relations.each(&:destroy)
     self.source_relations.each(&:destroy)
-    self.save!
-  end
-
-  before_update :update_deliverable_folders
-  def update_deliverable_folders
-    if self.abbreviation_changed? or (self.abbreviation.blank? and self.title_changed?)
-      self.target_relations.top_level.each do |relation| 
-        group_config = self.users.first.preferences # TODO: fix me?
-        from_deliverable_path = group_config.deliverable_folder_path(self, { folder_name: self.folder_name(true) })
-        relation.rename_folder_from(from_deliverable_path)
-      end
+    if self.is_assigned?
+      TodoFolder.new(self).delay.remove
     end
+    self.save!
   end
 
   def complete?
@@ -122,4 +114,26 @@ class Deliverable < ApplicationModel
   def incomplete?
     self.completed_by_id.nil?
   end
+  def is_assigned?
+    (self.deliverable_users.responsible.count > 0)
+  end
+
+  before_update :update_folders
+  def update_folders
+    if self.abbreviation_changed? or (self.abbreviation.blank? and self.title_changed?)
+      self.target_relations.top_level.each do |relation| 
+        group_config = self.users.first.preferences # TODO: fix me?
+        from_deliverable_path = group_config.deliverable_folder_path(self, { folder_name: self.folder_name(true) })
+        relation.rename_folder_from(from_deliverable_path)
+      end
+    end
+    if self.is_assigned? and self.completed_by_id_changed?
+      if self.complete?
+        TodoFolder.new(self).delay.remove
+      else
+        TodoFolder.new(self).delay.create
+      end
+    end
+  end
+
 end

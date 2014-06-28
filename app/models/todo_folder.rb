@@ -3,8 +3,12 @@ require 'plutolib/stateless_delayed_job'
 class TodoFolder
   include Plutolib::StatelessDelayedJob
   attr :deliverable_user
-  def initialize(deliverable_user)
-  	@deliverable_user = deliverable_user
+  def initialize(thing)
+    if thing.is_a?(DeliverableUser)
+      @deliverable_user = thing
+    elsif thing.is_a?(Deliverable)
+      @deliverable = thing
+    end
   end
 
   def deliverable
@@ -12,7 +16,7 @@ class TodoFolder
   end
 
   def each_email(&block)
-    first_relation = self.deliverable.target_relations.tree.not_deleted.by_date.first
+    first_relation = self.deliverable.target_relations.tree.by_date.first
     if message_id = first_relation.try(:message_id)
       self.deliverable.users.each do |user|
         user.email_accounts.each do |email_account|
@@ -26,24 +30,35 @@ class TodoFolder
     end
   end
 
-  def create_todo
+  def each_user(&block)
+    if self.deliverable_user
+      yield(self.deliverable_user.user)
+    else
+      self.deliverable.users.each(&block)
+    end
+  end
+
+  def create
     if self.deliverable.complete?
       log "Already complete"
     else
       self.each_email do |email_account, email|
-        todo_folder = email_account.user.preferences.todo_folder_path(self.deliverable_user.user)
-        log "Create TODO(#{email_account.username}): #{email.subject} => #{todo_folder.join('/')}"
-        email_account.assign_folder(todo_folder, email)
+        self.each_user do |user|
+          todo_folder = email_account.user.preferences.todo_folder_path(user)
+          log "Create TODO(#{email_account.username}): #{email.subject} => #{todo_folder.join('/')}"
+          email_account.assign_folder(todo_folder, email)
+        end
       end
     end
   end
 
-  def remove_todo
+  def remove
     self.each_email do |email_account, email|
-      email_account = email.email_account
-      todo_folder = email_account.user.preferences.todo_folder_path(self.deliverable_user.user)
-      log "Remove TODO(#{email_account.username}): #{email.subject} X-> #{todo_folder.join('/')}"
-      email_account.unassign_folder(todo_folder, email)
+      self.each_user do |user|
+        todo_folder = email_account.user.preferences.todo_folder_path(user)
+        log "Remove TODO(#{email_account.username}): #{email.subject} X-> #{todo_folder.join('/')}"
+        email_account.unassign_folder(todo_folder, email)
+      end
     end
   end
 end

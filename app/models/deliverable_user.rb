@@ -20,6 +20,8 @@ class DeliverableUser < ApplicationModel
   	self.access.try(:owner?) || self.responsible
   end
 
+ 	scope :responsible, where(responsible: true)
+
   protected
 
 	 	before_save :ensure_read_access
@@ -32,19 +34,19 @@ class DeliverableUser < ApplicationModel
 	  def create_todo_folder
 	  	if self.responsible
 	  		log "Creating TODO"
-		    TodoFolder.new(self).delay.create_todo
+		    TodoFolder.new(self).delay.create
 		  end
 	  end
 
 	  before_update :update_todo_folder
 	  def update_todo_folder
-	  	if self.responsible_changed?
+	  	if self.responsible_changed? and self.deliverable.incomplete?
 	  		if self.responsible
 	  			log "Creating TODO"
-	  			TodoFolder.new(self).delay.create_todo
+	  			TodoFolder.new(self).delay.create
 	  		else
 	  			log "Removing TODO"
-	  			TodoFolder.new(self).delay.remove_todo
+	  			TodoFolder.new(self).delay.remove
 	  		end
 	  	end
 	  end

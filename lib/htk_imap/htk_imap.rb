@@ -58,15 +58,26 @@ class HtkImap < Net::IMAP
     folder_path
   end
 
+  def safe_examine(folder_name)
+    begin
+      self.examine(folder_name)
+      true
+    rescue
+      log_error "Failed to examine #{folder_name}", $!
+      false
+    end
+  end
+
   def delete_if_empty(folder_path_array)
     folder_path = folder_path_array.join('/')
-    self.examine(folder_path)
-    remaining = self.uid_search(["ALL"])
-    if remaining.size == 0
-      log "removing empty folder #{folder_path}"
-      self.delete(folder_path)
-    else
-      log "still #{remaining.size} emails left in folder #{folder_path}"
+    if self.safe_examine(folder_path)
+      remaining = self.uid_search(["ALL"])
+      if remaining.size == 0
+        log "removing empty folder #{folder_path}"
+        self.delete(folder_path)
+      else
+        log "still #{remaining.size} emails left in folder #{folder_path}"
+      end
     end
   end
 
