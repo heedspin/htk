@@ -32,7 +32,7 @@ class DeliverableUser < ApplicationModel
 
 	 	after_create :create_todo_folder
 	  def create_todo_folder
-	  	if self.responsible
+	  	if self.deliverable.has_behavior?(:todo) and self.responsible
 	  		log "Creating TODO"
 		    TodoFolder.new(self).delay.create
 		  end
@@ -40,7 +40,7 @@ class DeliverableUser < ApplicationModel
 
 	  before_update :update_todo_folder
 	  def update_todo_folder
-	  	if self.responsible_changed? and self.deliverable.incomplete?
+	  	if self.deliverable.has_behavior?(:todo) and self.responsible_changed? and self.deliverable.incomplete?
 	  		if self.responsible
 	  			log "Creating TODO"
 	  			TodoFolder.new(self).delay.create

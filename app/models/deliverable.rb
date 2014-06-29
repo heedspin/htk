@@ -118,6 +118,10 @@ class Deliverable < ApplicationModel
     (self.deliverable_users.responsible.count > 0)
   end
 
+  def has_behavior?(key)
+    self.deliverable_type.has_behavior?(key)
+  end
+
   before_update :update_folders
   def update_folders
     if self.abbreviation_changed? or (self.abbreviation.blank? and self.title_changed?)

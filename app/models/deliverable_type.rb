@@ -17,4 +17,9 @@ class DeliverableType < ApplicationModel
 	def self.deliverable_types(types)
 		where(deliverable_type_config_id: types.uniq.map { |type| DeliverableTypeConfig.where(ar_type: type).first.try(:id) })
 	end
+
+  def has_behavior?(key)
+    self.deliverable_type_config.has_behavior?(key)
+  end
+
 end

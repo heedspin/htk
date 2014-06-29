@@ -4,12 +4,20 @@ class DeliverableTypeConfig < ActiveHash::Base
     { :id => 1, 
     	:name => 'Standard', 
     	:js_controller => 'StandardDeliverablesController', 
-    	:ar_type => 'StandardDeliverable'
+    	:ar_type => 'Deliverables::Standard',
+      :behaviors => [:todo]
     },
     { :id => 2, 
     	:name => 'LXD Opportunity', 
     	:js_controller => 'LxdOpportunitiesController', 
-    	:ar_type => 'LxdOpportunity'
+    	:ar_type => 'Deliverables::LxdOpportunity',
+      :behaviors => [:todo]
+    },
+    { :id => 3,
+      :name => 'Project',
+      :js_controller => 'ProjectsController',
+      :ar_type => 'Deliverables::Project',
+      :behaviors => []
     }
   ]
   include Plutolib::ActiveHashMethods
@@ -20,5 +28,9 @@ class DeliverableTypeConfig < ActiveHash::Base
 
   def deliverable_type
     @deliverable_type ||= DeliverableType.where(deliverable_type_config_id: self.id).first
+  end
+
+  def has_behavior?(key)
+    self.behaviors.include?(key)
   end
 end

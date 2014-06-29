@@ -7,3 +7,4 @@
 //= require ./associate_deliverable_controller.js
 //= require ./lxd_opportunities_controller.js
 //= require ./standard_deliverables_controller.js
+//= require ./projects_controller.js

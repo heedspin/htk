@@ -14,5 +14,5 @@
 #  status_id       :integer
 #
 
-class LxdOpportunity < Deliverable
+class Deliverables::Project < Deliverable
 end
