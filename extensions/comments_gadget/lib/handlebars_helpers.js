@@ -48,3 +48,4 @@ Handlebars.registerHelper('if_equal', function(a,b,options) {
 		return options.inverse(this);
 	}
 });
+

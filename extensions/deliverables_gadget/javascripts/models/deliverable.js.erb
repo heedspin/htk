@@ -4,12 +4,13 @@ function Deliverable(attributes) {
 	this.responsible_users = [];
 	this.tree = null;
 	this.parent_relation = null;
+	this.company_relation = null;
 }
 
 Deliverable.prototype = Object.create(HtkModel.prototype, {
 	api_url : {	value : function(){ return "/api/v1/deliverables"; } },
 	type_key : { value : "deliverable" },
-	attribute_keys : { value : <%= (Deliverable.columns.map(&:name) + ['config_id', 'email_id']).to_json %> },
+	attribute_keys : { value : <%= (Deliverable.columns.map(&:name) + ['deliverable_type_id', 'email_id']).to_json %> },
 	// write_attribute : {
 	// 	value : function(key, value) {
 	// 		HtkModel.prototype.write_attribute.apply(this, [key, value]);
@@ -35,15 +36,21 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 					_this.responsible_users.push(du);
 				}
 			});
-			this.parent_relation = DeliverableRelation.prototype.find_cached_parent(this);
+			_.each(DeliverableRelation.prototype.all_cached({ target_deliverable_id : this.id }), function(relation) {
+				if (relation.is_parent())
+					_this.parent_relation = relation;
+				else if (relation.is_company())
+					_this.company_relation = relation;
+			});
 			this.deliverable_type = DeliverableType.prototype.find_cached(this.deliverable_type_id);
 		}
-	}	
+	}
 });
 
 Deliverable.prototype.getParent = function() {
 	if (this.parent_relation && this.parent_relation.source_deliverable_id) {
-		return this.tree.getDeliverable(this.parent_relation.source_deliverable_id);
+		return Deliverable.prototype.find_cached(this.parent_relation.source_deliverable_id)
+		// return this.tree.getDeliverable(this.parent_relation.source_deliverable_id);
 	} else {
 		return null;
 	}
@@ -71,3 +78,7 @@ Deliverable.prototype.bindComments = function(router, container) {
 	});
 }
 
+Deliverable.prototype.canHaveCompanies = function() {
+	// TODO: Move this to deliverable type: Only projects can do this.
+	return this.parent_relation.source_deliverable_id == null;
+}

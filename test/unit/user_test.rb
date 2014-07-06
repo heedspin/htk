@@ -19,6 +19,7 @@
 #  first_name             :string(255)
 #  last_name              :string(255)
 #  short_name             :string(255)
+#  user_group_id          :integer
 #
 
 require 'test_helper'

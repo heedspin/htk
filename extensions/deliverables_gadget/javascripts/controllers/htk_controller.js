@@ -1,5 +1,5 @@
-function HtkController(router) {
-	this.router = router;	
+function HtkController() {
+	this.router = DeliverablesRouter.prototype.instance;
 }
 
 HtkController.prototype = Object.create(null);

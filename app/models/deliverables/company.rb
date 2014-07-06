@@ -15,7 +15,7 @@
 #  user_group_id   :integer
 #
 
-class Deliverables::Standard < Deliverable
+class Deliverables::Company < Deliverable
   def self.create_from_email(args)
   	email = args[:email] || (raise ':email required')
   	current_user = args[:current_user] || (raise ':current_user required')
@@ -31,18 +31,12 @@ class Deliverables::Standard < Deliverable
     deliverable.update_attributes(params.select { |k,v| accessible_attributes.include?(k.to_s) })
     # id = args[:id]
     # deliverable.id = id if id.present?
-  	Deliverable.transaction do
-  		deliverable.save!
-  		# email.message.message_thread.deliverables << deliverable
-  		User.email_accounts(email.participants).accessible_to(current_user).each do |recipient|
-  			access = if recipient.id == current_user.id
-  				DeliverableAccess.owner
-  			else
-  				DeliverableAccess.edit
-  			end
-  			deliverable.deliverable_users.create!(user_id: recipient.id, access_id: access.id)
-  		end
-  	end
+  	# Deliverable.transaction do
+  	# 	deliverable.save!
+  	# 	deliverable.permissions.create!(group_id: current_user.company_group_id, 
+  	# 		access_id: DeliverableAccess.edit.id)
+  	# 	end
+  	# end
   	deliverable
   end
 end

@@ -46,3 +46,11 @@ Handlebars.registerHelper('simple_format', function(text) {
 Handlebars.registerHelper('completion_comment_title', function(comment_type) {
 	return new Handlebars.SafeString(comment_type.name);
 });
+
+Handlebars.registerHelper('canHaveCompanies', function(deliverable,options) {
+	if (deliverable.canHaveCompanies()) {
+		return options.fn(this);
+	} else {
+		return options.inverse(this);
+	}
+});

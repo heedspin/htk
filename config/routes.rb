@@ -14,6 +14,7 @@ Htk::Application.routes.draw do
       resources :messages, only: [:index]
       resources :emails, only: [:index]
       resources :deliverable_types, :only => :index
+      resources :companies, controller: 'deliverables/companies'
     end
   end 
 

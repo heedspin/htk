@@ -12,6 +12,7 @@
 #  abbreviation    :string(255)
 #  completed_by_id :integer
 #  status_id       :integer
+#  user_group_id   :integer
 #
 
 require 'plutolib/serialized_attributes'
@@ -33,6 +34,7 @@ class Deliverable < ApplicationModel
   belongs_to_active_hash :status, :class_name => 'LifeStatus'
   # belongs_to :deliverable_type
   # validates :deliverable_type_id, presence: true
+  belongs_to :user_group
   validates :title, presence: true
 
   def deliverable_type
@@ -46,35 +48,6 @@ class Deliverable < ApplicationModel
   scope :not_deleted, where(['deliverables.status_id != ?', LifeStatus.deleted.id])
   scope :by_created_at_desc, order('deliverables.created_at desc')
 
-  def self.web_create(args)
-  	email = args[:email] || (raise ':email required')
-  	current_user = args[:current_user] || (raise ':current_user required')
-    params = args[:params] || {}
-    deliverable_type = if config_id = params[:config_id]
-      DeliverableTypeConfig.find(config_id).ar_type_class
-    else
-      DeliverableTypeConfig.standard.ar_type_class
-    end
-  	deliverable = deliverable_type.new
-    deliverable.status_id = params[:status_id] || LifeStatus.active.id
-    accessible_attributes = deliverable_type.accessible_attributes.select(&:present?)
-    deliverable.update_attributes(params.select { |k,v| accessible_attributes.include?(k.to_s) })
-    # id = args[:id]
-    # deliverable.id = id if id.present?
-  	Deliverable.transaction do
-  		deliverable.save!
-  		# email.message.message_thread.deliverables << deliverable
-  		User.email_accounts(email.participants).accessible_to(current_user).each do |recipient|
-  			access = if recipient.id == current_user.id
-  				DeliverableAccess.owner
-  			else
-  				DeliverableAccess.edit
-  			end
-  			deliverable.deliverable_users.create!(user_id: recipient.id, access_id: access.id)
-  		end
-  	end
-  	deliverable
-  end
   def self.editable_by(user)
     user_id = user.is_a?(User) ? user.id : user
     includes(:deliverable_users).where(deliverable_users: { user_id: user_id, access_id: [DeliverableAccess.owner.id, DeliverableAccess.edit.id] })

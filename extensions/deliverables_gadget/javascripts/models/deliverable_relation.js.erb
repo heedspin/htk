@@ -13,7 +13,13 @@ DeliverableRelation.prototype = Object.create(HtkModel.prototype, {
 	attribute_keys : { value : <%= DeliverableRelation.columns.map(&:name).to_json %> }
 });
 
-DeliverableRelation.prototype.parent_relation_type = "<%= DeliverableRelationType.parent.id %>";
+<% DeliverableRelationType.all.each do |relation_type| %>
+DeliverableRelation.prototype.<%= relation_type.cmethod %>_relation_type = "<%= relation_type.id %>";
+DeliverableRelation.prototype.is_<%= relation_type.cmethod %> = function() {
+	return this.relation_type_id == <%= relation_type.id %>;
+}
+<% end %>
+
 
 // DeliverableRelation.prototype.set_deliverables = function(deliverables) {
 // 	var _this = this;
@@ -25,11 +31,17 @@ DeliverableRelation.prototype.parent_relation_type = "<%= DeliverableRelationTyp
 // 	this.source_deliverable_id = parent_id;
 // }
 
-DeliverableRelation.prototype.find_cached_parent = function(deliverable) {
-	var cached = HtkObjectCache.prototype.types[DeliverableRelation.prototype.type_key];
-	for (var property in cached) {
-		var relation = cached[property];
-		if (relation && relation.target_deliverable_id == deliverable.id && relation.relation_type == DeliverableRelation.prototype.parent_relation_type)
-			return relation;
+DeliverableRelation.prototype.find_cached_targets = function(deliverable) {
+	var deliverable_relations = HtkObjectCache.prototype.types[DeliverableRelation.prototype.type_key];
+	var results = [];
+	for (var property in deliverable_relations) {
+		var relation = deliverable_relations[property];
+		if (relation && relation.target_deliverable_id == deliverable.id)
+			results.push(relation);
 	}
+	return results;
 }
+
+// DeliverableRelation.prototype.is_top_level = function() {
+// 	return this.is_parent() && this.source_deliverable_id == null;
+// }

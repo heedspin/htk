@@ -47,16 +47,16 @@ class DeliverableRelation < ApplicationModel
   scope :by_date, order(:created_at)
   scope :tree, where(relation_type_id: DeliverableRelationType.parent.id)
 
-  def is_top_level?
-    DeliverableRelation.is_top_level?(self.relation_type_id, self.source_deliverable_id)
+  def is_top_level
+    DeliverableRelation.is_top_level(self.relation_type_id, self.source_deliverable_id)
   end
-  def self.is_top_level?(relation_type_id, source_deliverable_id)
+  def self.is_top_level(relation_type_id, source_deliverable_id)
     DeliverableRelationType.find(relation_type_id).try(:parent?) && source_deliverable_id.nil?
   end
 
   after_create :copy_to_folders
   def copy_to_folders
-    if is_top_level?
+    if self.is_top_level
       DeliverableFolder.new(self).delay.copy_all_to_folder
     end
   end
@@ -64,11 +64,11 @@ class DeliverableRelation < ApplicationModel
   before_update :update_folders
   def update_folders
     if self.relation_type_id_changed? or self.source_deliverable_id_changed?
-      was_top_level = DeliverableRelation.is_top_level?(self.relation_type_id_was, self.source_deliverable_id_was)
-      is_top_level = self.is_top_level?
-      if was_top_level and !is_top_level
+      was_tl = DeliverableRelation.is_top_level(self.relation_type_id_was, self.source_deliverable_id_was)
+      is_tl = self.is_top_level
+      if was_tl and !is_tl
         self.remove_all_from_folder
-      elsif !was_top_level and is_top_level
+      elsif !was_tl and is_tl
         self.copy_to_folders
       end
     end
@@ -79,7 +79,7 @@ class DeliverableRelation < ApplicationModel
   end
 
   def rename_folder_from(from_deliverable_path)
-    if self.is_top_level?
+    if self.is_top_level
       DeliverableFolder.new(self).delay.rename_folder(from_deliverable_path)
     end
   end
@@ -87,7 +87,7 @@ class DeliverableRelation < ApplicationModel
   def destroy
     self.status_id = LifeStatus.deleted.id
     self.save!
-    if self.is_top_level?
+    if self.is_top_level
       self.remove_all_from_folder
     end
   end

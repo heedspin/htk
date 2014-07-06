@@ -50,16 +50,22 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   def create
   	# email = Email.user(current_user).from_address(params[:from_address]).date(params[:date]).first
   	email = Email.user(current_user).find(params[:email_id])
-		@deliverable = Deliverable.web_create(email: email, 
-			current_user: current_user,  
-			params: params)
-		deliverable_users = @deliverable.deliverable_users.select(&:significant?)
-		render json: { 
-			deliverable: DeliverableSerializer.new(@deliverable, root: false), 
-			deliverable_users: deliverable_users.map { |du| DeliverableUserSerializer.new(du, root: false) },
-			users: deliverable_users.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
-			deliverable_type: DeliverableTypeSerializer.new(@deliverable.deliverable_type , root: false)
-		}
+  	deliverable_type_id = params[:deliverable_type_id]
+  	if deliverable_type_config = DeliverableTypeConfig.find(deliverable_type_id)
+  		@deliverable = deliverable_type_config.ar_type_class.create_from_email(
+  			email: email, 
+				current_user: current_user,  
+				params: params)
+			deliverable_users = @deliverable.deliverable_users.select(&:significant?)
+			render json: { 
+				deliverable: DeliverableSerializer.new(@deliverable, root: false), 
+				deliverable_users: deliverable_users.map { |du| DeliverableUserSerializer.new(du, root: false) },
+				users: deliverable_users.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
+				deliverable_type: DeliverableTypeSerializer.new(@deliverable.deliverable_type , root: false)
+			}
+		else
+			render json: { errors: ["Invalid deliverable type id '#{deliverable_type_id}'"] }, status: 422
+		end
 	end
 
 	def update

@@ -1,5 +1,5 @@
-function DeliverablesController(router) {
-  HtkController.call(this, router);
+function DeliverablesController() {
+  HtkController.call(this);
   this.deliverableType = null;
   this.deliverable = null;
   this.deliverableTreeController = this.router.deliverableTreeController;
@@ -91,8 +91,10 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
 			container.append(show_view);
 			var comments_container = show_view.find("div.comments");
 			if (comments_container.length > 0) {
-				this.deliverable.bindComments(this.router, comments_container);				
+				this.deliverable.bindComments(this.router, comments_container);
 			}
+			var companies_controller = CompaniesController.prototype.getController(this.deliverable);
+			companies_controller.showCompany(show_view.find(".htk-company-placeholder"));
 			return show_view;
 		},
 	},
@@ -114,7 +116,11 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
 		}	 
 	},
 	populateAssignedUsersSelect : {
-		value : function(edit_form) {
+		value : function(edit_form, selectedText, noneSelectedText) {
+			if (!selectedText)
+				selectedText = "# Assigned";
+			if (!noneSelectedText)
+				noneSelectedText = "Assign Users";
 		  var _this = this;
 		  User.prototype.all(null, {
 		  	success : function(results) {
@@ -126,8 +132,8 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
 		      var select = edit_form.find("select[name=assigned_users]");
 		      select.empty().append(options);
 				  select.multiselect({
-						selectedText: "# Assigned",
-						noneSelectedText: "Assign Users"
+						selectedText: selectedText,
+						noneSelectedText: noneSelectedText
 					});//.multiselectfilter();
 		  	}
 		  });

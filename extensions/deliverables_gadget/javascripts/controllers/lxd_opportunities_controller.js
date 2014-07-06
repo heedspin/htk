@@ -1,5 +1,5 @@
-function LxdOpportunitiesController(router) {
-  HtkController.call(this, router);
+function LxdOpportunitiesController() {
+  HtkController.call(this);
 }
 
 LxdOpportunitiesController.prototype = Object.create(DeliverablesController.prototype);

@@ -1,5 +1,5 @@
-function DeliverableTreeController(router) {
-  HtkController.call(this, router);
+function DeliverableTreeController() {
+  HtkController.call(this);
   this.deliverableTree = new DeliverableTree(this);
   this.loadDeliverables();
   this.newView = null;

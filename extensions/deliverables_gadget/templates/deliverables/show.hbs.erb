@@ -6,6 +6,9 @@
 			{{#join responsible_users ", "}}{{user.first_name}}{{/join}}
 		{{/if}}
 	</p>
+	{{#canHaveCompanies ../deliverable}}
+		<div class="htk-company-placeholder" />
+	{{/canHaveCompanies}}
 	<h2>{{title}}</h2>
 {{/with}}
 {{#with deliverable}}

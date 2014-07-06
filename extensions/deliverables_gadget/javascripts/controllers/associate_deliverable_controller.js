@@ -1,6 +1,6 @@
-function AssociateDeliverableController(router) {
-  HtkController.call(this, router);
-  this.deliverableTree = router.deliverableTreeController.deliverableTree;
+function AssociateDeliverableController() {
+  HtkController.call(this);
+  this.deliverableTree = this.router.deliverableTreeController.deliverableTree;
   $("#htk-col2").on("click", ".htk-disassociate", $.proxy(this.showDisassociateEvent, this));
   // $("#htk-dcontainer").on("click", ".htka-fd", $.proxy(this.showAssociateEvent, this));
   this.disassociateViewContainer = $("#htk-col3");

@@ -1,11 +1,14 @@
 /*= require jqtree */
 /*= require_self */
 
+$normal-font-size: .75em;
+$link-color: #995533;
+
 #htk-dcontainer {
 	padding: 5px 5px 5px 10px;
 	background-color: #efefef;
  	overflow: hidden;
-	font-size: .75em;
+	font-size: $normal-font-size;
 	/*margin: 0 0 0 15px;	*/
 }
 
@@ -72,6 +75,11 @@ select[name=assigned_users] {
 div.htk-show p {
 	width: 30em;
 }
+div.htk-show h3 span {
+	font-size: $normal-font-size;
+	font-weight: normal;
+	color: $link-color;
+}
 
 div.comment {
 	border-top: 1px dotted #000000;
@@ -84,4 +92,11 @@ div.comment {
 
 span.assigned {
 	font-style: italic;
+}
+
+ul.form-actions {
+	list-style: none;
+}
+ul.form-actions li {
+	display: inline;
 }

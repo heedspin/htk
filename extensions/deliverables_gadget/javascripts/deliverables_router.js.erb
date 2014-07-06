@@ -1,7 +1,5 @@
-var htkRouter = null;
-
 function deliverablesGadgetReady() {
-  htkRouter = new DeliverablesRouter();
+  DeliverablesRouter.prototype.instance = new DeliverablesRouter();
 }
 
 function DeliverablesRouter() {
@@ -23,6 +21,8 @@ function DeliverablesRouter() {
 
 DeliverablesRouter.prototype = Object.create(null);
 
+DeliverablesRouter.prototype.instance = null;
+
 DeliverablesRouter.prototype.loadGadget = function() {
   var _this = this;
   htkRequest("GET", "/api/v1/users/current", null, function(obj) {
@@ -42,10 +42,10 @@ DeliverablesRouter.prototype.loadGadget = function() {
 }
 
 DeliverablesRouter.prototype.setupControllers = function() {
-  this.deliverableTreeController = new DeliverableTreeController(this);
-  this.completionCommentsController = new CompletionCommentsController(this);
-  this.associateDeliverableController = new AssociateDeliverableController(this);
-  this.commentsController = new CommentsController(this);
+  this.deliverableTreeController = new DeliverableTreeController();
+  this.completionCommentsController = new CompletionCommentsController();
+  this.associateDeliverableController = new AssociateDeliverableController();
+  this.commentsController = new CommentsController();
 }
 
 DeliverablesRouter.prototype.loadCurrentEmail = function(callbacks) {

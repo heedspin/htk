@@ -1,5 +1,5 @@
-function StandardDeliverablesController(router) {
-  DeliverablesController.call(this, router);
+function StandardDeliverablesController() {
+  DeliverablesController.call(this);
   this.editViews = new Object();
   this.newView = null;
 }
@@ -61,7 +61,7 @@ StandardDeliverablesController.prototype.createEvent = function(event) {
   var form = $(event.target).closest("form");
   if (form.find("input[name=title]").val()) {
     var params = form.formToNameValues();
-    params.push({ config_id : $("#deliverable-type-select").val() });
+    params.push({ deliverable_type_id : $("#deliverable-type-select").val() });
     params.push({ email_id : this.router.currentEmail.id })
     var parent_id = _.find(params, function(nv) { return nv.parent_id });
     if (parent_id) parent_id = parent_id.parent_id;

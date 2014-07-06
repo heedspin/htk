@@ -1,8 +1,8 @@
-function CompletionCommentsController(router) {
-  HtkController.call(this, router);
+function CompletionCommentsController() {
+  HtkController.call(this);
   this.completeView = null;
   this.incompleteView = null;
-  this.deliverableTreeController = router.deliverableTreeController;
+  this.deliverableTreeController = this.router.deliverableTreeController;
   $("#htk-col2").on("click", ".htk-complete", $.proxy(this.newCompletionComment, this));
   $("#htkv-incomplete > form > button").click($.proxy(this.createCompletionComment, this));  
 }

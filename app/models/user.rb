@@ -19,6 +19,7 @@
 #  first_name             :string(255)
 #  last_name              :string(255)
 #  short_name             :string(255)
+#  user_group_id          :integer
 #
 
 class User < ApplicationModel
@@ -37,6 +38,8 @@ class User < ApplicationModel
 
 	has_many :signed_request_users
 	accepts_nested_attributes_for :signed_request_users
+
+  belongs_to :user_group
 
   def name
     "#{self.first_name} #{self.last_name}".strip

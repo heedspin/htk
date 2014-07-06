@@ -8,3 +8,4 @@
 //= require ./lxd_opportunities_controller.js
 //= require ./standard_deliverables_controller.js
 //= require ./projects_controller.js
+//= require ./companies_controller.js
