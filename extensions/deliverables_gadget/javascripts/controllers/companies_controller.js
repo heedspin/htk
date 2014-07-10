@@ -62,11 +62,11 @@ CompaniesController.prototype.createCompany = function(container, deliverable_id
     params.push({ email_id : this.router.currentEmail.id })
     var parent_id = _.find(params, function(nv) { return nv.parent_id });
     if (parent_id) parent_id = parent_id.parent_id;
-    htkLog("createDeliverable: ", params);
+    htkLog("createCompany: ", params);
     this.deliverable = new Deliverable(params);
     this.deliverable.save({
       success : function(results) {
-        htkLog("Created new deliverable: ", results.obj.data);
+        htkLog("Created new company: ", results.obj.data);
         _this.deliverableTreeController.addDeliverable(parent_id, results.deliverable, {
           success : function(results) {
             _this.synchronize_assigned_users(form.find("select[name=assigned_users]").val());
@@ -74,9 +74,9 @@ CompaniesController.prototype.createCompany = function(container, deliverable_id
         });
       }, 
       error : function(results) {
-        _this.setStatusMsg("Create deliverable failed.");
+        _this.setStatusMsg("Create company failed.");
         // adjust_window_height();
-        htkLog("Create deliverable response: ", results.obj);
+        htkLog("Create company response: ", results.obj);
       }
     });
   } else {

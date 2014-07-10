@@ -42,10 +42,17 @@ class DeliverableRelation < ApplicationModel
     where :message_thread_id => mti
   end
   def self.top_level
-    where relation_type_id: DeliverableRelationType.parent.id, source_deliverable_id: nil
+    parent_relation.where(source_deliverable_id: nil)
+  end
+  def self.parent_relation
+    where relation_type_id: DeliverableRelationType.parent.id
   end
   scope :by_date, order(:created_at)
   scope :tree, where(relation_type_id: DeliverableRelationType.parent.id)
+
+  def self.message_or_thread(message_id, message_thread_id)
+    where ["deliverable_relations.message_id = ? or deliverable_relations.message_thread_id = ?", message_id, message_thread_id]
+  end
 
   def is_top_level
     DeliverableRelation.is_top_level(self.relation_type_id, self.source_deliverable_id)
@@ -90,5 +97,35 @@ class DeliverableRelation < ApplicationModel
     if self.is_top_level
       self.remove_all_from_folder
     end
+  end
+
+  def self.get_trees(*relations)
+    relations = relations.flatten
+    all_relations = Hash.new
+    all_deliverables = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten
+    relations.each { |r| all_relations[r.id] = r }
+    while true
+      relations = DeliverableRelation.parent_relation.where [
+        'deliverable_relations.source_deliverable_id in (?) or deliverable_relations.target_deliverable_id in (?)',
+        all_deliverables, all_deliverables
+      ]
+      if all_relations.size > 0
+        relations = relations.where [ 'deliverable_relations.id not in (?)', all_relations.keys ]
+      end
+      found_new_relation = false
+      relations.each { |r| 
+        unless all_relations.member?(r.id)
+          found_new_relation = true
+          all_relations[r.id] = r 
+        end
+      }
+      new_deliverables = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten - all_deliverables
+      if (new_deliverables.size == 0) and !found_new_relation
+        break
+      else
+        all_deliverables += new_deliverables
+      end
+    end
+    all_relations.values
   end
 end

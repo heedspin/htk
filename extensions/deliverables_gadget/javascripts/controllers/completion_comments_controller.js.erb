@@ -6,13 +6,11 @@ function CompletionCommentsController() {
   $("#htk-col2").on("click", ".htk-complete", $.proxy(this.newCompletionComment, this));
   $("#htkv-incomplete > form > button").click($.proxy(this.createCompletionComment, this));  
 }
-CompletionCommentsController.prototype = Object.create(CommentsController.prototype, {
-  template_directory : { value : "completion_comments" },
-});
+CompletionCommentsController.prototype = Object.create(CommentsController.prototype);
 
 CompletionCommentsController.prototype.getCompleteView = function() {
   if (!this.completeView) {
-    this.completeView = $(HandlebarsTemplates[this.template_directory + '/complete'](this));
+    this.completeView = $(HandlebarsTemplates['completion_comments/complete'](this));
     $("#htk-col3").append(this.completeView);
     this.completeView.find("button").click($.proxy(this.createCompletionComment, this));  
   }
@@ -21,7 +19,7 @@ CompletionCommentsController.prototype.getCompleteView = function() {
 
 CompletionCommentsController.prototype.getIncompleteView = function() {
   if (!this.incompleteView) {
-    this.incompleteView = $(HandlebarsTemplates[this.template_directory + '/incomplete'](this));
+    this.incompleteView = $(HandlebarsTemplates['completion_comments/incomplete'](this));
     $("#htk-col3").append(this.incompleteView);
     this.incompleteView.find("button").click($.proxy(this.createCompletionComment, this));  
   }

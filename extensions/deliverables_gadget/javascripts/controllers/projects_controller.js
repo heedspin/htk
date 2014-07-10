@@ -6,10 +6,10 @@ ProjectsController.prototype = Object.create(StandardDeliverablesController.prot
 
 ProjectsController.prototype.getNewView = function(newContainer) {
 	if (!this.newView) {
-	  this.newView = $(HandlebarsTemplates["projects/new"]({ deliverable_type : this.deliverableType }));
+	  this.newView = $(HandlebarsTemplates["deliverables/projects/new"]({ deliverable_type : this.deliverableType }));
 	  this.setParentDeliverableOptions(this.newView);
 	  newContainer.append(this.newView.hide());
-	  newContainer.on("click", "button#htk-action-cd", $.proxy(this.createEvent, this));
+	  newContainer.on("click", "#htkv-new-project button#htk-action-cd", $.proxy(this.createEvent, this));
 	  newContainer.on("change", ".parent-name-select", function(event) {
 	    var select = $(this);
 	    htkLog("parent changed to " + select.val());

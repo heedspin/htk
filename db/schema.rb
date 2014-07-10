@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140630003243) do
+ActiveRecord::Schema.define(:version => 20140706205645) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -99,15 +99,6 @@ ActiveRecord::Schema.define(:version => 20140630003243) do
     t.integer  "deliverable_type_config_id"
   end
 
-  create_table "deliverable_users", :force => true do |t|
-    t.integer  "deliverable_id"
-    t.integer  "user_id"
-    t.boolean  "responsible"
-    t.integer  "access_id"
-    t.datetime "created_at",     :null => false
-    t.datetime "updated_at",     :null => false
-  end
-
   create_table "deliverables", :force => true do |t|
     t.string   "title"
     t.datetime "created_at",      :null => false
@@ -118,7 +109,6 @@ ActiveRecord::Schema.define(:version => 20140630003243) do
     t.string   "abbreviation"
     t.integer  "completed_by_id"
     t.integer  "status_id"
-    t.integer  "user_group_id"
   end
 
   create_table "email_account_threads", :force => true do |t|
@@ -195,6 +185,16 @@ ActiveRecord::Schema.define(:version => 20140630003243) do
     t.string   "envelope_message_id"
     t.integer  "source_email_id"
     t.datetime "created_at"
+  end
+
+  create_table "permissions", :force => true do |t|
+    t.integer  "deliverable_id"
+    t.integer  "user_id"
+    t.integer  "group_id"
+    t.boolean  "responsible"
+    t.integer  "access_id"
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
   end
 
   create_table "signed_request_users", :force => true do |t|

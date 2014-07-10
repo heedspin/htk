@@ -4,16 +4,14 @@ function StandardDeliverablesController() {
   this.newView = null;
 }
 
-StandardDeliverablesController.prototype = Object.create(DeliverablesController.prototype, {
-	template_directory : { value : "deliverables" }	
-});
+StandardDeliverablesController.prototype = Object.create(DeliverablesController.prototype);
 
 StandardDeliverablesController.prototype.getNewView = function(newContainer) {
 	if (!this.newView) {
-	  this.newView = $(HandlebarsTemplates["deliverables/new"]({ deliverable_type : this.deliverableType }));
+	  this.newView = $(HandlebarsTemplates["deliverables/standard/new"]({ deliverable_type : this.deliverableType }));
 	  this.setParentDeliverableOptions(this.newView);
 	  newContainer.append(this.newView.hide());
-	  newContainer.on("click", "button#htk-action-cd", $.proxy(this.createEvent, this));
+	  newContainer.on("click", "#htkv-new-standard button#htk-action-cd", $.proxy(this.createEvent, this));
 	  newContainer.on("change", ".parent-name-select", function(event) {
 	    var select = $(this);
 	    htkLog("parent changed to " + select.val());
@@ -30,7 +28,7 @@ StandardDeliverablesController.prototype.getNewView = function(newContainer) {
 StandardDeliverablesController.prototype.getEditView = function(container) {
 	var editView = this.editViews[this.deliverable.id];
 	if (!editView) {
-	  editView = $(HandlebarsTemplates['deliverables/edit'](this));
+	  editView = $(HandlebarsTemplates['deliverables/standard/edit'](this));
 	  container.append(editView.hide());
 	  editView.find("form button").click($.proxy(this.updateOrDeleteEvent, this));
 	  // Toggle Save / Delete button.

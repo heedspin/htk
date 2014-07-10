@@ -28,7 +28,7 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 		value : function() {
 			var _this = this;
 			this.responsible_users = [];
-			_.each(DeliverableUser.prototype.all_cached({ deliverable_id : this.id }), function(du) {
+			_.each(Permission.prototype.all_cached({ deliverable_id : this.id }), function(du) {
 				if (du.access == "owner") {
 					_this.owner = du.user;
 				}

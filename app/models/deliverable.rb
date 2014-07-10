@@ -12,15 +12,14 @@
 #  abbreviation    :string(255)
 #  completed_by_id :integer
 #  status_id       :integer
-#  user_group_id   :integer
 #
 
 require 'plutolib/serialized_attributes'
 
 class Deliverable < ApplicationModel
   include Plutolib::SerializedAttributes
-  has_many :deliverable_users, dependent: :destroy
-  has_many :users, through: :deliverable_users
+  has_many :permissions, dependent: :destroy
+  has_many :users, through: :permissions
   attr_accessible :title, :status, :status_id, :description, :completed_by_id
   # has_many :deliverable_messages, dependent: :destroy
   # has_many :messages, through: :deliverable_messages
@@ -34,15 +33,14 @@ class Deliverable < ApplicationModel
   belongs_to_active_hash :status, :class_name => 'LifeStatus'
   # belongs_to :deliverable_type
   # validates :deliverable_type_id, presence: true
-  belongs_to :user_group
   validates :title, presence: true
 
   def deliverable_type
     DeliverableTypeConfig.where(ar_type: self.class.name).first.deliverable_type
   end
 
-  def significant_users
-    self.deliverable_users.all.select(&:significant?)
+  def significant_permissions
+    self.permissions.all.select(&:significant?)
   end
 
   scope :not_deleted, where(['deliverables.status_id != ?', LifeStatus.deleted.id])
@@ -50,11 +48,11 @@ class Deliverable < ApplicationModel
 
   def self.editable_by(user)
     user_id = user.is_a?(User) ? user.id : user
-    includes(:deliverable_users).where(deliverable_users: { user_id: user_id, access_id: [DeliverableAccess.owner.id, DeliverableAccess.edit.id] })
+    includes(:permissions).where(permissions: { user_id: user_id, access_id: [DeliverableAccess.owner.id, DeliverableAccess.edit.id] })
   end
   def self.accessible_to(user)
     user_id = user.is_a?(User) ? user.id : user
-    includes(:deliverable_users).where(deliverable_users: { user_id: user_id, access_id: DeliverableAccess.all.map(&:id) })
+    includes(:permissions).where(permissions: { user_id: user_id, access_id: DeliverableAccess.all.map(&:id) })
   end
   def self.title_like(text)
     where ['deliverables.title ilike ?', "%#{text}%"]
@@ -88,7 +86,7 @@ class Deliverable < ApplicationModel
     self.completed_by_id.nil?
   end
   def is_assigned?
-    (self.deliverable_users.responsible.count > 0)
+    (self.permissions.responsible.count > 0)
   end
 
   def has_behavior?(key)

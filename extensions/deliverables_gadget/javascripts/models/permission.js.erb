@@ -1,0 +1,16 @@
+function Permission(attributes) {
+	HtkModel.call(this, attributes);
+}
+
+Permission.prototype = Object.create(HtkModel.prototype, {
+	api_url : {	value : function() { return "/api/v1/deliverables/" + this.deliverable_id + "/permissions"; } },
+	type_key : { value : "permission" },
+	attribute_keys : { value : <%= Permission.columns.map(&:name).to_json %> },
+	registry_hook : { 
+		value : function() {
+			this.user = User.prototype.find_cached(this.user_id);
+		}
+	}
+});
+
+Permission.prototype.edit_access_id = "<%= DeliverableAccess.edit.id %>";

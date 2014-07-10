@@ -12,7 +12,6 @@
 #  abbreviation    :string(255)
 #  completed_by_id :integer
 #  status_id       :integer
-#  user_group_id   :integer
 #
 
 class Deliverables::Standard < Deliverable
@@ -40,7 +39,7 @@ class Deliverables::Standard < Deliverable
   			else
   				DeliverableAccess.edit
   			end
-  			deliverable.deliverable_users.create!(user_id: recipient.id, access_id: access.id)
+  			deliverable.permissions.create!(user_id: recipient.id, access_id: access.id)
   		end
   	end
   	deliverable

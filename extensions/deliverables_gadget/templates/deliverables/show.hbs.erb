@@ -20,9 +20,9 @@
 		{{else}}
 		<li class="htk-action htk-complete"><%= image_tag 'check.png' %></li>
 		{{/if}}
-		{{#unless parent}}
+		{{#ifTopLevel ../deliverable}}
 		<li class="htk-action htk-disassociate"><%= image_tag 'cross.png' %></li>
-		{{/unless}}
+		{{/ifTopLevel}}
 	</ul>
 {{/with}}
 

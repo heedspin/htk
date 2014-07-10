@@ -41,6 +41,9 @@ HtkObjectCache.prototype.all = function(key, query) {
 	if (type_cache) {
 		for(var object_id in type_cache) {
 			var object = type_cache[object_id];
+			if (!object) {
+				htkLog("HtkObjectCache Corrupt!");
+			}
 			var object_matches = true;
 			for (var attribute in query) {
 				var test_value = query[attribute];

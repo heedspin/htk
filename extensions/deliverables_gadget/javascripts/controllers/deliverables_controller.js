@@ -7,31 +7,30 @@ function DeliverablesController() {
 }
 
 DeliverablesController.prototype = Object.create(HtkController.prototype, {
-	template_directory : { value : "deliverables" },
 	synchronize_assigned_users : {
 		value : function(new_assigned_users) {
 			var _this = this;
 			var objects = [];
 			if (_this.deliverable) {
-				objects = _.map(_this.deliverable.responsible_users, function(du) { return { id : du.user_id, deliverable_user : du } });
+				objects = _.map(_this.deliverable.permissions, function(du) { return { id : du.user_id, deliverable_user : du } });
 			}
       ArraySynchronizer.prototype.synchronize(objects, new_assigned_users,
       	{
       		added : function(id, donebacks) {
-      			htkLog("DeliverableUser: added " + id);
-      			var new_du = new DeliverableUser({deliverable_id: _this.deliverable.id, 
+      			htkLog("Permission: added " + id);
+      			var new_du = new Permission({deliverable_id: _this.deliverable.id, 
       				user_id: id, 
       				responsible: true, 
-      				access_id: DeliverableUser.prototype.edit_access_id});
+      				access_id: Permission.prototype.edit_access_id});
       			new_du.save(donebacks);
       			return new_du;
       		},
       		removed : function(object, donebacks) {	
-      			htkLog("DeliverableUser: removed " + object.id);
-      			object.deliverable_user.write_attribute('responsible', false);
-      			object.deliverable_user.save(donebacks);
+      			htkLog("Permission: removed " + object.id);
+      			object.permission.write_attribute('responsible', false);
+      			object.permission.save(donebacks);
       		},
-      		done : function(deliverable_users) {
+      		done : function(permissions) {
 			      htkLog("Putting deliverable succeeded");
 			      _this.deliverable.registry_hook();
 			      _this.deliverableTreeController.showDeliverable(_this.deliverable, true);		      			
@@ -83,7 +82,7 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
 	},
 	getShowView : {
 		value : function(container) {
-			var show_view = $(HandlebarsTemplates[this.template_directory + '/show']({ 
+			var show_view = $(HandlebarsTemplates['deliverables/show']({ 
 		  	current_user: this.router.currentUser, 
 		  	deliverable: this.deliverable, 
 		  	parent: this.deliverable.getParent()

@@ -15,7 +15,7 @@ HtkModelRegistry.prototype.constructor_for = function(key) {
 	return HtkModelRegistry.prototype.registry[key];
 }
 
-<% [Deliverable, DeliverableComment, DeliverableCommentType, DeliverableUser,
+<% [Deliverable, DeliverableComment, DeliverableCommentType, Permission,
  DeliverableRelation, DeliverableType, Email, Message, User].each do |klass| %>
 HtkModelRegistry.prototype.register(<%= klass.name %>, '<%= klass.json_root %>', '<%= klass.json_root.pluralize %>');
 <% end %>

@@ -26,19 +26,20 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 			if (new_web_id = params[:web_id]) and (@email.web_id != new_web_id)
 				Email.find(@email.id).update_attributes(web_id: new_web_id)
 			end
-			@relations = DeliverableRelation.message_thread_id(@email.message.message_thread_id).not_deleted.all
+			@relations = DeliverableRelation.message_or_thread(@email.message.id, @email.message.message_thread_id).not_deleted.top_level.all
+			@relations = DeliverableRelation.get_trees(@relations)
 			deliverable_ids = @relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten
 			@deliverables = Deliverable.not_deleted.where(:id => deliverable_ids)
 			@deliverable_types = DeliverableType.deliverable_types(@deliverables.map(&:type)).all
 			
 			# render json: deliverables
 			# render json: { deliverables: @deliverables, email: EmailSerializer.new(@email, root: false) }
-			deliverable_users = @deliverables.map(&:significant_users).flatten.uniq
+			permissions = @deliverables.map(&:significant_permissions).flatten.uniq
 			render json: { 
 				deliverables: @deliverables.map { |d| DeliverableSerializer.new(d, root: false) }, 
 				email: EmailSerializer.new(@email, root: false),
-				deliverable_users: deliverable_users.map { |du| DeliverableUserSerializer.new(du, root: false) },
-				users: deliverable_users.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
+				permissions: permissions.map { |p| PermissionSerializer.new(p, root: false) },
+				users: permissions.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
 				deliverable_relations: @relations.map { |r| DeliverableRelationSerializer.new(r, root: false) },
 				deliverable_types: @deliverable_types.map { |t| DeliverableTypeSerializer.new(t, root: false) }
 			}
@@ -56,11 +57,11 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   			email: email, 
 				current_user: current_user,  
 				params: params)
-			deliverable_users = @deliverable.deliverable_users.select(&:significant?)
+			permissions = @deliverable.permissions.select(&:significant?)
 			render json: { 
 				deliverable: DeliverableSerializer.new(@deliverable, root: false), 
-				deliverable_users: deliverable_users.map { |du| DeliverableUserSerializer.new(du, root: false) },
-				users: deliverable_users.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
+				permissions: permissions.map { |du| PermissionSerializer.new(du, root: false) },
+				users: permissions.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
 				deliverable_type: DeliverableTypeSerializer.new(@deliverable.deliverable_type , root: false)
 			}
 		else

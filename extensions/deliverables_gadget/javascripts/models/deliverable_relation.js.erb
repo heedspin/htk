@@ -20,6 +20,9 @@ DeliverableRelation.prototype.is_<%= relation_type.cmethod %> = function() {
 }
 <% end %>
 
+DeliverableRelation.prototype.isTopLevel = function() {
+	return this.is_parent && (this.source_deliverable_id == null);
+}
 
 // DeliverableRelation.prototype.set_deliverables = function(deliverables) {
 // 	var _this = this;

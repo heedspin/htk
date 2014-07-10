@@ -6,7 +6,7 @@ Htk::Application.routes.draw do
       resources :signed_request_users, only: [:create]
       resources :deliverables do
         resources :comments, controller: 'deliverable_comments'
-        resources :users, controller: 'deliverable_users', only: [:create, :destroy, :update]
+        resources :permissions, only: [:create, :destroy, :update], controller: 'deliverables/permissions'
       end
       resources :deliverable_relations
       # resources :emails, :only => :create
