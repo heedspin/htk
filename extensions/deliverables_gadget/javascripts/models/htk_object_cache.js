@@ -27,6 +27,10 @@ HtkObjectCache.prototype.clear = function(key, id) {
 };
 
 HtkObjectCache.prototype.set = function(key, object) {
+	if (!key)
+		throw "HtkObjectCache.set called with null key";
+	if (!object)
+		throw "HtkObjectCache.set called for key " + key + " with null object";
 	var type_cache = this.types[key];
 	if (!type_cache) {
 		type_cache = new Object();
@@ -42,7 +46,7 @@ HtkObjectCache.prototype.all = function(key, query) {
 		for(var object_id in type_cache) {
 			var object = type_cache[object_id];
 			if (!object) {
-				htkLog("HtkObjectCache Corrupt!");
+				throw "HtkObjectCache Corrupt!";
 			}
 			var object_matches = true;
 			for (var attribute in query) {
