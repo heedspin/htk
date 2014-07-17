@@ -102,13 +102,11 @@ class DeliverableRelation < ApplicationModel
   def self.get_trees(*relations)
     relations = relations.flatten
     all_relations = Hash.new
-    all_deliverables = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten
+    all_deliverables = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten.compact
     relations.each { |r| all_relations[r.id] = r }
     while true
-      relations = DeliverableRelation.parent_relation.where [
-        'deliverable_relations.source_deliverable_id in (?) or deliverable_relations.target_deliverable_id in (?)',
-        all_deliverables, all_deliverables
-      ]
+      # Only go down tree (not up).
+      relations = DeliverableRelation.parent_relation.not_deleted.where(source_deliverable_id: all_deliverables)
       if all_relations.size > 0
         relations = relations.where [ 'deliverable_relations.id not in (?)', all_relations.keys ]
       end
