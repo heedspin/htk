@@ -33,13 +33,13 @@ DeliverableTree.prototype.getTreeData = function() {
   var all_children = new Object();
   var all_parents = new Array();
   _.each(this.deliverables, function(d) {
-    if (!d.parent_relation.source_deliverable_id) {
+    if (!d.getParentRelation().source_deliverable_id) {
       all_parents.push(d);
     } else {
-      if (all_children[d.parent_relation.source_deliverable_id]) {
-        all_children[d.parent_relation.source_deliverable_id].push(d);
+      if (all_children[d.getParentRelation().source_deliverable_id]) {
+        all_children[d.getParentRelation().source_deliverable_id].push(d);
       } else {
-        all_children[d.parent_relation.source_deliverable_id] = [ d ];
+        all_children[d.getParentRelation().source_deliverable_id] = [ d ];
       }
     }
   });
@@ -90,12 +90,12 @@ DeliverableTree.prototype.sortSiblings = function(unsorted, sorted, remainingAtt
   } else {
     // htkLog("DeliverableTree.sortSiblings: Unsorted", unsorted, "\nsorted", sorted);
     unsorted = _.reject(unsorted, function(ud) { 
-      if (!ud.parent_relation.previous_sibling_id) {
+      if (!ud.getParentRelation().previous_sibling_id) {
         sorted.push(ud);
         // htkLog("DeliverableTree.sortSiblings: Found first node ", ud);
         return true;
       } else {
-        var nextd = _.find(sorted, function(sd) { return ud.parent_relation.previous_sibling_id == sd.id; });
+        var nextd = _.find(sorted, function(sd) { return ud.getParentRelation().previous_sibling_id == sd.id; });
         if (nextd) {
           // htkLog("DeliverableTree.sortSiblings: Added next", ud);
           sorted.push(ud);
@@ -115,8 +115,8 @@ DeliverableTree.prototype.newNode = function(deliverable) {
     id : deliverable.id,
     deliverable : deliverable
   }
-  if (deliverable.parent_relation) {
-    new_node['parent_relation'] = deliverable.parent_relation;
+  if (deliverable.getParentRelation()) {
+    new_node['parent_relation'] = deliverable.getParentRelation();
   }
   return new_node;
 }
@@ -182,7 +182,7 @@ DeliverableTree.prototype.writeTree = function(node) {
     node = this.tree.tree("getTree");
   }
   if (node.deliverable) {
-    var relation = node.deliverable.parent_relation;
+    var relation = node.deliverable.getParentRelation();
     if (node.parent) {
       if (node.parent.deliverable) {
         relation.write_attribute('source_deliverable_id', node.parent.id);
@@ -208,9 +208,31 @@ DeliverableTree.prototype.selectDeliverable = function(deliverable_id) {
   this.tree.tree('selectNode', node);
 }
 
+DeliverableTree.prototype.addRelation = function(relation) {
+  var deliverable = relation.getTargetDeliverable();
+  deliverable.tree = this;
+  var new_node = this.newNode(deliverable);
+  var last_parent = _.last(this.tree.tree('getTree').children);
+  if (!last_parent) {
+    this.tree.tree('appendNode', new_node);
+    htkLog("Tree: added first: " + deliverable.title);
+  } else if (relation.source_deliverable_id) {
+    var parent_node = this.tree.tree('getNodeById', relation.source_deliverable_id);
+    this.tree.tree('appendNode', new_node, parent_node);
+    htkLog("Tree: added to parent: " + parent_node.deliverable.title + " => " + deliverable.title);
+  } else {
+    this.tree.tree('addNodeAfter', new_node, last_parent);
+    htkLog("Tree: added top level after: " + last_parent.deliverable.title + ", " + deliverable.title);
+  }
+  htkLog("Tree: added node " + JSON.stringify(new_node.label));
+  this.deliverables.push(deliverable);
+  // Reload to get sibling data.
+  new_node = this.tree.tree('getNodeById', new_node.id);
+  return new_node;
+}
+
 DeliverableTree.prototype.createNode = function(message_id, parent_id, deliverable, callbacks) {
   // htkLog("DeliverableTree.createNode with deliverable " + deliverable.id);
-  deliverable.tree = this;
   var relation = new DeliverableRelation({
     source_deliverable_id : parent_id,
     target_deliverable_id : deliverable.id,
@@ -218,28 +240,19 @@ DeliverableTree.prototype.createNode = function(message_id, parent_id, deliverab
     message_thread_id : this.message_thread_id,
     message_id : message_id
   });
-  var new_node = this.newNode(deliverable);
-  if (this.deliverables.length == 0) {
-    this.tree.tree('appendNode', new_node);
-    // htkLog("Tree: added first: " + deliverable.title);
-  } else if (parent_id) {
-    var parent_node = this.tree.tree('getNodeById', parent_id);
-    this.tree.tree('appendNode', new_node, parent_node);
-    // htkLog("Tree: added to parent: " + parent_node.deliverable.title + " => " + deliverable.title);
-  } else {
-    var insert_after_node = _.last(this.tree.tree('getTree').children);
-    this.tree.tree('addNodeAfter', new_node, insert_after_node);
-    // htkLog("Tree: added top level after: " + insert_after_node.deliverable.title + ", " + deliverable.title);
-  }
-  // htkLog("Tree: added node " + JSON.stringify(new_node.label));
-  deliverable.parent_relation = relation;
-  this.deliverables.push(deliverable);
-  new_node = this.tree.tree('getNodeById', new_node.id);
+  var new_node = this.addRelation(relation);
   var previous_node = new_node.getPreviousSibling();    
   if (previous_node) {
     relation.write_attribute('previous_sibling_id', previous_node.id);
   }
-  relation.save(callbacks);
+  var _this = this;
+  relation.save({
+    success : function(results) {
+      _.each(results.deliverable_relations, function(r) { return _this.addRelation(r) });
+      callbacks["success"](results);
+    },
+    error : callbacks['error']
+  });
 }
 
 DeliverableTree.prototype.removeDeliverable = function(deliverable_id, delete_association) {
@@ -250,7 +263,7 @@ DeliverableTree.prototype.removeDeliverable = function(deliverable_id, delete_as
   var _this = this;
   this.tree.tree('removeNode', node);
   if (delete_association) {
-    node.deliverable.parent_relation.destroy({
+    node.deliverable.getParentRelation().destroy({
       success : function() {
         _this.writeTree();
       }

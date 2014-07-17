@@ -1,4 +1,6 @@
+require 'get_deliverables_json'
 class Api::V1::DeliverablesController < Api::V1::ApiController
+	include GetDeliverablesJson
 	respond_to :json
 	def default_serializer_options
 	  {root: 'deliverable'}
@@ -27,22 +29,9 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 				Email.find(@email.id).update_attributes(web_id: new_web_id)
 			end
 			@relations = DeliverableRelation.message_or_thread(@email.message.id, @email.message.message_thread_id).not_deleted.top_level.all
-			@relations = DeliverableRelation.get_trees(@relations)
-			deliverable_ids = @relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten
-			@deliverables = Deliverable.not_deleted.where(:id => deliverable_ids)
-			@deliverable_types = DeliverableType.deliverable_types(@deliverables.map(&:type)).all
-			
-			# render json: deliverables
-			# render json: { deliverables: @deliverables, email: EmailSerializer.new(@email, root: false) }
-			permissions = @deliverables.map(&:significant_permissions).flatten.uniq
-			render json: { 
-				deliverables: @deliverables.map { |d| DeliverableSerializer.new(d, root: false) }, 
-				email: EmailSerializer.new(@email, root: false),
-				permissions: permissions.map { |p| PermissionSerializer.new(p, root: false) },
-				users: permissions.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
-				deliverable_relations: @relations.map { |r| DeliverableRelationSerializer.new(r, root: false) },
-				deliverable_types: @deliverable_types.map { |t| DeliverableTypeSerializer.new(t, root: false) }
-			}
+			json_response = get_deliverables_json(@relations)
+			json_response[:email] = EmailSerializer.new(@email, root: false)
+			render json: json_response
 		else
 			render json: { result: 'no email' }, status: 404
 		end

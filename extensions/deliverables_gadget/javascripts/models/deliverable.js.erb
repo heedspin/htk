@@ -56,6 +56,14 @@ Deliverable.prototype.getParent = function() {
 	}
 }
 
+Deliverable.prototype.getParentRelation = function() {
+	return this.parent_relation;
+}
+
+Deliverable.prototype.getCompanyRelation = function() {
+	return this.company_relation;
+}
+
 Deliverable.prototype.recent = function(query_data, callbacks) {
 	var _this = this;
 	htkRequest("GET", this.api_url() + "/recent", query_data, function(obj) {

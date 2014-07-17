@@ -199,11 +199,9 @@ HtkModel.prototype = Object.create(Object.prototype, {
 		    var rc = "";
 		    if (obj.rc) rc = obj.rc;
 		    if (rc == 200) {
-					HtkModel.prototype.cache.clear(_this.type_key, _this.id);
-		      htkLog("Delete relation succeeded");
+		    	// Leave it in there! HtkModel.prototype.cache.clear(_this.type_key, _this.id);
 			    if (callbacks.success && (typeof(callbacks.success) === "function")) callbacks.success(obj);
 		    } else {
-		      htkLog("Delete relation failed");
 			    if (callbacks.error && (typeof(callbacks.error) === "function")) callbacks.error(obj);
 		    }
 		  });	

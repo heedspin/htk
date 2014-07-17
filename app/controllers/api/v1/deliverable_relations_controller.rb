@@ -1,4 +1,6 @@
+require 'get_deliverables_json'
 class Api::V1::DeliverableRelationsController < Api::V1::ApiController
+	include GetDeliverablesJson
 	def create
   	@message_thread = MessageThread.accessible_to(current_user).find(params[:message_thread_id])
   	if (source_deliverable_id = params[:source_deliverable_id]).present?
@@ -17,7 +19,11 @@ class Api::V1::DeliverableRelationsController < Api::V1::ApiController
 			relation_type_id: params[:relation_type_id],
 			status_id: params[:status_id] || LifeStatus.active.id)
 		if @relation.save
-			render json: @relation
+			json_response = get_deliverables_json(@relation)
+			# The relation created is stored in the singular. Side effects are stored in the plural.  Embrace it.
+			json_response[:deliverable_relations] = json_response[:deliverable_relations].select { |r| r.id != @relation.id }
+			json_response[:deliverable_relation] = DeliverableRelationSerializer.new(@relation, root: false)
+			render json: json_response
 		else
 			render json: { errors: @relation.errors }, status: 422
 		end

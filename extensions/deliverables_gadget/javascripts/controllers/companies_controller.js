@@ -67,7 +67,7 @@ CompaniesController.prototype.createCompany = function(container, deliverable_id
     this.deliverable.save({
       success : function(results) {
         htkLog("Created new company: ", results.obj.data);
-        _this.deliverableTreeController.addDeliverable(parent_id, results.deliverable, {
+        _this.deliverableTreeController.createRelation(parent_id, results.deliverable, {
           success : function(results) {
             _this.synchronize_assigned_users(form.find("select[name=assigned_users]").val());
           }

@@ -1,6 +1,7 @@
 function AssociateDeliverableController() {
   HtkController.call(this);
   this.deliverableTree = this.router.deliverableTreeController.deliverableTree;
+  this.deliverableTreeController = this.router.deliverableTreeController;
   $("#htk-col2").on("click", ".htk-disassociate", $.proxy(this.showDisassociateEvent, this));
   // $("#htk-dcontainer").on("click", ".htka-fd", $.proxy(this.showAssociateEvent, this));
   this.disassociateViewContainer = $("#htk-col3");
@@ -9,6 +10,7 @@ function AssociateDeliverableController() {
 }
 AssociateDeliverableController.prototype = Object.create(HtkController.prototype);
 
+// TODO: This needs to pull in deliverable tree.
 AssociateDeliverableController.prototype.associateEvent = function(event) {
   var _this = this;
   var view = this.getAssociateView();
@@ -18,8 +20,8 @@ AssociateDeliverableController.prototype.associateEvent = function(event) {
     htkLog("associateDeliverable: " + deliverable_id);
     Deliverable.prototype.find(deliverable_id, {
       success : function(results) {
-        _this.deliverableTree.createNode(_this.router.currentEmail.message_id, null, results.deliverable, {
-          success : function() {
+        _this.deliverableTreeController.createRelation(null, results.deliverable, {
+          success : function(r) {
             _this.router.deliverableTreeController.showDeliverable(results.deliverable);
           }
         });

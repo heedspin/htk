@@ -1,8 +1,6 @@
 
 function DeliverableRelation(attributes, deliverables) {
 	HtkModel.call(this, attributes);
-	// this.source_deliverable = null;
-	// this.target_deliverable = null;
 }
 
 DeliverableRelation.prototype = Object.create(HtkModel.prototype, {
@@ -48,3 +46,7 @@ DeliverableRelation.prototype.find_cached_targets = function(deliverable) {
 // DeliverableRelation.prototype.is_top_level = function() {
 // 	return this.is_parent() && this.source_deliverable_id == null;
 // }
+
+DeliverableRelation.prototype.getTargetDeliverable = function() {
+	return Deliverable.prototype.find_cached(this.target_deliverable_id);
+}

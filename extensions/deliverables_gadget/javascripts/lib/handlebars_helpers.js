@@ -56,7 +56,7 @@ Handlebars.registerHelper('canHaveCompanies', function(deliverable,options) {
 });
 
 Handlebars.registerHelper('ifTopLevel', function(deliverable, options) {
-	if (deliverable.parent_relation.isTopLevel()) {
+	if (deliverable.getParentRelation().isTopLevel()) {
 		return options.fn(this);
 	} else {
 		return options.inverse(this);
