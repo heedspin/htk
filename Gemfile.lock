@@ -61,7 +61,11 @@ GEM
     arbre (1.0.1)
       activesupport (>= 3.0.0)
     arel (3.0.3)
+    autoprefixer-rails (2.1.1.20140710)
+      execjs
     bcrypt-ruby (3.1.1)
+    bootstrap-sass (3.2.0.0)
+      sass (~> 3.2)
     bourbon (3.1.8)
       sass (>= 3.2.0)
       thor
@@ -198,8 +202,6 @@ GEM
       multi_json (~> 1.0, >= 1.0.2)
     warden (1.2.3)
       rack (>= 1.0)
-    zurb-foundation (4.3.1)
-      sass (>= 3.2.0)
 
 PLATFORMS
   ruby
@@ -209,6 +211,8 @@ DEPENDENCIES
   active_model_serializers
   activeadmin
   annotate!
+  autoprefixer-rails
+  bootstrap-sass (~> 3.2.0)
   coffee-rails (~> 3.2.1)
   daemons
   debugger
@@ -226,4 +230,3 @@ DEPENDENCIES
   rails (= 3.2.15)
   sass-rails (~> 3.2.3)
   uglifier (>= 1.0.3)
-  zurb-foundation

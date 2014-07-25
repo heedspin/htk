@@ -22,4 +22,8 @@ class DeliverableType < ApplicationModel
     self.deliverable_type_config.has_behavior?(key)
   end
 
+  def self.deliverable_type_config(config_or_id)
+  	id = config_or_id.is_a?(DeliverableTypeConfig) ? config_or_id.id : config_or_id
+  	where deliverable_type_config_id: id
+  end
 end

@@ -16,7 +16,7 @@ class TodoFolder
   end
 
   def each_email(&block)
-    first_relation = self.deliverable.target_relations.tree.by_date.first
+    first_relation = self.deliverable.target_relations.parent_relation.by_date.first
     if message_id = first_relation.try(:message_id)
       self.deliverable.users.each do |user|
         user.email_accounts.each do |email_account|

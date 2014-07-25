@@ -31,7 +31,10 @@ class Deliverables::Standard < Deliverable
     # id = args[:id]
     # deliverable.id = id if id.present?
   	Deliverable.transaction do
-  		deliverable.save!
+      deliverable.save!
+      if current_user.user_group_id
+        deliverable.permissions.create!(access_id: DeliverableAccess.read.id, group_id: current_user.user_group_id)
+      end
   		# email.message.message_thread.deliverables << deliverable
   		User.email_accounts(email.participants).accessible_to(current_user).each do |recipient|
   			access = if recipient.id == current_user.id
@@ -39,7 +42,7 @@ class Deliverables::Standard < Deliverable
   			else
   				DeliverableAccess.edit
   			end
-  			deliverable.permissions.create!(user_id: recipient.id, access_id: access.id)
+  			deliverable.permissions.create!(user_id: recipient.id, access_id: access.id, group_id: current_user.user_group_id)
   		end
   	end
   	deliverable

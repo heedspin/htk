@@ -7,7 +7,7 @@ class Api::V1::Deliverables::PermissionsController < Api::V1::ApiController
   		# If the user has no permissions, the DU will not be on the client.  Make sure we update existing record in that case.
   		assign_params(@permission)
   	else
-  		@permission = @deliverable.permissions.build(user_id: @user.id, responsible: params[:responsible], access_id: params[:access_id])
+  		@permission = @deliverable.permissions.build(user_id: @user.id, responsible: params[:responsible], access_id: params[:access_id], group_id: current_user.user_group_id)
 	  end
   	if @permission.save
 			render json: { permission: PermissionSerializer.new(@permission, root: false) }

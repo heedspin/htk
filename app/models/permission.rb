@@ -17,12 +17,33 @@ class Permission < ApplicationModel
 	belongs_to :user
 	belongs_to :group
   belongs_to_active_hash :access, :class_name => 'DeliverableAccess'
-  attr_accessible :user_id, :access_id, :responsible
+  attr_accessible :user_id, :access_id, :responsible, :group_id
   def significant?
   	self.access.try(:owner?) || self.responsible
   end
 
  	scope :responsible, where(responsible: true)
+ 	def self.user(user)
+ 		user_id = user.is_a?(User) ? user.id : user
+ 		where user_id: user_id
+ 	end
+ 	def self.deliverable(deliverable)
+ 		deliverable_id = deliverable.is_a?(Deliverable) ? deliverable.id : deliverable
+ 		where deliverable_id: deliverable_id
+ 	end
+ 	def self.user_or_group(user, group=nil)
+ 		user_id = user.is_a?(User) ? user.id : user
+ 		group_id = group.nil? ? (user.is_a?(User) ? user.user_group_id : nil) : (group.is_a?(UserGroup) ? group.id : group)
+ 		where [ 'permissions.user_id = ? or permissions.group_id = ?', user_id, group_id ]
+ 	end
+ 	def self.group(group)
+ 		group_id = group.is_a?(UserGroup) ? group.id : group
+ 		where group_id: group_id
+ 	end
+ 	def self.responsible(value=nil)
+ 		value = true if value.nil?
+ 		where responsible: value
+ 	end
 
   protected
 

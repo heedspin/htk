@@ -32,7 +32,7 @@ class Api::V1::DeliverableCommentsController < Api::V1::ApiController
 	protected
 
 		def editable_parent_object
-			@parent_object ||= Deliverable.editable_by(current_user).find(params[:deliverable_id])
+			@parent_object ||= Deliverable.find(params[:deliverable_id]).ensure_editable_by!(current_user)
 		end
 
 		# def current_object

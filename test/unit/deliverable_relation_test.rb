@@ -4,7 +4,6 @@
 #
 #  id                    :integer          not null, primary key
 #  status_id             :integer
-#  integer               :integer
 #  source_deliverable_id :integer
 #  target_deliverable_id :integer
 #  relation_type_id      :integer

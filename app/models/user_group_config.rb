@@ -25,4 +25,9 @@ class UserGroupConfig
 		result.push(override[:folder_name] || deliverable.folder_name)
 		result
 	end
+
+	def deliverable_types
+		# TODO: Make company-specific.
+		DeliverableType
+	end
 end

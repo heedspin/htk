@@ -4,7 +4,6 @@
 #
 #  id                    :integer          not null, primary key
 #  status_id             :integer
-#  integer               :integer
 #  source_deliverable_id :integer
 #  target_deliverable_id :integer
 #  relation_type_id      :integer
@@ -44,14 +43,15 @@ class DeliverableRelation < ApplicationModel
   def self.top_level
     parent_relation.where(source_deliverable_id: nil)
   end
-  def self.parent_relation
-    where relation_type_id: DeliverableRelationType.parent.id
-  end
+  scope :parent_relation, where(relation_type_id: DeliverableRelationType.parent.id)
+  scope :company_relation, where(relation_type_id: DeliverableRelationType.company.id)
   scope :by_date, order(:created_at)
-  scope :tree, where(relation_type_id: DeliverableRelationType.parent.id)
-
   def self.message_or_thread(message_id, message_thread_id)
     where ["deliverable_relations.message_id = ? or deliverable_relations.message_thread_id = ?", message_id, message_thread_id]
+  end
+  def self.target(deliverable_ids)
+    deliverable_ids = [ deliverable_ids ] unless deliverable_ids.is_a?(Array)
+    where ['deliverable_relations.target_deliverable_id in (?)', deliverable_ids]
   end
 
   def is_top_level
@@ -99,8 +99,7 @@ class DeliverableRelation < ApplicationModel
     end
   end
 
-  def self.get_trees(*relations)
-    relations = relations.flatten
+  def self.get_trees(relations)
     all_relations = Hash.new
     all_deliverables = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten.compact
     relations.each { |r| all_relations[r.id] = r }
@@ -125,5 +124,10 @@ class DeliverableRelation < ApplicationModel
       end
     end
     all_relations.values
+  end
+
+  def self.get_companies(relations)
+    deliverable_ids = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten.compact.uniq
+    DeliverableRelation.company_relation.not_deleted.target(deliverable_ids).all
   end
 end

@@ -1,0 +1,56 @@
+
+function DeliverableRelation(attributes, deliverables) {
+	HtkModel.call(this, attributes);
+}
+
+DeliverableRelation.prototype = Object.create(HtkModel.prototype, {
+	api_url : {	
+		value : function() { return "/api/v1/deliverable_relations"; }
+	},
+	type_key : { value : "deliverable_relation" },
+	attribute_keys : { value : <%= DeliverableRelation.columns.map(&:name).to_json %> }
+});
+
+<% DeliverableRelationType.all.each do |relation_type| %>
+DeliverableRelation.prototype.<%= relation_type.cmethod %>_relation_type = "<%= relation_type.id %>";
+DeliverableRelation.prototype.is_<%= relation_type.cmethod %> = function() {
+	return this.relation_type_id == <%= relation_type.id %>;
+}
+<% end %>
+
+DeliverableRelation.prototype.isTopLevel = function() {
+	return this.is_parent && (this.source_deliverable_id == null);
+}
+
+// DeliverableRelation.prototype.set_deliverables = function(deliverables) {
+// 	var _this = this;
+// 	this.source_deliverable = _.find(deliverables, function(d) { return d.id == _this.source_deliverable_id; });
+// 	this.target_deliverable = _.find(deliverables, function(d) { return d.id == _this.target_deliverable_id; });
+// }
+
+// DeliverableRelation.prototype.setParentId = function(parent_id) {
+// 	this.source_deliverable_id = parent_id;
+// }
+
+DeliverableRelation.prototype.find_cached_targets = function(deliverable) {
+	var deliverable_relations = HtkObjectCache.prototype.types[DeliverableRelation.prototype.type_key];
+	var results = [];
+	for (var property in deliverable_relations) {
+		var relation = deliverable_relations[property];
+		if (relation && relation.target_deliverable_id == deliverable.id)
+			results.push(relation);
+	}
+	return results;
+}
+
+// DeliverableRelation.prototype.is_top_level = function() {
+// 	return this.is_parent() && this.source_deliverable_id == null;
+// }
+
+DeliverableRelation.prototype.getTargetDeliverable = function() {
+	return Deliverable.prototype.find_cached(this.target_deliverable_id);
+}
+
+DeliverableRelation.prototype.getSourceDeliverable = function() {
+	return Deliverable.prototype.find_cached(this.source_deliverable_id);
+}

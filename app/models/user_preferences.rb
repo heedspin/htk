@@ -16,4 +16,12 @@ class UserPreferences
 	def deliverable_folder_path(deliverable, override={})
 		self.group_config.deliverable_folder_path(deliverable, override)
 	end
+
+	def deliverable_types
+		self.group_config.deliverable_types
+	end
+
+	def home_page_url
+		Rails.application.routes.url_helpers.deliverables_url(host: AppConfig.hostname)
+	end
 end

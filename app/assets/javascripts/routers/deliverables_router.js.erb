@@ -1,0 +1,99 @@
+function deliverablesGadgetReady() {
+  DeliverablesRouter.prototype.instance = new DeliverablesRouter();
+}
+
+function DeliverablesRouter() {
+  this.currentUser = null;
+  this.currentEmail = null;
+  this.loginController = new HtkLoginController(this);
+  this.htkContainer = $("#htk-dcontainer");
+  if (this.htkContainer.size() == 0) {
+    this.htkContainer = $(HandlebarsTemplates['deliverables/layout']);
+    $("body").append(this.htkContainer);
+  }
+  this.statusMsg = $("<p>Loading Deliverables...</p>");
+  this.htkContainer.append(this.statusMsg);
+  adjust_window_height();
+  this.commentsControllers = new Object();  
+  this.loadGadget();
+}
+
+DeliverablesRouter.prototype = Object.create(null);
+
+DeliverablesRouter.prototype.instance = null;
+
+DeliverablesRouter.prototype.loadGadget = function() {
+  var _this = this;
+  htkRequest("GET", "/api/v1/users/current", null, function(obj) {
+    if (obj.rc && (obj.rc == "401")) {
+      _this.statusMsg.empty();
+      _this.loginController.promptLogin();
+    } else if (obj.errors.length > 0) {
+      _this.statusMsg.empty().append("Error").show();
+      htkLog("Error response: " + JSON.stringify(obj));
+      adjust_window_height();
+    } else {
+      _this.currentUser = new User(obj.data["user"]);
+      htkLog("Current user: " + JSON.stringify(_this.currentUser));
+      _this.setupControllers();
+    }    
+  });
+}
+
+DeliverablesRouter.prototype.setupControllers = function() {
+  this.deliverableTreeController = new DeliverableTreeController();
+  this.completionCommentsController = new CompletionCommentsController();
+  this.associateDeliverableController = new AssociateDeliverableController();
+  this.commentsController = new CommentsController();
+}
+
+DeliverablesRouter.prototype.loadCurrentEmail = function(callbacks) {
+  if (this.currentEmail) {
+    if (callbacks.success && (typeof(callbacks.success) === "function")) callbacks.success(this.currentEmail);
+  } else {
+    var _this = this;
+    var matches = htkGetContentMatches(["date_sent", "sender_email", "message_id"]);
+    htkLog("getCurrentEmail matches: " + JSON.stringify(matches));
+    Email.prototype.all(matches, {
+      success : function(results) {
+        _this.currentEmail = results.emails[0];
+        htkLog("Current email = " + JSON.stringify(_this.currentEmail));
+        if (callbacks.success && (typeof(callbacks.success) === "function")) callbacks.success(_this.currentEmail);
+      },
+      error : function(results) {
+        htkLog("Failed to get current email: " + JSON.stringify(results.obj));
+        if (callbacks.error && (typeof(callbacks.error) === "function")) callbacks.error(results.obj);
+      }
+    });
+  }
+}
+
+DeliverablesRouter.prototype.deliverables = function() {
+  return this.deliverableTreeController.deliverableTree.deliverables;
+}
+
+DeliverablesRouter.prototype.getCommentsController = function(thing) {
+  htkLog("DeliverablesRouter.getCommentsController: ", thing);
+  var comment = null;
+  var comment_type = null;
+  if (thing instanceof DeliverableComment) {
+    comment = thing;
+    comment_type = comment.comment_type;
+  } else if (thing instanceof CommentType) {
+    comment_type = thing;
+  } 
+  // else if (typeof(thing) == "string") {
+  //   comment_type = this.commentTypes[thing];
+  // }
+  var controller = this.commentsControllers[comment_type.js_controller];
+  if (!controller) {
+    var newControllerProto = window[comment_type.js_controller];
+    if (!newControllerProto) {
+      htkLog("No controller prototype for " + comment_type.js_controller);
+    } else {
+      controller = new newControllerProto(this);
+      this.commentsControllers[comment_type.js_controller] = controller;
+    }
+  }
+  return controller;
+}

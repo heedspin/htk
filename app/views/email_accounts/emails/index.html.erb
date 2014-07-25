@@ -1,20 +1,23 @@
-<table>
-	<thead>
-		<tr>
-			<th>From</th>
-			<th>To</th>
-			<th>Subject</th>
-			<th>Date</th>
-		</tr>
-	</thead>
-	<tbody>
-		<% @emails.each do |email| %>
-		<tr>
-			<td><%= email.from_address %></td>
-			<td><%= email.to_addresses.map(&:to_s).join(', ') %></td>
-			<td><%= link_to email.subject, email_account_email_url(@email_account, email) %></td>
-			<td><%= email.date %></td>
-		</tr>
-		<% end %>
-	</tbody>
-</table>
+<h2><%= @email_account.username %></h2>
+<div class="table-responsive">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>From</th>
+				<th>To</th>
+				<th>Subject</th>
+				<th>Date</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% @emails.each do |email| %>
+			<tr>
+				<td><%= email.from_address %></td>
+				<td><%= email.to_addresses.map(&:to_s).join(', ') %></td>
+				<td><%= link_to email.subject, email_account_email_url(@email_account, email) %></td>
+				<td><%= email.date %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+</div>

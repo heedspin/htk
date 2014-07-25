@@ -9,7 +9,7 @@ ActiveAdmin.register DeliverableType do
 		f.inputs "Details" do
 			f.input :name
 			f.input :description
-			# f.input :deliverable_type_config_id#, as: :select, collection: DeliverableTypeConfig.all
+			f.input :deliverable_type_config_id#, as: :select, collection: DeliverableTypeConfig.all
 		end
 		f.actions
 	end

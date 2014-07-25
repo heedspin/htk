@@ -1,1 +1,15 @@
 app_config:
+  shared: &shared
+    menu_selected:
+      deliverables:
+        controllers: deliverables
+      login:
+        controllers: user_sessions
+      inbox:
+        controllers: email_accounts/emails
+  development:
+    <<: *shared
+  production:
+    <<: *shared
+  test:
+    <<: *shared

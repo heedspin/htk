@@ -1,6 +1,6 @@
-require 'get_deliverables_json'
+require 'get_deliverable_tree'
 class Api::V1::DeliverablesController < Api::V1::ApiController
-	include GetDeliverablesJson
+	include GetDeliverableTree
 	respond_to :json
 	def default_serializer_options
 	  {root: 'deliverable'}
@@ -11,8 +11,10 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	def index
     if (search_term = params[:term]).present?
       autocomplete_index(search_term)
+    elsif (from_address = params[:from_address]) and (date = params[:date])
+      index_by_email(from_address, date)
     else
-      search_index
+    	index_by_params
     end
 	end
 
@@ -23,18 +25,37 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
     render :json => results.to_json
 	end
 
-	def search_index
-		if @email = Email.user(current_user).from_address(params[:from_address]).date(params[:date]).first
+	def index_by_email(from_address, date)
+		if @email = Email.user(current_user).from_address(from_address).date(date).first
 			if (new_web_id = params[:web_id]) and (@email.web_id != new_web_id)
 				Email.find(@email.id).update_attributes(web_id: new_web_id)
 			end
 			@relations = DeliverableRelation.message_or_thread(@email.message.id, @email.message.message_thread_id).not_deleted.top_level.all
-			json_response = get_deliverables_json(@relations)
+			json_response = get_deliverable_tree(relations: @relations)
 			json_response[:email] = EmailSerializer.new(@email, root: false)
 			render json: json_response
 		else
 			render json: { result: 'no email' }, status: 404
 		end
+  end
+
+  def index_by_params
+  	user = current_user
+  	if user_id = params[:user_id]
+  		if user_id != user.id
+	  		user = User.find(user_id)
+	  		raise Exceptions::AccessDenied unless (user.user_group_id == current_user.user_group_id)
+	  	end
+	  end
+	  @deliverables = Deliverable.not_deleted.user_group(user.user_group_id)
+  	if params.member?(:responsible)
+  		@deliverables = @deliverables.responsible_user(user)
+  	end
+  	if type = params[:type]
+  		@deliverables = @deliverables.type(type)
+  	end
+		json_response = get_deliverable_tree(deliverables: @deliverables)
+		render json: json_response
   end
   
   def create
@@ -42,17 +63,22 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   	email = Email.user(current_user).find(params[:email_id])
   	deliverable_type_id = params[:deliverable_type_id]
   	if deliverable_type_config = DeliverableTypeConfig.find(deliverable_type_id)
-  		@deliverable = deliverable_type_config.ar_type_class.create_from_email(
-  			email: email, 
-				current_user: current_user,  
-				params: params)
-			permissions = @deliverable.permissions.select(&:significant?)
-			render json: { 
-				deliverable: DeliverableSerializer.new(@deliverable, root: false), 
-				permissions: permissions.map { |du| PermissionSerializer.new(du, root: false) },
-				users: permissions.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
-				deliverable_type: DeliverableTypeSerializer.new(@deliverable.deliverable_type , root: false)
-			}
+  		@deliverable_type = current_user.preferences.deliverable_types.deliverable_type_config(deliverable_type_config).first
+  		if @deliverable_type
+	  		@deliverable = deliverable_type_config.ar_type_class.create_from_email(
+	  			email: email, 
+					current_user: current_user,  
+					params: params)
+				permissions = @deliverable.permissions.select(&:significant?)
+				render json: { 
+					deliverable: DeliverableSerializer.new(@deliverable, root: false), 
+					permissions: permissions.map { |du| PermissionSerializer.new(du, root: false) },
+					users: permissions.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
+					deliverable_type: DeliverableTypeSerializer.new(@deliverable_type, root: false)
+				}
+			else
+				render json: { errors: ["Deliverable type id '#{deliverable_type_id}' is not configured / enabled"] }, status: 422
+			end
 		else
 			render json: { errors: ["Invalid deliverable type id '#{deliverable_type_id}'"] }, status: 422
 		end

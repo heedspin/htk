@@ -1,0 +1,55 @@
+function ReliableDeliverablesController() {
+  HtkController.call(this, ReliableDeliverablesRouter.prototype.instance);
+}
+
+ReliableDeliverablesController.prototype = Object.create(HtkController.prototype);
+
+ReliableDeliverablesController.prototype.setupEvents = function() {
+  // User.prototype.all(null, {
+  //   success : function(results) {
+  //     var assigned = new Object();
+  //     if (_this.deliverable) {
+  //       _.each(_this.deliverable.responsible_users, function(du) { assigned[du.user_id] = true; });           
+  //     }
+  //     var options = $(HandlebarsTemplates['users/options']({assigned: assigned,  users: results.users}));
+  //     var select = edit_form.find("select[name=assigned_users]");
+  //     select.empty().append(options);
+  //     select.multiselect({
+  //       selectedText: selectedText,
+  //       noneSelectedText: noneSelectedText
+  //     });//.multiselectfilter();
+  //   }
+  // });
+
+}
+
+ReliableDeliverablesController.prototype.load = function() {
+  var container = $("#rdbls");
+  container.empty().append($(HandlebarsTemplates['reliable_deliverables/index']()));
+  this.filterForm = container.find("form");
+  var selected_user = this.getCurrentUser();
+  var options = HandlebarsTemplates['users/single_select']({selected_user: selected_user,  users: [ selected_user ]});
+  var select = this.filterForm.find("select[name=assigned-user]");
+  select.empty().append($(options));
+  var query = new Object();
+  query['type'] = <%= DeliverableTypeConfig.standard.id %>;
+  query['responsible'] = true;
+  query['user_id'] = selected_user.id;
+  // this.setupEvents();
+  Deliverable.prototype.all(query, {
+    success : function(results) {
+      var deliverables = results.deliverables
+      htkLog("Loaded " + deliverables.length + " deliverables");
+      var table = $(HandlebarsTemplates['reliable_deliverables/table']());
+      container.find(".deliverables-list").append(table);
+      _.each(deliverables, function(d) {
+        var row = $(HandlebarsTemplates['reliable_deliverables/row']({ 
+          deliverable: d, 
+          project: d.getProject(), 
+          company: d.getCompany()
+        }));
+        table.append(row);
+      });
+    }
+  });
+}

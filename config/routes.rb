@@ -35,6 +35,8 @@ Htk::Application.routes.draw do
   resources :users, :only => [:show]
   match 'test_deliverables_gadget', to: 'test_deliverables_gadget#index'
 
+  resources :deliverables
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

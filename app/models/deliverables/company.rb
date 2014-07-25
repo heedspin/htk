@@ -27,7 +27,14 @@ class Deliverables::Company < Deliverable
   	deliverable = deliverable_type.new
     deliverable.status_id = params[:status_id] || LifeStatus.active.id
     accessible_attributes = deliverable_type.accessible_attributes.select(&:present?)
-    deliverable.update_attributes(params.select { |k,v| accessible_attributes.include?(k.to_s) })
+    Deliverable.transaction do
+      deliverable.update_attributes!(params.select { |k,v| accessible_attributes.include?(k.to_s) })
+      if current_user.user_group_id
+        permission = deliverable.permissions.build(access_id: DeliverableAccess.edit.id)
+        permission.group_id = current_user.user_group_id
+        permission.save!
+      end
+    end
     # id = args[:id]
     # deliverable.id = id if id.present?
   	# Deliverable.transaction do
@@ -38,4 +45,15 @@ class Deliverables::Company < Deliverable
   	# end
   	deliverable
   end
+
+  def self.ensure_editable_by!(deliverable_ids, user)
+    # TODO: Add group permissions to companies and test against.
+    deliverable_ids
+  end
+
+  def ensure_editable_by!(user)
+    # TODO: Add group permissions to companies and test against.
+    self
+  end
+
 end

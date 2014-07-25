@@ -15,6 +15,7 @@
 #
 
 require 'plutolib/serialized_attributes'
+require 'exceptions/access_denied'
 
 class Deliverable < ApplicationModel
   include Plutolib::SerializedAttributes
@@ -36,7 +37,11 @@ class Deliverable < ApplicationModel
   validates :title, presence: true
 
   def deliverable_type
-    DeliverableTypeConfig.where(ar_type: self.class.name).first.deliverable_type
+    self.deliverable_type_config.first.deliverable_type
+  end
+
+  def deliverable_type_config
+    DeliverableTypeConfig.where(ar_type: self.class.name)
   end
 
   def significant_permissions
@@ -46,10 +51,6 @@ class Deliverable < ApplicationModel
   scope :not_deleted, where(['deliverables.status_id != ?', LifeStatus.deleted.id])
   scope :by_created_at_desc, order('deliverables.created_at desc')
 
-  def self.editable_by(user)
-    user_id = user.is_a?(User) ? user.id : user
-    includes(:permissions).where(permissions: { user_id: user_id, access_id: [DeliverableAccess.owner.id, DeliverableAccess.edit.id] })
-  end
   def self.accessible_to(user)
     user_id = user.is_a?(User) ? user.id : user
     includes(:permissions).where(permissions: { user_id: user_id, access_id: DeliverableAccess.all.map(&:id) })
@@ -59,6 +60,21 @@ class Deliverable < ApplicationModel
   end
   def self.excluding(deliverable_ids)
     where ['deliverables.id not in (?)', deliverable_ids]
+  end
+  def self.user_group(group)
+    group_id = group.is_a?(UserGroup) ? group.id : group
+    includes(:permissions).where(permissions: { group_id: group_id })
+  end
+  def self.responsible_user(user)
+    user_id = user.is_a?(User) ? user.id : user
+    includes(:permissions).where(permissions: { user_id: user_id, responsible: true})
+  end
+  def self.type(type_config_id)
+    where type: DeliverableTypeConfig.find(type_config_id).ar_type
+  end
+  def self.editable_by(user)
+    user_id = user.is_a?(User) ? user.id : user
+    includes(:permissions).where(permissions: { user_id: user_id, access_id: [DeliverableAccess.owner.id, DeliverableAccess.edit.id] })
   end
 
   def folder_name(use_previous_name=false)
@@ -73,6 +89,7 @@ class Deliverable < ApplicationModel
     self.status_id = LifeStatus.deleted.id
     self.target_relations.each(&:destroy)
     self.source_relations.each(&:destroy)
+    # self.permissions.each(&:destroy)
     if self.is_assigned?
       TodoFolder.new(self).delay.remove
     end
@@ -109,6 +126,24 @@ class Deliverable < ApplicationModel
         TodoFolder.new(self).delay.create
       end
     end
+  end
+
+  def self.ensure_editable_by!(deliverable_ids, user)
+    deliverable_ids = deliverable_ids.is_a?(Array) ? deliverable_ids : [deliverable_ids]
+    deliverable_ids.each do |deliverable_id|
+      access_ids = Permission.deliverable_id(deliverable_id).all.map(&:access_id)
+      intersection = [DeliverableAccess.owner.id, DeliverableAccess.edit.id] & access_id
+      if intersection.size == 0
+        raise Exception::AccessDenied
+      end
+    end
+    deliverable_ids
+  end
+  def ensure_editable_by!(user)
+    unless [DeliverableAccess.owner.id, DeliverableAccess.edit.id].include?(self.permissions.user(user).first.access_id)    
+      raise Exception::AccessDenied
+    end
+    self
   end
 
 end
