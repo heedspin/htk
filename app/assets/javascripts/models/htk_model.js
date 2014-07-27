@@ -57,6 +57,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	save : {
 		value : function(callbacks) {
+			this.add_joiner(callbacks);
 			if (this.changes.length > 0) {
 				if (!this.id) {
 					this.create(callbacks);
@@ -68,6 +69,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	create : {		
 		value : function(callbacks) {
+			this.add_joiner(callbacks);
 	    var _this = this;
 	    htkRequest("POST", this.api_url(), this.attributes(), function(obj) {
 	    	var results = _this.update_single(obj);
@@ -79,6 +81,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	update : {		
 		value : function(callbacks) {
+			this.add_joiner(callbacks);
 	    var _this = this;
 	    htkRequest("PUT", this.api_url() + "/" + this.id, this.attributes(), function(obj) {
 	    	var results = _this.update_single(obj);
@@ -152,10 +155,21 @@ HtkModel.prototype = Object.create(Object.prototype, {
 			    htkLog("Unhandled error: " + JSON.stringify(results.obj));			
 				}
 		  }
+	  	if (callbacks && callbacks.joiner) {  
+	  		callbacks.joiner.remove();
+			}
+		}
+	},
+	add_joiner : {
+		value : function(callbacks) {
+	  	if (callbacks && callbacks.joiner) {  
+	  		callbacks.joiner.add();
+			}
 		}
 	},
 	all : {
 		value : function(query_data, callbacks) {
+			this.add_joiner(callbacks);
 			var _this = this;
 			htkRequest("GET", this.api_url(), query_data, function(obj) {
 				var results = _this.extract(obj);
@@ -184,6 +198,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	find : {
 		value : function(id, callbacks) {
+			this.add_joiner(callbacks);
 			var cached = this.find_cached(id);
 			if (cached) {
 				var results = new Object();
@@ -200,6 +215,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	destroy : {
 		value : function(callbacks) {
+			this.add_joiner(callbacks);
 			var _this = this;
 		  htkRequest("DELETE", this.api_url() + "/" + this.id, null, function(obj) {
 		    var rc = "";

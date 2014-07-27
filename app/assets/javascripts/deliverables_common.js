@@ -1,13 +1,7 @@
 //= require jquery
 //= require jquery-ui-1.10.4.custom
 //= require lib/handlebars-v1.3.0.js
-//# require handlebars.runtime
-//= require ./lib/array_synchronizer.js
-//= require ./lib/autogrow.js
-//= require ./lib/handlebars_helpers.js
-//= require ./lib/htk_gadgets.js.erb
-//= require ./lib/deliverable_tree.js
-//= require lib/underscore-min.js
+//= require ./lib
 //= require ./routers
 //= require ./models
 //= require ./controllers

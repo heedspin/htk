@@ -1,6 +1,6 @@
 function reliableDeliverablesReady() {
   ReliableDeliverablesRouter.prototype.instance = new ReliableDeliverablesRouter();
-  ReliableDeliverablesRouter.prototype.instance.load();
+  ReliableDeliverablesRouter.prototype.instance.loadControllers();
 }
 
 function ReliableDeliverablesRouter() {
@@ -11,13 +11,13 @@ ReliableDeliverablesRouter.prototype = Object.create(null);
 
 ReliableDeliverablesRouter.prototype.instance = null;
 
-ReliableDeliverablesRouter.prototype.load = function() {
+ReliableDeliverablesRouter.prototype.loadControllers = function() {
 	this.reliableDeliverablesController = new ReliableDeliverablesController();
 
   var _this = this;
   this.loadCurrentUser({
   	success : function() {
-  		_this.reliableDeliverablesController.load();
+  		_this.reliableDeliverablesController.loadController();
   	}
   })
 }
