@@ -27,7 +27,7 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
       		},
       		removed : function(object, donebacks) {	
       			htkLog("Permission: removed " + object.id);
-      			object.permission.write_attribute('responsible', false);
+      			object.permission.set('responsible', false);
       			object.permission.save(donebacks);
       		},
       		done : function(permissions) {
@@ -45,7 +45,7 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
 		  var new_assigned_users = form.find("select[name=assigned_users]").val();
 		  htkLog("updating deliverable " + this.deliverable.id + " with " + JSON.stringify(nameValues));
 		  // var deliverable = this.deliverableTree.getDeliverable(deliverable_id);
-		  this.deliverable.write_attributes(nameValues);
+		  this.deliverable.set_attributes(nameValues);
 		  if (this.deliverable.changed()) {
 			  this.deliverable.save({
 			    success : function(results) {		    	

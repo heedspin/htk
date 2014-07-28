@@ -1,6 +1,6 @@
 function ReliableDeliverablesController() {
   HtkController.call(this, ReliableDeliverablesRouter.prototype.instance);
-  this.query = new Object();
+  this.query = new HtkModel();
 }
 
 ReliableDeliverablesController.prototype = Object.create(HtkController.prototype);
@@ -25,25 +25,29 @@ ReliableDeliverablesController.prototype.setupEvents = function() {
 }
 
 ReliableDeliverablesController.prototype.loadController = function() {
+  var _this = this;
   this.container = $("#rdbls");
   this.container.empty().append($(HandlebarsTemplates['reliable_deliverables/index']()));
-  this.filterForm = this.container.find("form");
-  this.query['type'] = <%= DeliverableTypeConfig.standard.id %>;
-  this.query['responsible'] = true;
-  this.query['user_id'] = this.getCurrentUser().id;
-  var _this = this;
+  this.deliverablesList = this.container.find(".deliverables-list");
+  this.filterForm = this.container.find("form").change(function() {
+    _this.getDeliverables();
+  });
+  this.query.bindForm(this.filterForm, "Reliable Form");
+  this.query.set('type', <%= DeliverableTypeConfig.standard.id %>);
+  this.query.set('responsible', true);
+  this.query.set('user_id', this.getCurrentUser().id);
   var joiner = new HtkJoiner();
   User.prototype.all(null, {
     success : function(results) {
       var options = HandlebarsTemplates['users/single_select']({selected_user: _this.query.user_id, users: results.users});
-      _this.filterForm.find("select[name=assigned-user]").empty().append($(options));
+      _this.filterForm.find("select[name=user_id]").empty().append($(options));
     },
     joiner : joiner
   });
   DeliverableType.prototype.all(null, {
     success : function(results) {
       var options = HandlebarsTemplates["deliverable_types/single_select"]({selected: _this.query.type, deliverable_types: results.deliverable_types});
-      _this.filterForm.find("select[name=deliverable-type]").empty().append($(options));
+      _this.filterForm.find("select[name=type]").empty().append($(options));
     },
     joiner : joiner
   })
@@ -52,12 +56,14 @@ ReliableDeliverablesController.prototype.loadController = function() {
 
 ReliableDeliverablesController.prototype.getDeliverables = function() {
   var _this = this;
-  Deliverable.prototype.all(this.query, {
+  this.deliverablesList.empty().append("<p>Loading...</p>");
+  // this.query.type = this.filterForm.find("select[")
+  Deliverable.prototype.all(this.query.toObject(), {
     success : function(results) {
-      var deliverables = results.deliverables
+      var deliverables = _.select(results.deliverables, function(d) { return d.deliverable_type_id == _this.query.type; })
       htkLog("Loaded " + deliverables.length + " deliverables");
       var table = $(HandlebarsTemplates['reliable_deliverables/table']());
-      _this.container.find(".deliverables-list").append(table);
+      _this.deliverablesList.empty().append(table);
       _.each(deliverables, function(d) {
         var row = $(HandlebarsTemplates['reliable_deliverables/row']({ 
           deliverable: d, 

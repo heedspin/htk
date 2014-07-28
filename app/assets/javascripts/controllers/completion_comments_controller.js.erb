@@ -47,7 +47,7 @@ CompletionCommentsController.prototype.createCompletionComment = function(event)
   htkLog("createCompletionComment: " + JSON.stringify(comment));
   comment.save({
     success: function(results) {
-      deliverable.write_attributes(results.deliverable);
+      deliverable.set_attributes(results.deliverable);
       deliverable.reset_changes();
       _this.deliverableTreeController.showDeliverable(deliverable, true);
       htkLog("Deliverable marked complete");

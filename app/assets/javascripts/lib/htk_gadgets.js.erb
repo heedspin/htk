@@ -1,8 +1,3 @@
-function htkLog() {
-  if (console && console.log) {
-    console.log.apply(console, arguments);
-  }
-}
 function htkRequest(method, path, data, callback) {
   var request_data = null;
   if (!data) {

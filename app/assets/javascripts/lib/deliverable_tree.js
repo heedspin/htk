@@ -185,15 +185,15 @@ DeliverableTree.prototype.writeTree = function(node) {
     var relation = node.deliverable.getParentRelation();
     if (node.parent) {
       if (node.parent.deliverable) {
-        relation.write_attribute('source_deliverable_id', node.parent.id);
+        relation.set('source_deliverable_id', node.parent.id);
       } else {
-        relation.write_attribute('source_deliverable_id', null);
+        relation.set('source_deliverable_id', null);
       }
       var previous_node = node.getPreviousSibling();
       if (previous_node) {
-        relation.write_attribute('previous_sibling_id', previous_node.id); 
+        relation.set('previous_sibling_id', previous_node.id); 
       } else {
-        relation.write_attribute('previous_sibling_id',null);
+        relation.set('previous_sibling_id',null);
       }
       relation.save();
     }
@@ -243,7 +243,7 @@ DeliverableTree.prototype.createNode = function(message_id, parent_id, deliverab
   var new_node = this.addRelation(relation);
   var previous_node = new_node.getPreviousSibling();    
   if (previous_node) {
-    relation.write_attribute('previous_sibling_id', previous_node.id);
+    relation.set('previous_sibling_id', previous_node.id);
   }
   var _this = this;
   relation.save({

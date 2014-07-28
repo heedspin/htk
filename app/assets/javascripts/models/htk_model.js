@@ -1,7 +1,19 @@
 function HtkModel(attributes) {
 	this.id = null;
 	this.changes = [];
-	this.write_attributes(attributes);
+	this.bindings = new Object();
+	this.set_attributes(attributes);
+	if (this.attribute_keys.size == 0) {
+		var _this = this;
+		var add_attribute_key = function(a) {
+			for (var property in a) {	_this.attribute_keys.push(property); }
+		}
+		if (attributes instanceof Array) {
+			_.each(attributes, add_attribute_key);
+		} else {
+			add_attribute_key(attributes);
+		}
+	}
 }
 
 HtkModel.prototype = Object.create(Object.prototype, {
@@ -10,6 +22,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	api_url : { value : function() {} },
 	type_key : { value : null },
+	attribute_keys : { value : [] },
 	attributes : {
 		value : function() {
 			var result = new Object();
@@ -25,8 +38,8 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	reset_changes : { value : function() { this.changes = []; }},
 	changed : { value : function() { return (this.changes.length > 0); } },
-	write_attribute : {
-		value : function(key, value) {
+	set : {
+		value : function(key, value, exclude_binding_id) {
 			if ((typeof(this[key]) === "undefined") || (this[key] != value)) {
 				this.changes.push({
 					attribute : key,
@@ -34,24 +47,31 @@ HtkModel.prototype = Object.create(Object.prototype, {
 					new_value : value
 				});
 				this[key] = value;
+				var attribute_bindings = this.bindings[key];
+				if (attribute_bindings) {
+					_.each(attribute_bindings, function(b) {
+						if (!exclude_binding_id || (exclude_binding_id != b.id))
+							b.set(value); 
+					});
+				}
 			}
 		}
 	},
-	write_attributes_by_obj : {
+	set_attributes_by_obj : {
 		value : function(obj) {
 			for (var property in obj) {
-	    	this.write_attribute(property, obj[property]);
+	    	this.set(property, obj[property]);
 		    // if (obj.hasOwnProperty(property)) {
 		    // }
 			}
 		}
 	},
-	write_attributes : {
+	set_attributes : {
 		value : function(thing) {
 			if (thing instanceof Array) {
-				_.each(thing, this.write_attributes_by_obj, this);
+				_.each(thing, this.set_attributes_by_obj, this);
 			} else {
-				this.write_attributes_by_obj(thing);
+				this.set_attributes_by_obj(thing);
 			}
 		}
 	},
@@ -94,7 +114,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 		value : function(model_constructor, data) {
 			var object = HtkModel.prototype.cache.get(model_constructor.prototype.type_key, data.id);
 			if (object) {
-				object.write_attributes(data);
+				object.set_attributes(data);
 			} else {
 				object = new model_constructor(data);
 				HtkModel.prototype.cache.set(model_constructor.prototype.type_key, object);
@@ -133,7 +153,7 @@ HtkModel.prototype = Object.create(Object.prototype, {
 		value : function(obj) {
 			var results = this.extract(obj);
 			results[this.type_key] = this;
-		  this.write_attributes(obj.data[this.type_key]);
+		  this.set_attributes(obj.data[this.type_key]);
 		  this.reset_changes();
 		  this.registry_hook();
 		  return results;
@@ -227,6 +247,55 @@ HtkModel.prototype = Object.create(Object.prototype, {
 			    if (callbacks.error && (typeof(callbacks.error) === "function")) callbacks.error(obj);
 		    }
 		  });	
+		}
+	},
+	bind : {
+		value : function(jqe, debug_message) {
+			_this = this;
+			jqe.find("data-bind").each(function(i) {
+				var element = $(this);
+				var markup_name = element.attr("data-bind");
+				if (markup_name) {
+					if (_.contains(_this.attribute_keys, markup_name)) {
+						htkLog("Binding " + markup_name);
+						_this.addBinding(markup_name, new HtkBinding(element, [debug_message, markup_name]));
+					}
+				}
+			});
+		}
+	},
+	bindForm : {
+		value : function(jqf, debug_message) {
+			_this = this;
+			jqf.find("input, select, textarea").each(function(i) {
+				var element = $(this);
+				var markup_name = element.attr("name");
+				if (markup_name) {
+					_this.attribute_keys.push(markup_name);
+					htkLog("Binding form element " + markup_name);
+					_this.addBinding(markup_name, HtkBinding.prototype.create(element, _this, markup_name, [debug_message, markup_name]));
+				}
+			});
+		}
+	},
+	addBinding : {
+		value : function(attribute_key, binding) {
+			var attribute_bindings = this.bindings[attribute_key];
+			if (!attribute_bindings) {
+				attribute_bindings = this.bindings[attribute_key] = [];
+			}
+			attribute_bindings.push(binding);
+			return binding;
+		}
+	},
+	toObject : {
+		value : function() {
+			var _this = this;
+			var result = new Object();
+			_.each(this.attribute_keys, function(key) {
+				result[key] = _this[key];
+			});
+			return result;
 		}
 	}
 });
