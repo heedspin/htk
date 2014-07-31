@@ -68,7 +68,7 @@ Htk::Application.configure do
   # Devise wants:
   config.action_mailer.default_url_options = { :host => 'htk.lxdinc.com' }
 
-  config.action_controller.asset_host = 'https://htk-assets.s3-website-us-east-1.amazonaws.com'
+  config.action_controller.asset_host = 'https://htk-assets.s3.amazonaws.com'
 
   # config.ember.variant = :production
 end
