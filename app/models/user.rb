@@ -65,7 +65,7 @@ class User < ApplicationModel
     before_save :set_short_name
     def set_short_name
       unless self.short_name.present?
-        self.short_name = "#{self.first_name} #{self.last_name[0]}"
+        self.short_name = self.last_name.present? ? "#{self.first_name} #{self.last_name[0]}" : self.first_name
       end
     end
 

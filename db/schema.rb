@@ -80,7 +80,6 @@ ActiveRecord::Schema.define(:version => 20140706205645) do
 
   create_table "deliverable_relations", :force => true do |t|
     t.integer  "status_id"
-    t.integer  "integer"
     t.integer  "source_deliverable_id"
     t.integer  "target_deliverable_id"
     t.integer  "relation_type_id"
@@ -104,10 +103,10 @@ ActiveRecord::Schema.define(:version => 20140706205645) do
     t.datetime "created_at",      :null => false
     t.datetime "updated_at",      :null => false
     t.text     "description"
+    t.integer  "completed_by_id"
     t.string   "type"
     t.text     "data"
     t.string   "abbreviation"
-    t.integer  "completed_by_id"
     t.integer  "status_id"
   end
 
@@ -167,13 +166,6 @@ ActiveRecord::Schema.define(:version => 20140706205645) do
     t.datetime "created_at"
   end
 
-  create_table "integrations", :force => true do |t|
-    t.string  "name"
-    t.boolean "enabled",             :default => true
-    t.integer "integration_type_id"
-    t.text    "data"
-  end
-
   create_table "message_threads", :force => true do |t|
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
@@ -185,6 +177,7 @@ ActiveRecord::Schema.define(:version => 20140706205645) do
     t.string   "envelope_message_id"
     t.integer  "source_email_id"
     t.datetime "created_at"
+    t.text     "data"
   end
 
   create_table "permissions", :force => true do |t|
@@ -204,37 +197,6 @@ ActiveRecord::Schema.define(:version => 20140706205645) do
     t.string   "opensocial_owner_id"
     t.string   "opensocial_container"
     t.integer  "user_id"
-  end
-
-  create_table "tag_type_groups", :force => true do |t|
-    t.integer "tag_type_id"
-    t.integer "group_id"
-    t.integer "permission_id"
-  end
-
-  create_table "tag_type_users", :force => true do |t|
-    t.integer "tag_type_id"
-    t.integer "user_id"
-    t.integer "permission_id"
-  end
-
-  create_table "tag_types", :force => true do |t|
-    t.string   "name"
-    t.text     "description"
-    t.integer  "creator_id"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
-  end
-
-  create_table "tags", :force => true do |t|
-    t.integer  "tag_type_id"
-    t.integer  "message_id"
-    t.integer  "conversation_id"
-    t.string   "match_text"
-    t.text     "notes"
-    t.integer  "creator_id"
-    t.datetime "created_at",      :null => false
-    t.datetime "updated_at",      :null => false
   end
 
   create_table "user_groups", :force => true do |t|

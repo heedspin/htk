@@ -66,7 +66,7 @@ Htk::Application.configure do
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
 
   # Devise wants:
-  config.action_mailer.default_url_options = { :host => 's3.lxdinc.com' }
+  config.action_mailer.default_url_options = { :host => 'htk.lxdinc.com' }
 
   config.action_controller.asset_host = 'https://stk-assets.s3-us-west-2.amazonaws.com'
 

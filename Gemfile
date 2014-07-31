@@ -30,7 +30,7 @@ gem 'active_hash'
 if File.exists?('../plutolib')
   gem 'plutolib', :path => '../plutolib'
 else
-  gem 'plutolib', :git => 'git@github.com:heedspin/plutolib.git'
+  gem 'plutolib', :git => 'https://github.com/heedspin/plutolib.git'
 end
 
 gem 'pg'
@@ -66,4 +66,4 @@ end
 # gem 'capistrano'
 
 # To use debugger
-gem 'debugger'
+gem 'byebug'
