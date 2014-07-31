@@ -19,6 +19,14 @@ Run "rake doc:app" to generate API documentation for your models, controllers, h
    cd RAILS_ROOT
    s3cmd --configure -c config/s3cfg
 
+## Sync assets to s3
+ * cd public
+   find . -type f -name '.DS_Store' -exec rm {} \;
+   
+ * Dry run:
+   s3cmd sync -n -c ../config/s3cfg --acl-public ./ s3://stk_or_htk-assets/   
+
+
 ##  Gadget
  * Build gadget
    bundle exec rake htk:build_deliverables RAILS_ENV=development

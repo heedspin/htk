@@ -23,8 +23,7 @@ HtkLoginController.prototype.loginResponse = function(obj) {
 }
 HtkLoginController.prototype.promptLogin = function() {
   if (!this.loginForm) {
-    login_html = "<%= insert_file('html/login.html', :javascript_escape => true) %>"
-    this.loginForm = $(login_html);
+    this.loginForm = $(HandlebarsTemplates['login/login'](this));
     this.router.htkContainer.append(this.loginForm);
     var _this = this;
     $("#login").on('click', function(e) {

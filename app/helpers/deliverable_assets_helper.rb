@@ -16,8 +16,11 @@ module DeliverableAssetsHelper
 
 	def insert_file(filename, options=nil)
 		options ||= {}
-		filename = filename.to_s
-		input_file = (filename[0] == '/') ? filename : File.join(gadget_root, filename)
+		filename = asset_path(filename.to_s)
+		if not File.exists?(filename)
+			raise "#{filename} does not exist"
+		end
+		# input_file = (filename[0] == '/') ? filename :  File.join(gadget_root, filename)
 		result = IO.read(input_file)
 		if filename =~ /.*\.erb$/
 			result = ERB.new(result).result(binding)
