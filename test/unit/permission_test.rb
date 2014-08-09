@@ -16,6 +16,10 @@ require 'test_helper'
 
 # bundle exec rake test TEST=test/unit/permission_test.rb
 class PermissionTest < ActiveSupport::TestCase
+  setup do
+    DeliverableTypeConfig.enable!(users(:user1).user_group_id)
+  end
+
   test "should assign permissions" do    
     user1 = users(:user1)
     user2 = users(:user2)

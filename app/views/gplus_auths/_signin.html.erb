@@ -1,0 +1,74 @@
+<div id="gConnect">
+  <button class="g-signin"
+      data-scope="<%= AppConfig.gplus_signin_scope %>"
+      data-requestvisibleactions="http://schemas.google.com/AddActivity"
+      data-clientId="<%= gplus_credentials.client_id %>"
+      data-accesstype="offline"
+      data-callback="onSignInCallback"
+      data-theme="dark"
+      data-cookiepolicy="single_host_origin"
+      data-approvalprompt="<%= params.member?(:force) ? 'force' : 'auto' %>">
+  </button>
+</div>
+<div id="login-spin" class="hidden">
+	<%= image_tag "small_spinning_icon.gif" %>
+</div>
+<div id="authOps" style="display:none">
+  <h2>Authentication Logs</h2>
+  <pre id="authResult"></pre>
+</div>
+
+<input type="hidden" name="redirect_url" value=<%= @redirect_url %> />
+
+<% content_for :javascripts do %>
+<script type="text/javascript">
+
+var count = 0;
+function onSignInCallback(authResult) {
+  if (authResult['access_token']) {
+    // The user is signed in
+    console.log(authResult.code);
+    $('#gConnect').hide();
+    $("#authResult").hide();
+    $("#login-spin").show();
+    $.ajax({
+      type: 'POST',
+      url: "<%= connect_gplus_auths_url %>",
+      contentType: 'application/octet-stream; charset=utf-8',
+      success: function(result) {
+        console.log(result);
+		    var redirect_url = $("input[name=redirect_url]").val();
+		    if (!redirect_url) {
+		      redirect_url = "<%= root_url %>";
+		    }
+        console.log("Would redirect to " + redirect_url);
+		    window.location = redirect_url;
+      },
+      processData: false,
+      data: authResult.code
+    });
+  } else if (authResult['error']) {
+    if (authResult['error'] == 'user_signed_out')
+    $("#login-spin").hide();
+    $('#authResult').empty().html('Auth Result:<br/>');
+    for (var field in authResult) {
+      $('#authResult').append(' ' + field + ': ' + authResult[field] + '<br/>');
+    }
+    console.log('There was an error: ' + authResult['error']);
+    $('#authResult').append('Logged out');
+    $('#authOps').show('slow');
+    $('#gConnect').show();
+  }
+  console.log('authResult', authResult);
+}
+
+(function() {
+  var po = document.createElement('script');
+  po.type = 'text/javascript'; po.async = true;
+  po.src = 'https://plus.google.com/js/client:plusone.js';
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(po, s);
+})();
+
+</script>
+<% end %>

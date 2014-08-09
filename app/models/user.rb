@@ -40,6 +40,7 @@ class User < ApplicationModel
 	accepts_nested_attributes_for :signed_request_users
 
   belongs_to :user_group
+  has_one :google_authorization
 
   def name
     "#{self.first_name} #{self.last_name}".strip
@@ -58,6 +59,11 @@ class User < ApplicationModel
 
   def preferences
     UserPreferences.new(self)
+  end
+
+  # Allow gplus login.
+  def password_required?
+    super if false
   end
 
   protected

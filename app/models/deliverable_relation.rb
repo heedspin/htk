@@ -25,7 +25,8 @@ class DeliverableRelation < ApplicationModel
   belongs_to_active_hash :status, :class_name => 'LifeStatus'
 
   def self.deliverables(deliverables)
-    ids = deliverables.map(&:id)
+    deliverables = [deliverables] if deliverables.is_a?(Fixnum) or deliverables.is_a?(String)
+    ids = deliverables.map { |d| d.is_a?(Deliverable) ? d.id : d }
     where ['deliverable_relations.source_deliverable_id in (?) or deliverable_relations.target_deliverable_id in (?)', ids, ids]
   end
 
@@ -101,26 +102,24 @@ class DeliverableRelation < ApplicationModel
 
   def self.get_trees(relations)
     all_relations = Hash.new
-    all_deliverables = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten.compact
     relations.each { |r| all_relations[r.id] = r }
+    all_deliverables = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten.compact.uniq
     while true
       # Only go down tree (not up).
-      relations = DeliverableRelation.parent_relation.not_deleted.where(source_deliverable_id: all_deliverables)
-      if all_relations.size > 0
-        relations = relations.where [ 'deliverable_relations.id not in (?)', all_relations.keys ]
-      end
+      relations = DeliverableRelation.parent_relation
+        .not_deleted.where(source_deliverable_id: all_deliverables)
+        .where([ 'deliverable_relations.id not in (?)', all_relations.keys ])
       found_new_relation = false
       relations.each { |r| 
         unless all_relations.member?(r.id)
           found_new_relation = true
-          all_relations[r.id] = r 
+          all_relations[r.id] = r
+          all_deliverables.concat [r.source_deliverable_id, r.target_deliverable_id].compact
         end
       }
-      new_deliverables = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten - all_deliverables
-      if (new_deliverables.size == 0) and !found_new_relation
+      all_deliverables.uniq!
+      if !found_new_relation
         break
-      else
-        all_deliverables += new_deliverables
       end
     end
     all_relations.values

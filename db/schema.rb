@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140706205645) do
+ActiveRecord::Schema.define(:version => 20140802212501) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -96,6 +96,7 @@ ActiveRecord::Schema.define(:version => 20140706205645) do
     t.datetime "created_at",                 :null => false
     t.datetime "updated_at",                 :null => false
     t.integer  "deliverable_type_config_id"
+    t.integer  "user_group_id"
   end
 
   create_table "deliverables", :force => true do |t|
@@ -164,6 +165,17 @@ ActiveRecord::Schema.define(:version => 20140706205645) do
     t.text     "encoded_mail"
     t.text     "data"
     t.datetime "created_at"
+  end
+
+  create_table "google_authorizations", :force => true do |t|
+    t.integer  "user_id"
+    t.string   "gplus_id"
+    t.string   "refresh_token"
+    t.string   "access_token"
+    t.integer  "expires_in"
+    t.datetime "issued_at"
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
   end
 
   create_table "message_threads", :force => true do |t|

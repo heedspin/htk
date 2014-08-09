@@ -25,6 +25,9 @@ class Deliverables::Standard < Deliverable
       DeliverableTypeConfig.standard.ar_type_class
     end
   	deliverable = deliverable_type.new
+    if Rails.env.test? and params.member?(:id)
+      deliverable.id = params[:id]
+    end
     deliverable.status_id = params[:status_id] || LifeStatus.active.id
     accessible_attributes = deliverable_type.accessible_attributes.select(&:present?)
     deliverable.update_attributes(params.select { |k,v| accessible_attributes.include?(k.to_s) })

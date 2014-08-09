@@ -32,7 +32,6 @@ Htk::Application.routes.draw do
 
   resources :messages, :only => [:index, :show, :update, :destroy]
   # resources :message_bodies, :only => [:show]
-  resources :users, :only => [:show]
   match 'test_deliverables_gadget', to: 'test_deliverables_gadget#index'
 
   resources :deliverables
@@ -83,6 +82,17 @@ Htk::Application.routes.draw do
   #     # (app/controllers/admin/products_controller.rb)
   #     resources :products
   #   end
+
+
+  resources :users
+
+  resource :gplus_auths, only: :show do
+    post 'connect'
+    post 'disconnect'
+    get 'profile'
+  end
+
+  match 'signin', to: 'signin#signin'
 
   root :to => "home#index"
 

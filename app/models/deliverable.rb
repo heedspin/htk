@@ -28,8 +28,6 @@ class Deliverable < ApplicationModel
   has_many :comments, class_name: 'DeliverableComment', dependent: :destroy
   has_many :source_relations, class_name: 'DeliverableRelation', foreign_key: :source_deliverable_id, dependent: :destroy
   has_many :target_relations, class_name: 'DeliverableRelation', foreign_key: :target_deliverable_id, dependent: :destroy
-  has_many :children_relations, class_name: 'DeliverableRelation', foreign_key: :target_deliverable_id
-  has_many :children, class_name: 'Deliverable', through: :children_relations, source: 'source_deliverable'
   has_many :parent_relations, class_name: 'DeliverableRelation', foreign_key: :target_deliverable_id, conditions: { relation_type_id: DeliverableRelationType.parent.id }
   belongs_to_active_hash :status, :class_name => 'LifeStatus'
   # belongs_to :deliverable_type
@@ -37,11 +35,11 @@ class Deliverable < ApplicationModel
   validates :title, presence: true
 
   def deliverable_type
-    self.deliverable_type_config.first.deliverable_type
+    self.deliverable_type_config.deliverable_type(self.user_group_id)
   end
 
   def deliverable_type_config
-    DeliverableTypeConfig.where(ar_type: self.class.name)
+    DeliverableTypeConfig.where(ar_type: self.class.name).first
   end
 
   def significant_permissions
@@ -104,6 +102,11 @@ class Deliverable < ApplicationModel
   end
   def is_assigned?
     (self.permissions.responsible.count > 0)
+  end
+
+  # TODO: Move user_group_id from permissions to deliverable?
+  def user_group_id
+    self.permissions.first.group_id
   end
 
   def has_behavior?(key)

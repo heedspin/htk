@@ -2,6 +2,10 @@ require 'test_helper'
 
 # bundle exec rake test TEST=test/functional/api/v1/deliverables_controller_test.rb
 class Api::V1::DeliverablesControllerTest < HtkControllerTest
+  setup do
+    DeliverableTypeConfig.enable!(users(:red_user1).user_group_id)
+  end
+
   # test "should 404 if no email" do
   #   signed_request_user = signed_request_users(:user1)
   # 	user1 = users(:user1)

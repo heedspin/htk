@@ -18,8 +18,19 @@ require 'test_helper'
 
 # bundle exec rake test TEST=test/unit/deliverable_relation_test.rb
 class DeliverableRelationTest < ActiveSupport::TestCase
+	setup do
+		@current_user = users(:user1)
+		DeliverableTypeConfig.enable!(@current_user.user_group_id)
+	end
+
+	def get_trees(*deliverable_ids)
+		relation = DeliverableRelation.parent_relation.deliverables(deliverable_ids)
+		relations = DeliverableRelation.get_trees(relation)
+		deliverables = relations.map { |r| [r.source_deliverable_id, r.target_deliverable_id] }.flatten.uniq.compact.sort
+		[deliverables, relations]
+	end
+
 	test "should find all relations" do
-		current_user = users(:user1)
 		created = Set.new
 		#        1000           1001               1002
 		#    1003   1004      1005           1006  1007   1008
@@ -27,7 +38,8 @@ class DeliverableRelationTest < ActiveSupport::TestCase
 		#                                            1016       1017
 		#                                        1018    1019 
 		#                                 1020 1021 1022
-		[	[1000, 1003], [1000, 1004], 
+		[	[nil, 1000], [nil, 1001], [nil, 1002],
+		  [1000, 1003], [1000, 1004], 
 			[1003, 1009], [1003, 1010],
 			[1004, 1011],
 			[1001, 1005],
@@ -38,40 +50,43 @@ class DeliverableRelationTest < ActiveSupport::TestCase
 			[1015, 1017],
 			[1016, 1018], [1016, 1019],
 			[1018, 1020], [1018, 1021], [1018, 1022]
-		].each do |target, source|
-			[target, source].each do |did|
+		].each do |source, target|
+			[source, target].each do |did|
 				unless created.member?(did)
-					DeliverableFactory.create(id: did, current_user: current_user)
+					DeliverableFactory.create(current_user: @current_user, params: { id: did })
 					created.add did
 				end
 			end
-			DeliverableRelation.create!(source_deliverable_id: source, target_deliverable_id: target, relation_type_id: DeliverableRelationType.parent.id)
+			DeliverableRelation.create!(source_deliverable_id: source, 
+				target_deliverable_id: target, 
+				relation_type_id: DeliverableRelationType.parent.id,
+				status_id: LifeStatus.active.id)
 		end
 		assert d = Deliverable.find(1000)
-		assert_equal 2, d.children.size
-		assert_equal [1003, 1004], d.children.map(&:id).sort
+		assert_equal 2, d.source_relations.size
+		assert_equal [1003, 1004], d.source_relations.map(&:target_deliverable_id).sort
 
-		tree, relations = DeliverableRelation.get_trees(1000)
-		assert_equal [1000, 1003, 1004, 1009, 1010, 1011], tree.map(&:id).sort
+		deliverable_ids, relations = get_trees(1000)
+		assert_equal [1000, 1003, 1004, 1009, 1010, 1011], deliverable_ids
 
-		tree, relations = DeliverableRelation.get_trees(1004)
-		assert_equal [1000, 1003, 1004, 1009, 1010, 1011], tree.map(&:id).sort
+		deliverable_ids, relations = get_trees(1004)
+		assert_equal [1000, 1003, 1004, 1009, 1010, 1011], deliverable_ids
 
-		tree, relations = DeliverableRelation.get_trees(1001)
-		assert_equal [1001, 1005, 1012, 1013], tree.map(&:id).sort
-		assert_equal 3, relations.size
+		deliverable_ids, relations = get_trees(1001)
+		assert_equal [1001, 1005, 1012, 1013], deliverable_ids
+		assert_equal 4, relations.size
 
-		tree, relations = DeliverableRelation.get_trees(1001, 1005, 1012, 1013)
-		assert_equal [1001, 1005, 1012, 1013], tree.map(&:id).sort
-		assert_equal 3, relations.size
+		deliverable_ids, relations = get_trees(1001, 1005, 1012, 1013)
+		assert_equal [1001, 1005, 1012, 1013], deliverable_ids
+		assert_equal 4, relations.size
 
-		tree, relations = DeliverableRelation.get_trees(1007)
-		assert_equal [1002, 1006, 1007, 1008, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022], tree.map(&:id).sort
+		deliverable_ids, relations = get_trees(1007)
+		assert_equal [1002, 1006, 1007, 1008, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022], deliverable_ids
 
-		tree, relations = DeliverableRelation.get_trees([1000, 1001])
-		assert_equal [1000, 1003, 1004, 1009, 1010, 1011, 1001, 1005, 1012, 1013].sort, tree.map(&:id).sort
+		deliverable_ids, relations = get_trees(1000, 1001)
+		assert_equal [1000, 1003, 1004, 1009, 1010, 1011, 1001, 1005, 1012, 1013].sort, deliverable_ids
 
-		tree, relations = DeliverableRelation.get_trees(1001, 1004)
-		assert_equal [1000, 1003, 1004, 1009, 1010, 1011, 1001, 1005, 1012, 1013].sort, tree.map(&:id).sort
+		deliverable_ids, relations = get_trees(1001, 1004)
+		assert_equal [1000, 1003, 1004, 1009, 1010, 1011, 1001, 1005, 1012, 1013].sort, deliverable_ids
 	end
 end

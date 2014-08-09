@@ -1,0 +1,29 @@
+
+<h3><%= @user.name %></h3>
+
+<div id="profile">
+  <div id="profile-spin">
+    <%= image_tag "big_spinning_icon.gif" %>
+  </div>
+</div>
+
+<% content_for :javascripts do %>
+<script type="text/javascript">
+$(document).ready(function() {
+	$.ajax({
+	  type: 'GET',
+	  url: "<%= profile_gplus_auths_url %>",
+	  success: function(result) {
+	  	$("#profile-spin").hide();
+	    console.log(result);
+	  },
+	  error: function(result) {
+	  	console.log(result);
+	  	$("#profile-spin").hide();
+	  	window.location = "<%= signin_url %>?r=<%= CGI.escape(request.original_fullpath) %>";
+	  },
+	  processData: false
+	});
+});
+</script>
+<% end %>

@@ -6,11 +6,11 @@ function DeliverablesRouter() {
   this.currentUser = null;
   this.currentEmail = null;
   this.loginController = new HtkLoginController(this);
-  this.htkContainer = $("#htk-dcontainer");
-  if (this.htkContainer.size() == 0) {
-    this.htkContainer = $(HandlebarsTemplates['deliverables/layout']);
-    $("body").append(this.htkContainer);
-  }
+  var htkBody = $("#htk-body");
+  if (htkBody.size() == 0)
+    htkBody = $("body");
+  this.htkContainer = $(HandlebarsTemplates['deliverables/layout']());
+  htkBody.append(this.htkContainer);
   this.statusMsg = $("<p>Loading Deliverables...</p>");
   this.htkContainer.append(this.statusMsg);
   adjust_window_height();

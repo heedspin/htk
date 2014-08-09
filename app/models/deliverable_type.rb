@@ -8,10 +8,11 @@
 #  created_at                 :datetime         not null
 #  updated_at                 :datetime         not null
 #  deliverable_type_config_id :integer
+#  user_group_id              :integer
 #
 
 class DeliverableType < ApplicationModel
-	attr_accessible :name, :description, :deliverable_type_config_id
+	attr_accessible :name, :description, :deliverable_type_config_id, :user_group_id
 	belongs_to_active_hash :deliverable_type_config
 
 	def self.deliverable_types(types)

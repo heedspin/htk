@@ -33,6 +33,12 @@ else
   gem 'plutolib', :git => 'https://github.com/heedspin/plutolib.git'
 end
 
+if File.exists?('../google-api-ruby-client')
+  gem 'google-api-client', :path => '../google-api-ruby-client', :require => 'google/api_client'
+else
+  gem 'google-api-client', :git => 'https://github.com/heedspin/google-api-ruby-client.git'
+end
+
 gem 'pg'
 gem 'devise', '3.0.2'
 gem 'activeadmin'

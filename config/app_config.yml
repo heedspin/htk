@@ -7,6 +7,7 @@ app_config:
         controllers: user_sessions
       inbox:
         controllers: email_accounts/emails
+    gplus_signin_scope: email https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/gmail.readonly
   development:
     <<: *shared
   production:

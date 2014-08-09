@@ -8,6 +8,7 @@
 #  envelope_message_id :string(255)
 #  source_email_id     :integer
 #  created_at          :datetime
+#  data                :text
 #
 
 require 'email_account_cache'

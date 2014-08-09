@@ -1,10 +1,13 @@
+require 'plutolib/logger_utils'
+
 module MonkeyPatchGmailImap
 	def self.patch(imap)
 		# From https://gist.github.com/kellyredding/2712611
 		# patch only this instance of Net::IMAP
 		class << imap.instance_variable_get("@parser")
 		  # copied from the stdlib net/smtp.rb
-		  def msg_att
+		  # Added (n) for ruby 2.
+		  def msg_att(n)
 		    match(T_LPAR)
 		    attr = {}
 		    while true
@@ -41,7 +44,7 @@ module MonkeyPatchGmailImap
 		      when /\A(?:X-GM-THRID)\z/ni
 		        name, val = uid_data
 		      else
-		        parse_error("unknown attribute `%s'", token.value)
+		        parse_error("unknown attribute `%s'", token.value, n)
 		      end
 		      attr[name] = val
 		    end
@@ -53,6 +56,7 @@ module MonkeyPatchGmailImap
 end
 
 class HtkImap::GmailImap
+	include Plutolib::LoggerUtils
   def self.imap_connect(email_account, &block)
     Net::IMAP.debug = true
     imap = HtkImap.new(email_account.server, email_account.port, true)
@@ -61,9 +65,13 @@ class HtkImap::GmailImap
     if block_given?
 	    begin
 	    	yield(imap)
+	    rescue => e
+	    	log_error "Unhandled imap exception", e
 	    ensure
-				imap.logout()
-				imap.disconnect()
+	    	unless imap.disconnected?
+					imap.logout()
+					imap.disconnect()
+				end
 	    end
 	  else
 	  	imap

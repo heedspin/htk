@@ -5,7 +5,7 @@ class EmailFactory
 	  include ImportSingleEmail
 		def create_email(args)
 			from_email = args[:email]
-			for_thread = args[:thread]
+			for_thread = args[:thread] # set as related email
 			include_participants = args[:include_participants]
 			email_account = args[:email_account] || (raise ':email_account required')
 			if email_account.is_a?(String)
