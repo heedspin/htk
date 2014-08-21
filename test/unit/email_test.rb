@@ -17,6 +17,8 @@
 #  encoded_mail            :text
 #  data                    :text
 #  created_at              :datetime
+#  user_id                 :integer
+#  snippet                 :string(255)
 #
 
 require 'test_helper'

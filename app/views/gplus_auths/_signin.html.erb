@@ -1,6 +1,6 @@
 <div id="gConnect">
   <button class="g-signin"
-      data-scope="<%= AppConfig.gplus_signin_scope %>"
+      data-scope="<%= AppConfig.gplus_signin_scope.join(' ') %>"
       data-requestvisibleactions="http://schemas.google.com/AddActivity"
       data-clientId="<%= gplus_credentials.client_id %>"
       data-accesstype="offline"

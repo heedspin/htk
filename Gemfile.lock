@@ -24,7 +24,7 @@ PATH
 PATH
   remote: ../plutolib
   specs:
-    plutolib (1.4.1)
+    plutolib (1.5.0)
       active_hash (~> 1.0.0)
 
 GEM

@@ -17,6 +17,8 @@
 #  encoded_mail            :text
 #  data                    :text
 #  created_at              :datetime
+#  user_id                 :integer
+#  snippet                 :string(255)
 #
 
 require 'htk_imap/htk_imap'
@@ -26,7 +28,7 @@ class Email < ApplicationModel
 	include EmailAccountCache	
 	include HtkImap::MailUtils
 	include ActionView::Helpers::TextHelper
-	attr_accessible :folder, :date, :uid, :guid, :subject, :from_address, :mail, :thread_id, :raw_email, :message, :web_id
+	attr_accessible :folder, :date, :uid, :guid, :subject, :from_address, :mail, :thread_id, :raw_email, :message, :web_id, :user_id, :snippet
 	belongs_to :email_account
 	belongs_to :message
 	belongs_to :email_account_thread
@@ -41,7 +43,7 @@ class Email < ApplicationModel
 
 	def self.user(user)
 		user_id = user.is_a?(User) ? user.id : user
-		joins(:email_account).where(email_accounts: { user_id: user_id })
+		where user_id: user_id
 	end
 	def self.starting_uid(uid)
 		where(['emails.uid < ?', uid])
@@ -78,9 +80,6 @@ class Email < ApplicationModel
 	end
 	def self.subject(txt)
 		where ['emails.subject = ?', txt]
-	end
-	def self.web_id(txt)
-		where :web_id => txt
 	end
 	def self.message(message)
 		message_id = message.is_a?(Message) ? message.id : message
@@ -119,10 +118,9 @@ class Email < ApplicationModel
 		end
 	end
 
-	attr_accessible :to_addresses, :cc_addresses, :body_brief
+	attr_accessible :to_addresses, :cc_addresses
 	serialized_attribute :to_addresses, default: '[]'
 	serialized_attribute :cc_addresses, default: '[]'
-	serialized_attribute :body_brief, default: 'nil'
 	%w(to_addresses cc_addresses).each do |key|
 		class_eval <<-RUBY
 		def #{key}=(val)
@@ -132,6 +130,17 @@ class Email < ApplicationModel
 			self.data['#{key}'] = val
 		end
 		RUBY
+	end
+
+	def to_first_names
+		emails = []
+		first_names = self.to_addresses.map do |addr| 
+			name, email = Plutolib::RegexUtils.extract_email_parts(addr)
+			emails.push(email.downcase)
+			name.split(' ').first.capitalize
+		end
+		first_names += User.emails(emails.compact.uniq).select(:first_name).all.map { |u| u.first_name.capitalize }
+		first_names.compact.uniq
 	end
 
 	attr_accessor :mail

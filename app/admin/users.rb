@@ -49,14 +49,6 @@ ActiveAdmin.register User do
       row :current_sign_in_ip
       row :last_sign_in_ip
     end
-    # div do
-    # 	user.email_accounts.map do |email_account|
-    # 		p do
-    # 			column :
-    # 			[email_account.username, email_account.server].join(', ')
-    # 		end
-    # 	end
-    # end
   end
 
   controller do

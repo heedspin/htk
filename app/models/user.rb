@@ -42,6 +42,13 @@ class User < ApplicationModel
   belongs_to :user_group
   has_one :google_authorization
 
+  def self.email(email)
+    where ['lower(users.email) = ?', email.downcase]
+  end
+  def self.emails(emails)
+    where ['lower(users.email) in (?)', emails.map(&:downcase)]
+  end
+
   def name
     "#{self.first_name} #{self.last_name}".strip
   end

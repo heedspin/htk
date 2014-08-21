@@ -70,12 +70,12 @@ class Message < ApplicationModel
 		self.extract_email_reply self.text_body
 	end
 
-	def self.find_or_create(email)
-		emails = Email.from_address(email.from_address).date(email.date).includes(:email_account, :message).all
+	def self.find_or_build(email)
+		emails = Email.from_address(email.from_address).date(email.date).includes(:message).all
 		same_emails = emails.select { |e| e.same_email?(email) }
 		messages = same_emails.map(&:message).uniq
 		if messages.size == 0
-			email.create_message!
+			Message.new source_email_id: email.id, status: LifeStatus.active
 		elsif messages.size == 1
 			messages.first
 		else

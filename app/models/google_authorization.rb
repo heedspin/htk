@@ -22,6 +22,11 @@ require 'cgi'
 class GoogleAuthorization < ApplicationModel
 	belongs_to :user
 	attr_accessible :user_id, :access_token, :refresh_token, :expires_in, :issued_at, :gplus_id
+
+	def self.user(user)
+		where user_id: user.is_a?(User) ? user.id : user
+	end
+
 	def self.find_or_build(code) 
 		log "code = #{code}"
 		credentials = GoogleAuthorization.load_credentials
