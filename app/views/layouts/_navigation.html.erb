@@ -16,9 +16,7 @@
         <li><a href="#contact">Contact</a></li>
         <% if current_user %>
         <li class="<%= menu_selected(:deliverables) %>"><%= link_to 'Deliverables', deliverables_url %></li>
-        <% current_user.email_accounts.each do |email_account| %>
-        <li class="<%= menu_selected(:inbox) %>"><%= link_to email_account.username, email_account_emails_url(email_account) %></li>
-        <% end %>
+        <li class="<%= menu_selected(:inbox) %>"><%= link_to 'Inbox', emails_url %></li>
         <li class="dropdown">
         <a href="#account" class="dropdown-toggle" data-toggle="dropdown">Account <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">

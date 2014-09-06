@@ -1,19 +1,18 @@
 <tr>
 	<td>{{deliverable.deliverable_type.name}}</td>
-	<td>{{deliverable.title}}</td>
-	{{#if project}}
-	<td>{{project.title}}</td>
-	{{else}}
-	<td></td>
-	{{/if}}
-	{{#if company}}
-	<td>{{company.title}}</td>
-	{{else}}
-	<td></td>
-	{{/if}}
+	<td><a href="/deliverables/{{deliverable.id}}">{{deliverable.title}}</a></td>
 	<td>
-	{{#each deliverable.responsible_users}}
-		{{user.first_name}}
-	{{/each}}
+		{{#if project}}
+		Project: {{project.title}}
+		{{/if}}
+		{{#if company}}
+		Company: {{company.title}}
+		{{/if}}
+	</td>
+	<td>{{deliverable.owner.name}}</td>
+	<td>
+		{{#each deliverable.responsible_users}}
+			{{user.name}}
+		{{/each}}
 	</td>
 </tr>

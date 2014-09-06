@@ -21,7 +21,7 @@ class Api::V1::DeliverableRelationsController < Api::V1::ApiController
 			relation_type_id: params[:relation_type_id],
 			status_id: params[:status_id] || LifeStatus.active.id)
 		if @relation.save
-			json_response = get_deliverable_tree(relation: @relation)
+			json_response = get_deliverable_tree(relation: @relation, serialize: true)
 			# The relation created is stored in the singular. Side effects are stored in the plural.  Embrace it.
 			json_response[:deliverable_relations] = json_response[:deliverable_relations].select { |r| r.id != @relation.id }
 			json_response[:deliverable_relation] = DeliverableRelationSerializer.new(@relation, root: false)

@@ -27,11 +27,6 @@ class ApplicationController < ActionController::Base
       HtkCurrentUser.user = current_user
     end
 
-    rescue_from Exceptions::AccessDenied, with: :render_access_denied
-    def render_access_denied
-      render json: { error: 'access denied' }, status: 403
-    end
-
     def verify_authenticated_user!
       unless current_user && current_user.google_authorization.try(:authorized?)
         sign_out

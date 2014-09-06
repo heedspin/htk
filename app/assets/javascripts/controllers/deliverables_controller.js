@@ -21,7 +21,7 @@ DeliverablesController.prototype = Object.create(HtkController.prototype, {
       			var new_du = new Permission({deliverable_id: _this.deliverable.id, 
       				user_id: id, 
       				responsible: true, 
-      				access_id: Permission.prototype.edit_access_id});
+      				access_id: Permission.prototype.edit_access});
       			new_du.save(donebacks);
       			return new_du;
       		},

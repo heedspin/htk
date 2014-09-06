@@ -31,7 +31,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 				Email.find(@email.id).update_attributes(web_id: new_web_id)
 			end
 			@relations = DeliverableRelation.message_or_thread(@email.message.id, @email.message.message_thread_id).not_deleted.top_level.all
-			json_response = get_deliverable_tree(relations: @relations)
+			json_response = get_deliverable_tree(relations: @relations, serialize: true)
 			json_response[:email] = EmailSerializer.new(@email, root: false)
 			render json: json_response
 		else
@@ -54,7 +54,7 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
   	if type = params[:type]
   		@deliverables = @deliverables.type(type)
   	end
-		json_response = get_deliverable_tree(deliverables: @deliverables)
+		json_response = get_deliverable_tree(deliverables: @deliverables, serialize: true)
 		render json: json_response
   end
   

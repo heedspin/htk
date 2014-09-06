@@ -1,6 +1,9 @@
 module ImportSingleEmail
 	def import_single_email(email)
 		Email.transaction do
+      if email.new_record?
+        email.save! # need id
+      end
   		message = Message.find_or_build(email)
 			# TODO: ensure MessageThread always created.
   		email.message = message

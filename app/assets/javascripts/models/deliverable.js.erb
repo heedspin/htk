@@ -29,12 +29,12 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 		value : function() {
 			var _this = this;
 			this.responsible_users = [];
-			_.each(Permission.prototype.all_cached({ deliverable_id : this.id }), function(du) {
-				if (du.access == "owner") {
-					_this.owner = du.user;
+			_.each(Permission.prototype.all_cached({ deliverable_id : this.id }), function(p) {
+				if (p.has_owner_access()) {
+					_this.owner = p.user;
 				}
-				if (du.responsible) {
-					_this.responsible_users.push(du);
+				if (p.responsible) {
+					_this.responsible_users.push(p);
 				}
 			});
 			_.each(DeliverableRelation.prototype.all_cached({ target_deliverable_id : this.id }), function(relation) {

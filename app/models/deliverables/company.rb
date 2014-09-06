@@ -17,7 +17,7 @@
 class Deliverables::Company < Deliverable
   def self.create_from_email(args)
   	email = args[:email] || (raise ':email required')
-  	current_user = args[:current_user] || (raise ':current_user required')
+  	creator = args[:creator] || (raise ':creator required')
     params = args[:params] || {}
     deliverable_type = if deliverable_type_id = params[:deliverable_type_id]
       DeliverableTypeConfig.find(deliverable_type_id).ar_type_class
@@ -29,9 +29,9 @@ class Deliverables::Company < Deliverable
     accessible_attributes = deliverable_type.accessible_attributes.select(&:present?)
     Deliverable.transaction do
       deliverable.update_attributes!(params.select { |k,v| accessible_attributes.include?(k.to_s) })
-      if current_user.user_group_id
+      if creator.user_group_id
         permission = deliverable.permissions.build(access_id: DeliverableAccess.edit.id)
-        permission.group_id = current_user.user_group_id
+        permission.group_id = creator.user_group_id
         permission.save!
       end
     end
@@ -39,7 +39,7 @@ class Deliverables::Company < Deliverable
     # deliverable.id = id if id.present?
   	# Deliverable.transaction do
   	# 	deliverable.save!
-  	# 	deliverable.permissions.create!(group_id: current_user.company_group_id, 
+  	# 	deliverable.permissions.create!(group_id: creator.company_group_id, 
   	# 		access_id: DeliverableAccess.edit.id)
   	# 	end
   	# end

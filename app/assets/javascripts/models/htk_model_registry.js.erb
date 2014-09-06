@@ -15,7 +15,33 @@ HtkModelRegistry.prototype.constructor_for = function(key) {
 	return HtkModelRegistry.prototype.registry[key];
 }
 
-<% [Deliverable, DeliverableComment, DeliverableCommentType, Permission,
- DeliverableRelation, DeliverableType, Email, Message, User].each do |klass| %>
+HtkModelRegistry.prototype.types_by_dependencies = [];
+<% [User, 
+		Permission, 
+		DeliverableType, 
+	  DeliverableRelation, 
+	  DeliverableCommentType, 
+	  DeliverableComment, 
+		Deliverable, 
+		Email, 
+		Message].each do |klass| %>
+HtkModelRegistry.prototype.types_by_dependencies.push('<%= klass.json_root %>');
 HtkModelRegistry.prototype.register(<%= klass.name %>, '<%= klass.json_root %>', '<%= klass.json_root.pluralize %>');
 <% end %>
+
+HtkModelRegistry.prototype.by_dependency = function(objects, callback) {
+	var by_type = Object();
+	_.each(objects, function(o) {
+		if (!by_type[o.type_key]) {
+			by_type[o.type_key] = [ o ];
+		} else {
+			by_type[o.type_key].push(o);
+		}
+	});
+	_.each(HtkModelRegistry.prototype.types_by_dependencies, function(type_key) {
+		var type_objects = by_type[type_key];
+		if (type_objects) {
+			_.each(type_objects, callback);
+		}
+	});
+}

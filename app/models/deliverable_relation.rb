@@ -38,6 +38,14 @@ class DeliverableRelation < ApplicationModel
   # end
 
   scope :not_deleted, where(['deliverable_relations.status_id != ?', LifeStatus.deleted.id])
+  def self.message(message)
+    message_id = message.is_a?(Message) ? message.id : message
+    where message_id: message_id
+  end
+  def self.messages(messages)
+    message_ids = messages.map { |m| m.is_a?(Message) ? m.id : m }
+    where message_id: message_ids
+  end
   def self.message_thread_id(mti)
     where :message_thread_id => mti
   end
@@ -62,12 +70,12 @@ class DeliverableRelation < ApplicationModel
     DeliverableRelationType.find(relation_type_id).try(:parent?) && source_deliverable_id.nil?
   end
 
-  after_create :copy_to_folders
-  def copy_to_folders
-    if self.is_top_level
-      DeliverableFolder.new(self).delay.copy_all_to_folder
-    end
-  end
+  # after_create :copy_to_folders
+  # def copy_to_folders
+  #   if self.is_top_level
+  #     DeliverableFolder.new(self).delay.copy_all_to_folder
+  #   end
+  # end
 
   before_update :update_folders
   def update_folders

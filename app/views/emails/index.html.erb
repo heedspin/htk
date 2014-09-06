@@ -1,11 +1,11 @@
-<h2><%= @email_account.username %></h2>
+<h2><%= current_user.email %></h2>
 <div class="table-responsive">
 	<table class="table table-striped">
 		<thead>
 			<tr>
 				<th>From</th>
-				<th>To</th>
 				<th>Subject</th>
+				<th>Folder</th>
 				<th>Date</th>
 			</tr>
 		</thead>
@@ -13,8 +13,11 @@
 			<% @emails.each do |email| %>
 			<tr>
 				<td><%= email.from_address %></td>
-				<td><%= email.to_addresses.map(&:to_s).join(', ') %></td>
-				<td><%= link_to email.subject, email_account_email_url(@email_account, email) %></td>
+				<td>
+					<strong><%= link_to email.subject, email_url(email) %></strong>
+					<%= email.snippet %>
+				</td>
+				<td><%= email.label_ids.try(:join, ' ') %></td>
 				<td><%= email.date %></td>
 			</tr>
 			<% end %>

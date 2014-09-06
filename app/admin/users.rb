@@ -27,16 +27,6 @@ ActiveAdmin.register User do
 			f.input :password
 			f.input :password_confirmation
 		end
-		f.inputs do
-	    f.has_many :email_accounts, :allow_destroy => true do |eaf|
-	  		eaf.input :username
-	  		eaf.input :authentication_string
-	  		eaf.input :status_id
-	  		eaf.input :server
-	  		eaf.input :port
-	    end
-	    f.actions
-	  end
   end  
 	show do |ad|
     attributes_table do

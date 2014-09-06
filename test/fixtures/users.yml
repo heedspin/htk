@@ -47,21 +47,3 @@ red_user2:
   email: red_dawn@red.com
   first_name: Red
   last_name: Dawn
-
-lxd_tim:
-  id: 5
-  email: tharrison@lxdinc.com
-  first_name: Tim
-  last_name: Harrison
-
-bps_tim:
-  id: 6
-  email: tim@126bps.com
-  first_name: Tim
-  last_name: Harrison
-
-bps_lindsay:
-  id: 7
-  email: lindsay@126bps.com
-  first_name: Lindsay
-  last_name: Harrison

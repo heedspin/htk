@@ -45,6 +45,7 @@ gem 'activeadmin'
 gem 'oauth'
 gem 'html_press'
 gem 'active_model_serializers'
+gem 'airbrake'
 
 # http://stackoverflow.com/questions/1226302/how-to-monitor-delayed-job-with-monit
 gem 'delayed_job_active_record'
@@ -56,7 +57,8 @@ group :development do
 end
 
 group :development, :test do
-  gem "qunit-rails"
+  gem 'qunit-rails'
+  gem 'rspec-rails'
 end
 
 # To use ActiveModel has_secure_password

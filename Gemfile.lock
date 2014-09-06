@@ -24,7 +24,7 @@ PATH
 PATH
   remote: ../plutolib
   specs:
-    plutolib (1.5.0)
+    plutolib (1.7.0)
       active_hash (~> 1.0.0)
 
 GEM
@@ -74,6 +74,9 @@ GEM
       i18n (~> 0.6, >= 0.6.4)
       multi_json (~> 1.0)
     addressable (2.3.6)
+    airbrake (4.0.0)
+      builder
+      multi_json
     arbre (1.0.1)
       activesupport (>= 3.0.0)
     arel (3.0.3)
@@ -117,6 +120,7 @@ GEM
       orm_adapter (~> 0.1)
       railties (>= 3.2.6, < 5)
       warden (~> 1.2.3)
+    diff-lcs (1.2.5)
     erubis (2.7.0)
     execjs (2.0.2)
     extlib (0.9.16)
@@ -207,6 +211,22 @@ GEM
     responders (1.0.0)
       railties (>= 3.2, < 5)
     retriable (1.4.1)
+    rspec-core (3.0.4)
+      rspec-support (~> 3.0.0)
+    rspec-expectations (3.0.4)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.0.0)
+    rspec-mocks (3.0.4)
+      rspec-support (~> 3.0.0)
+    rspec-rails (3.0.2)
+      actionpack (>= 3.0)
+      activesupport (>= 3.0)
+      railties (>= 3.0)
+      rspec-core (~> 3.0.0)
+      rspec-expectations (~> 3.0.0)
+      rspec-mocks (~> 3.0.0)
+      rspec-support (~> 3.0.0)
+    rspec-support (3.0.4)
     sass (3.2.10)
     sass-rails (3.2.6)
       railties (~> 3.2.0)
@@ -242,6 +262,7 @@ DEPENDENCIES
   active_hash
   active_model_serializers
   activeadmin
+  airbrake
   annotate!
   autoprefixer-rails
   bootstrap-sass (~> 3.2.0)
@@ -261,5 +282,6 @@ DEPENDENCIES
   quiet_assets
   qunit-rails
   rails (= 3.2.15)
+  rspec-rails
   sass-rails (~> 3.2.3)
   uglifier (>= 1.0.3)

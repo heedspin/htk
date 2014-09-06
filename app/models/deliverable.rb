@@ -22,8 +22,6 @@ class Deliverable < ApplicationModel
   has_many :permissions, dependent: :destroy
   has_many :users, through: :permissions
   attr_accessible :title, :status, :status_id, :description, :completed_by_id
-  # has_many :deliverable_messages, dependent: :destroy
-  # has_many :messages, through: :deliverable_messages
   belongs_to :completed_by, class_name: 'User', foreign_key: :completed_by_id
   has_many :comments, class_name: 'DeliverableComment', dependent: :destroy
   has_many :source_relations, class_name: 'DeliverableRelation', foreign_key: :source_deliverable_id, dependent: :destroy
@@ -33,6 +31,10 @@ class Deliverable < ApplicationModel
   # belongs_to :deliverable_type
   # validates :deliverable_type_id, presence: true
   validates :title, presence: true
+
+  def owner
+    self.permissions.detect { |p| p.access.owner? }.try(:user)
+  end
 
   def deliverable_type
     self.deliverable_type_config.deliverable_type(self.user_group_id)
@@ -51,7 +53,7 @@ class Deliverable < ApplicationModel
 
   def self.accessible_to(user)
     user_id = user.is_a?(User) ? user.id : user
-    includes(:permissions).where(permissions: { user_id: user_id, access_id: DeliverableAccess.all.map(&:id) })
+    includes(:permissions).merge(Permission.user_or_group(user))
   end
   def self.title_like(text)
     where ['deliverables.title ilike ?', "%#{text}%"]
@@ -88,9 +90,9 @@ class Deliverable < ApplicationModel
     self.target_relations.each(&:destroy)
     self.source_relations.each(&:destroy)
     # self.permissions.each(&:destroy)
-    if self.is_assigned?
-      TodoFolder.new(self).delay.remove
-    end
+    # if self.is_assigned?
+    #   TodoFolder.new(self).delay.remove
+    # end
     self.save!
   end
 

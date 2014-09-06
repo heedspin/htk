@@ -23,7 +23,7 @@ class EmailAccount < ApplicationModel
   attr_accessible :authentication_string, :port, :server, :username, :status
   attr_protected :user_id
   belongs_to :user
-  belongs_to_active_hash :status, :class_name => 'EmailAccountStatus'
+  # belongs_to_active_hash :status, :class_name => 'EmailAccountStatus'
   validates_uniqueness_of :username, :case_sensitive => false, :scope => :user_id
   has_many :emails, dependent: :destroy
   has_many :email_account_threads, dependent: :destroy
@@ -38,7 +38,7 @@ class EmailAccount < ApplicationModel
   def self.username(txt)
     where username: txt.downcase
   end
-  scope :active, :conditions => { :status_id => EmailAccountStatus.active.id }
+  # scope :active, :conditions => { :status_id => EmailAccountStatus.active.id }
 
   def username=(txt)
     super txt.try(:downcase).try(:strip)
@@ -63,7 +63,7 @@ class EmailAccount < ApplicationModel
     self.imap_connection do |imap|
       current_folder = self.mailbox_all
       imap.examine(current_folder) # readonly
-      args = args.clone
+      args = args.dup
       args[:imap] = imap
       args[:current_folder] = current_folder
       args[:limit] ||= 10

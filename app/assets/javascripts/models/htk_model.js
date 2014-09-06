@@ -3,6 +3,7 @@ function HtkModel(attributes) {
 	this.changes = [];
 	this.bindings = new Object();
 	this.set_attributes(attributes);
+	this.type_key = null;
 	if (this.attribute_keys.size == 0) {
 		var _this = this;
 		var add_attribute_key = function(a) {
@@ -141,11 +142,11 @@ HtkModel.prototype = Object.create(Object.prototype, {
 					} else {
 						var new_object = this.receive_object(model_constructor, v);
 						created.push(new_object);
-						results[property] = new_object
+						results[property] = new_object;
 					}
 				}
 			}
-			_.each(created, function(o) { o.registry_hook() });
+			HtkModelRegistry.prototype.by_dependency(created, function(o) { o.registry_hook() });
 			return results;
 		}
 	},

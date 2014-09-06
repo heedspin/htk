@@ -45,7 +45,7 @@ class DeliverableTypeConfig < ActiveHash::Base
   end
 
   def enable!(user_group_id)
-    self.deliverable_type(user_group_id) || DeliverableType.create!(deliverable_type_config_id: self.id, user_group_id: user_group_id)
+    self.deliverable_type(user_group_id) || DeliverableType.create!(deliverable_type_config_id: self.id, user_group_id: user_group_id, name: self.name)
   end
 
   def self.enable!(user_group_id, *args)

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140819190805) do
+ActiveRecord::Schema.define(:version => 20140829112251) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -117,20 +117,10 @@ ActiveRecord::Schema.define(:version => 20140819190805) do
     t.string   "thread_id"
     t.string   "subject"
     t.datetime "start_time"
-    t.datetime "created_at",        :null => false
-    t.datetime "updated_at",        :null => false
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
     t.integer  "user_id"
-  end
-
-  create_table "email_accounts", :force => true do |t|
-    t.integer  "status_id"
-    t.integer  "user_id"
-    t.string   "username"
-    t.string   "authentication_string"
-    t.string   "server"
-    t.integer  "port"
-    t.datetime "created_at",            :null => false
-    t.datetime "updated_at",            :null => false
+    t.integer  "status_id",         :default => 2
   end
 
   create_table "email_comment_users", :force => true do |t|
@@ -168,6 +158,7 @@ ActiveRecord::Schema.define(:version => 20140819190805) do
     t.datetime "created_at"
     t.integer  "user_id"
     t.string   "snippet"
+    t.integer  "status_id",               :default => 2
   end
 
   create_table "gmail_synchronizations", :force => true do |t|
@@ -190,12 +181,13 @@ ActiveRecord::Schema.define(:version => 20140819190805) do
   end
 
   create_table "message_threads", :force => true do |t|
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",                :null => false
+    t.datetime "updated_at",                :null => false
+    t.integer  "status_id",  :default => 2
   end
 
   create_table "messages", :force => true do |t|
-    t.integer  "status_id"
+    t.integer  "status_id",           :default => 2
     t.integer  "message_thread_id"
     t.string   "envelope_message_id"
     t.integer  "source_email_id"

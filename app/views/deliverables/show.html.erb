@@ -1,0 +1,48 @@
+<h1><%= @deliverable.title %></h1>
+<div class="row deliverable-status">
+	<div class="col-md-2">
+		<% if @deliverable.completed_by_id %>
+			<%= image_tag 'green-check.png' %> Completed By <%= @deliverable.completed_by.name %>
+		<% else %>
+			<%= image_tag 'check.png' %> Incomplete.
+		<% end %>		
+	</div>
+	<div class="col-md-4">
+		Created <%= time_ago_in_words @deliverable.created_at %> ago
+		by <%= @deliverable.owner.try(:name) %>.
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12 deliverable-description">
+		<p><%= @deliverable.description %></p>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12">
+<% @message_threads.each do |thread| %>
+		<strong><%= thread.messages.first.subject %></strong>
+		<div class="table-responsive">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>From</th>
+						<th>To</th>
+						<th></th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<% thread.messages.each do |message| %>
+					<tr>
+						<td><%= message.from_address %></td>
+						<td><%= message.to_addresses.join(', ') %></td>
+						<td><%= message.snippet %></td>
+						<td><%= time_ago_in_words message.date %></td>
+					</tr>
+					<% end %>
+				</tbody>
+			</table>
+		</div>
+<% end %>
+	</div>
+</div>

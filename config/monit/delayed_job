@@ -1,7 +1,7 @@
 ############################################################
 # Staging
 
-check process stk with pidfile /home/ubuntu/Dropbox/p/htk/tmp/pids/delayed_job_stk.pid
+check process stk with pidfile /home/ubuntu/Dropbox/p/htk/tmp/pids/delayed_job.pid
   start program = "/usr/bin/env HOME=/home/ubuntu PATH=/usr/local/bin:$PATH RAILS_ENV=development /home/ubuntu/Dropbox/p/htk/script/monit_delayed_job.sh start"
     as uid ubuntu and gid www-data
   stop program = "/usr/bin/env HOME=/home/ubuntu PATH=/usr/local/bin:$PATH RAILS_ENV=development /home/ubuntu/Dropbox/p/htk/script/monit_delayed_job.sh stop"

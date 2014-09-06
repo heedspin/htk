@@ -33,13 +33,11 @@ class Api::V1::DeliverablesControllerTest < HtkControllerTest
   test "should return deliverable for thread" do    
   	user1 = users(:red_user1)
   	user2 = users(:red_user2)
-    assert_not_nil email1_user1 = EmailFactory.create_email(email_account: user1.email_accounts.first, 
-    	subject: 'subject',
-    	to_addresses: [user2.email])
+    assert_not_nil email1_user1 = EmailFactory.create_email(user: user1, subject: 'subject', to_addresses: [user2.email])
    	assert_equal 0, email1_user1.message.message_thread.deliverables.count
 		assert_not_nil deliverable = DeliverableFactory.create(email: email1_user1, current_user: user1)
    	assert_equal 1, email1_user1.message.message_thread.deliverables.count
-    assert_not_nil email1_user2 = EmailFactory.create_email(email_account: user2.email_accounts.first, email: email1_user1)
+    assert_not_nil email1_user2 = EmailFactory.create_email(user: user2, email: email1_user1)
    	assert_equal 1, email1_user2.message.message_thread.deliverables.count
    	get :index, {
    		from_address: email1_user1.from_address,

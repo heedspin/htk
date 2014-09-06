@@ -63,4 +63,9 @@ class Api::V1::ApiController < ActionController::Base
 	    end
 		end
 
+    rescue_from Exceptions::AccessDenied, with: :render_access_denied
+    def render_access_denied
+      render json: { error: 'access denied' }, status: 403
+    end
+
 end

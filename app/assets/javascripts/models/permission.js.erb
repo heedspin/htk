@@ -8,9 +8,22 @@ Permission.prototype = Object.create(HtkModel.prototype, {
 	attribute_keys : { value : <%= Permission.columns.map(&:name).to_json %> },
 	registry_hook : { 
 		value : function() {
-			this.user = User.prototype.find_cached(this.user_id);
+			this.getUser();
+		}
+	},
+	getUser : {
+		value : function() {
+			if (!this.user) {
+				this.user = User.prototype.find_cached(this.user_id);				
+			}
+			return this.user;
 		}
 	}
 });
 
-Permission.prototype.edit_access_id = "<%= DeliverableAccess.edit.id %>";
+<% DeliverableAccess.all.each do |access_type| %>
+Permission.prototype.<%= access_type.cmethod %>_access = "<%= access_type.id %>";
+Permission.prototype.has_<%= access_type.cmethod %>_access = function() {
+	return this.access_id == <%= access_type.id %>;
+}
+<% end %>

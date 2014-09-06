@@ -23,16 +23,9 @@ Htk::Application.routes.draw do
   ActiveAdmin.routes(self)
 
   devise_for :users, path: "auth"
-
-  resources :email_accounts do
-    resources :emails, :controller => 'email_accounts/emails'
-  end
-  resources :emails, :controller => 'email_accounts/emails', :only => :show
-  resources :email_summaries, :controller => 'email_accounts/email_summaries', :only => :index
+  resources :emails
 
   resources :messages, :only => [:index, :show, :update, :destroy]
-  # resources :message_bodies, :only => [:show]
-  match 'test_deliverables_gadget', to: 'test_deliverables_gadget#index'
 
   resources :deliverables
 

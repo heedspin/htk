@@ -15,12 +15,22 @@ module GetDeliverableTree
 		end
 		@deliverable_types = DeliverableType.deliverable_types(@deliverables.map(&:type)).all		
 		@permissions = @deliverables.map(&:significant_permissions).flatten.uniq
-		{ 
-			deliverables: @deliverables.map { |d| DeliverableSerializer.new(d, root: false) }, 
-			permissions: @permissions.map { |p| PermissionSerializer.new(p, root: false) },
-			users: @permissions.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
-			deliverable_relations: @relations.map { |r| DeliverableRelationSerializer.new(r, root: false) },
-			deliverable_types: @deliverable_types.map { |t| DeliverableTypeSerializer.new(t, root: false) }
-		}
+		if args[:serialize]
+			{ 
+				deliverables: @deliverables.map { |d| DeliverableSerializer.new(d, root: false) }, 
+				permissions: @permissions.map { |p| PermissionSerializer.new(p, root: false) },
+				users: @permissions.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
+				deliverable_relations: @relations.map { |r| DeliverableRelationSerializer.new(r, root: false) },
+				deliverable_types: @deliverable_types.map { |t| DeliverableTypeSerializer.new(t, root: false) }
+			}
+		else
+			{ 
+				deliverables: @deliverables, 
+				permissions: @permissions,
+				users: @permissions,
+				deliverable_relations: @relations,
+				deliverable_types: @deliverable_types
+			}
+		end
 	end
 end

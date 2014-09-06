@@ -11,7 +11,8 @@
 <p>
 	From: <%= @email.from_address %><br />
 	To: <%= @email.to_addresses.map(&:to_s).join(', ') %><br />
-	Sent: <%= @email.date %>
+	Sent: <%= @email.date %><br />
+	Folders: <%= @email.label_ids.join(' ') %>
 </p>
 <hr />
 

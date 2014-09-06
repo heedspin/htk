@@ -1,7 +1,7 @@
 require 'plutolib/active_hash_methods'
-class EmailAccountStatus < ActiveHash::Base
+class UserStatus < ActiveHash::Base
   self.data = [
-    {:id => 1, :name => 'Unclaimed'},
+    {:id => 1, :name => 'Surrogate'},
     {:id => 2, :name => 'Active'},
     {:id => 3, :name => 'Deleted'}
   ]

@@ -12,4 +12,7 @@
 class UserGroup < ApplicationModel
 	attr_accessible :name
 	has_many :users
+	def self.group_name(text)
+		where name: text
+	end
 end

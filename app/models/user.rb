@@ -28,19 +28,20 @@ class User < ApplicationModel
   # :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
-  validates_uniqueness_of :short_name
+  # validates_uniqueness_of :short_name
+  belongs_to_active_hash :status, :class_name => 'UserStatus'
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :first_name, :last_name, :email, :password, :password_confirmation, :remember_me, :email_accounts_attributes, :short_name
+  attr_accessible :first_name, :last_name, :email, :password, :password_confirmation, :remember_me, :short_name, :name
 
-	has_many :email_accounts, dependent: :destroy
-	accepts_nested_attributes_for :email_accounts
+  has_many :emails, dependent: :destroy
 
 	has_many :signed_request_users
 	accepts_nested_attributes_for :signed_request_users
 
   belongs_to :user_group
   has_one :google_authorization
+  has_one :gmail_synchronization, :class_name => 'Htkoogle::GmailSynchronization'
 
   def self.email(email)
     where ['lower(users.email) = ?', email.downcase]
@@ -48,16 +49,28 @@ class User < ApplicationModel
   def self.emails(emails)
     where ['lower(users.email) in (?)', emails.map(&:downcase)]
   end
+  def self.user_group(group)
+    group_id = group.is_a?(UserGroup) ? group.id : group
+    where user_group_id: group_id
+  end
+  def self.accessible_to(user)
+    where(['users.email like ?', '%@' + user.email_domain ])
+  end
+  scope :active, where(status_id: UserStatus.active.id)
+  scope :surrogate, where(status_id: UserStatus.surrogate.id)
 
   def name
     "#{self.first_name} #{self.last_name}".strip
   end
 
-  def self.email_accounts(emails)
-    joins(:email_accounts).where(['email_accounts.username in (?)', emails])
-  end
-  def self.accessible_to(user)
-    joins(:email_accounts).where(['email_accounts.username like ?', '%@' + user.email_domain ])
+  def name=(val)
+    if val
+      parts = val.split(' ')
+      self.first_name = parts[0]
+      self.last_name = parts[1..-1].join(' ')
+    else
+      self.first_name = self.last_name = nil
+    end
   end
 
   def email_domain
@@ -71,6 +84,18 @@ class User < ApplicationModel
   # Allow gplus login.
   def password_required?
     super if false
+  end
+
+  def self.build(args)
+    args = args.dup
+    user_group_id = args.delete(:user_group_id)
+    user_group = args.delete(:user_group)
+    status = args.delete(:status)
+    user = User.new(args)
+    user.user_group_id = user_group_id if user_group_id
+    user.user_group = user_group if user_group
+    user.status = status
+    user
   end
 
   protected
