@@ -3,7 +3,11 @@ require 'import_single_email'
 class UserFactory
 	class << self
 		def create(args)
-			args = args.dup
+			if args.is_a?(String)
+				args = { email: args }
+			else
+				args = args.dup
+			end
 			email = args[:email] || (raise ':email required')
 			args[:status] ||= UserStatus.active 
 			unless user_group = args[:user_group]

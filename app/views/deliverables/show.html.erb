@@ -9,7 +9,7 @@
 	</div>
 	<div class="col-md-4">
 		Created <%= time_ago_in_words @deliverable.created_at %> ago
-		by <%= @deliverable.owner.try(:name) %>.
+		by <%= @deliverable.creator.try(:name_and_email) %>.
 	</div>
 </div>
 <div class="row">

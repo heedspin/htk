@@ -1,29 +1,58 @@
+# == Schema Information
+#
+# Table name: deliverables
+#
+#  id              :integer          not null, primary key
+#  title           :string(255)
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  description     :text
+#  completed_by_id :integer
+#  type            :string(255)
+#  data            :text
+#  abbreviation    :string(255)
+#  status_id       :integer
+#  creator_id      :integer
+#
+
 require 'rails_helper'
 
 RSpec.describe Deliverables::Standard, :type => :model do
 	context 'permissions' do
-		it 'creates owner and current group permissions' do
-			user = UserFactory.create(email: 'testuser@htk.com')
-			expect(Permission.user(user).count).to eq(0)
-			expect(Permission.user_group(user.user_group_id).count).to eq(0)
-			email = EmailFactory.create(current_user: user,
-				from_address: 'someone@company1.com', 
-				to_addresses: [user.email, 'someone@company2.com'], 
-				cc_addresses: ['someone@company3.com'])
-			expect deliverable = Deliverables::Standard.create_from_email(current_user: user, email: email, params: { title: 'test' })
+		it 'creates creator user and current group permissions' do
+			current_user = UserFactory.create(email: 'testuser@htk.com')
+			creator_address = 'someone@company1.com'
+			bystander1 = 'someone@company2.com'
+			bystander2 = 'someone@company3.com'
+			expect(Permission.user_or_group(current_user).count).to eq(0)
+			expect(User.email(creator_address).count).to eq(0)
+			expect(User.email(bystander1).count).to eq(0)
+			expect(User.email(bystander2).count).to eq(0)
 
-			# owner permissions
-			expect owner = email.from_user
-			permissions = Permission.user(owner).all
-			expect(permissions.size).to eq(1)
-			permission = permissions.first
-			expect(permission.deliverable_id).to eq(deliverable.id)
-			expect(permission.access.owner?).to be_truthy
+			# Create email
+			email = EmailFactory.create(current_user: current_user,
+				from_address: creator_address, 
+				to_addresses: [current_user.email, bystander1], 
+				cc_addresses: [bystander2])
 
-			# group permissions
-			permissions = Permission.user_group(user.user_group_id).all
+			# Create deliverable
+			deliverable = Deliverables::Standard.create_from_email(current_user: current_user, email: email, params: { title: 'test' })
+			expect(deliverable).to be_truthy
+
+			# Bystanders
+			expect(User.email(bystander1).count).to eq(0)
+			expect(User.email(bystander2).count).to eq(0)			
+
+			# Creator user
+			expect(creator = User.inactive.email(creator_address).first).to be_truthy
+			expect(creator).to eq(email.from_user)
+			expect(creator).to eq(deliverable.creator)
+			expect(Permission.user(creator).count).to eq(0)
+
+			# Group permissions
+			permissions = Permission.user_group(current_user.user_group_id).all
 			expect(permissions.size).to eq(1)
-			expect permission = permissions.first
+			expect(permission = permissions.first).to be_truthy
 			expect(permission.deliverable_id).to eq(deliverable.id)
 			expect(permission.access.edit?).to be_truthy
 		end

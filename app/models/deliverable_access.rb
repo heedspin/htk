@@ -1,9 +1,8 @@
 require 'plutolib/active_hash_methods'
 class DeliverableAccess < ActiveHash::Base
   self.data = [
-    {:id => 1, :name => 'Owner'},
-    {:id => 2, :name => 'Edit'},
-    {:id => 3, :name => 'Read'}
+    {:id => 1, :name => 'Read'},
+    {:id => 2, :name => 'Edit'}
   ]
   include Plutolib::ActiveHashMethods
 end

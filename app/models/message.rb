@@ -11,11 +11,9 @@
 #  data                :text
 #
 
-require 'email_account_cache'
 require 'extract_email_reply'
 
 class Message < ApplicationModel
-	include EmailAccountCache	
 	include ExtractEmailReply
 	attr_accessible :status_id, :status, :envelope_message_id, :source_email_id, :message_thread_id, :message_thread
 	belongs_to_active_hash :status, :class_name => 'LifeStatus'

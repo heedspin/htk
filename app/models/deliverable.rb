@@ -7,11 +7,12 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  description     :text
+#  completed_by_id :integer
 #  type            :string(255)
 #  data            :text
 #  abbreviation    :string(255)
-#  completed_by_id :integer
 #  status_id       :integer
+#  creator_id      :integer
 #
 
 require 'plutolib/serialized_attributes'
@@ -23,6 +24,7 @@ class Deliverable < ApplicationModel
   has_many :users, through: :permissions
   attr_accessible :title, :status, :status_id, :description, :completed_by_id
   belongs_to :completed_by, class_name: 'User', foreign_key: :completed_by_id
+  belongs_to :creator, class_name: 'User', foreign_key: :creator_id
   has_many :comments, class_name: 'DeliverableComment', dependent: :destroy
   has_many :source_relations, class_name: 'DeliverableRelation', foreign_key: :source_deliverable_id, dependent: :destroy
   has_many :target_relations, class_name: 'DeliverableRelation', foreign_key: :target_deliverable_id, dependent: :destroy
@@ -32,20 +34,12 @@ class Deliverable < ApplicationModel
   # validates :deliverable_type_id, presence: true
   validates :title, presence: true
 
-  def owner
-    self.permissions.detect { |p| p.access.owner? }.try(:user)
-  end
-
   def deliverable_type
     self.deliverable_type_config.deliverable_type(self.user_group_id)
   end
 
   def deliverable_type_config
     DeliverableTypeConfig.where(ar_type: self.class.name).first
-  end
-
-  def significant_permissions
-    self.permissions.all.select(&:significant?)
   end
 
   scope :not_deleted, where(['deliverables.status_id != ?', LifeStatus.deleted.id])
@@ -74,7 +68,7 @@ class Deliverable < ApplicationModel
   end
   def self.editable_by(user)
     user_id = user.is_a?(User) ? user.id : user
-    includes(:permissions).where(permissions: { user_id: user_id, access_id: [DeliverableAccess.owner.id, DeliverableAccess.edit.id] })
+    includes(:permissions).merge(Permission.user_or_group(user).editable)
   end
 
   def folder_name(use_previous_name=false)
@@ -136,16 +130,14 @@ class Deliverable < ApplicationModel
   def self.ensure_editable_by!(deliverable_ids, user)
     deliverable_ids = deliverable_ids.is_a?(Array) ? deliverable_ids : [deliverable_ids]
     deliverable_ids.each do |deliverable_id|
-      access_ids = Permission.deliverable_id(deliverable_id).all.map(&:access_id)
-      intersection = [DeliverableAccess.owner.id, DeliverableAccess.edit.id] & access_id
-      if intersection.size == 0
+      if Permission.user_or_group(user).deliverable(deliverable_id).editable.count == 0
         raise Exception::AccessDenied
       end
     end
     deliverable_ids
   end
   def ensure_editable_by!(user)
-    unless [DeliverableAccess.owner.id, DeliverableAccess.edit.id].include?(self.permissions.user(user).first.access_id)    
+    if self.permissions.user_or_group(user).editable.count == 0
       raise Exception::AccessDenied
     end
     self

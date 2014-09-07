@@ -7,11 +7,12 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  description     :text
+#  completed_by_id :integer
 #  type            :string(255)
 #  data            :text
 #  abbreviation    :string(255)
-#  completed_by_id :integer
 #  status_id       :integer
+#  creator_id      :integer
 #
 
 class Deliverables::Standard < Deliverable
@@ -36,12 +37,9 @@ class Deliverables::Standard < Deliverable
     # id = args[:id]
     # deliverable.id = id if id.present?
   	Deliverable.transaction do
-      # Create owner user and permission.
+      # Create creator user.
       email.from_user.save! if email.from_user.new_record?
-      permissions.push deliverable.permissions.create!(access: DeliverableAccess.owner, user_id: email.from_user.id)
-      # if email.from_user.user_group_id and (email.from_user.user_group_id == current_user.user_group_id)
-      #   # Creator from same group gets edit permissions.
-      # end
+      deliverable.creator_id = email.from_user.id
       deliverable.save!
       if current_user.user_group_id
         permissions.push deliverable.permissions.create!(access: DeliverableAccess.edit, group_id: current_user.user_group_id)

@@ -1,6 +1,6 @@
 function Deliverable(attributes) {
 	HtkModel.call(this, attributes);
-	this.owner = null;
+	this.creator = null;
 	this.responsible_users = [];
 	this.tree = null;
 	this.parent_relation = null;
@@ -29,10 +29,8 @@ Deliverable.prototype = Object.create(HtkModel.prototype, {
 		value : function() {
 			var _this = this;
 			this.responsible_users = [];
+			this.creator = User.prototype.first_cached({ id: this.creator_id });
 			_.each(Permission.prototype.all_cached({ deliverable_id : this.id }), function(p) {
-				if (p.has_owner_access()) {
-					_this.owner = p.user;
-				}
 				if (p.responsible) {
 					_this.responsible_users.push(p);
 				}

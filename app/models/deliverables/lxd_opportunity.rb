@@ -7,11 +7,12 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  description     :text
+#  completed_by_id :integer
 #  type            :string(255)
 #  data            :text
 #  abbreviation    :string(255)
-#  completed_by_id :integer
 #  status_id       :integer
+#  creator_id      :integer
 #
 
 class Deliverables::LxdOpportunity < Deliverables::Standard

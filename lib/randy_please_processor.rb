@@ -25,7 +25,7 @@ class RandyPleaseProcessor
 				hot_phrases = 'could you|would you|can you'
 				regex = "\\b(#{first_names})\\W*\\b(#{hot_phrases})\\W*\\b([^\?\.]+)[\?\.]?"
 				recognizer = Regexp.new regex, Regexp::IGNORECASE | Regexp::MULTILINE
-				text.split('.').each do |sentence|
+				text.split(/[\.!\?]/).each do |sentence|
 					# log "Running #{regex} against #{sentence}"
 					if matches = recognizer.match(sentence)
 						user = first_name_to_users[matches[1].downcase]
@@ -46,7 +46,6 @@ class RandyPleaseProcessor
 	def process_pleasms
 		pleasms = Pleasm.parse(self.email.first_names_to_users, self.text)
 		if pleasms.size > 0
-			log	"Importing: #{self.email.guid} TID:#{self.email.thread_id} #{self.email.snippet}"
 			pleasms.each do |pleasm|
 				DeliverableRelation.message(self.email.message).includes(:target_deliverable).each do |relation|
 					if relation.target_deliverable.title == pleasm.task
@@ -57,10 +56,9 @@ class RandyPleaseProcessor
 
 				log "Creating #{pleasm.assignee.name}(#{pleasm.assignee.email}) => #{pleasm.pleasm} => #{pleasm.task}"
 				Deliverables::Standard.transaction do
-					permissions = []
 					deliverable = Deliverables::Standard.create_from_email(current_user: self.current_user,
 						email: self.email, 
-						params: { title: pleasm.task,	description: self.text,	permissions: permissions })
+						params: { title: pleasm.task,	description: self.text })
 					# Create relations
 					DeliverableRelation.create!(target_deliverable_id: deliverable.id, 
 						status_id: LifeStatus.active.id, 
@@ -72,15 +70,8 @@ class RandyPleaseProcessor
 						pleasm.assignee.user_group_id = self.current_user.user_group_id
 						pleasm.assignee.save!
 					end
-					# HERE: NEED TO CREATE OWNER USER AND LOOK AT THESE PERMISSIONS
-
-					# Create permission if one does not exist.
-					permission = permissions.first { |p| p.user_id == pleasm.assignee.id } 
-					if permission.nil?
-						permission = Permission.create!(user_id: pleasm.assignee.id, deliverable_id: deliverable.id, access: DeliverableAccess.read, responsible: true)
-					else
-						permission.update_attributes!(responsible: true)
-					end
+					# Create assignment permission.
+					Permission.create!(user_id: pleasm.assignee.id, deliverable_id: deliverable.id, access: DeliverableAccess.edit, responsible: true)
 				end
 			end
 		end

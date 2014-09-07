@@ -23,10 +23,8 @@
 #
 
 require 'htk_imap/htk_imap'
-require 'email_account_cache'
 
 class Email < ApplicationModel
-	include EmailAccountCache	
 	include HtkImap::MailUtils
 	include ActionView::Helpers::TextHelper
 	attr_accessible :folder, :date, :uid, :guid, :subject, :from_address, :mail, :thread_id, :raw_email, :message, :web_id, :user, :user_id, :snippet, :message_wrapper, :status, :status_id
@@ -152,12 +150,11 @@ class Email < ApplicationModel
 				alias_emails.push [first_name.downcase, name, email]
 			end
 		end
-		# Choose active user over surrogate.
-		users = User.user_group(self.user.user_group_id).emails(alias_emails.map(&:last)).all.sort_by { |u| [u.email, u.status.surrogate? ? 1 : 0] }
+		users = User.emails(alias_emails.map(&:last)).all
 		result = {}
 		alias_emails.each do |first_name, name, email|
 			u = users.first { |u| u.email == name_email.last }
-			u ||= User.build(email: email, name: name, status: UserStatus.surrogate, user_group_id: self.user.user_group_id)
+			u ||= User.build(email: email, name: name, status: UserStatus.inactive, user_group_id: nil)
 			result[first_name] = u unless result.member?(first_name)			
 			if (user_first_name = u.first_name.try(:downcase)) and user_first_name != first_name
 				result[user_first_name] = u unless result.member?(user_first_name)
@@ -173,9 +170,7 @@ class Email < ApplicationModel
 	def from_user
 		if @from_user.nil?
 			name, email = Plutolib::RegexUtils.extract_email_parts(self.from_address)
-			@from_user = User.user_group(self.user.user_group_id).active.email(email).first || 
-				User.user_group(self.user.user_group_id).surrogate.email(email).first ||
-				User.build(email: email, name: name, status: UserStatus.surrogate, user_group_id: self.user.user_group_id)
+			@from_user = User.email(email).first ||	User.build(email: email, name: name, status: UserStatus.inactive, user_group_id: nil)
 		end
 		@from_user
 	end

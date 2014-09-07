@@ -69,11 +69,12 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	  			email: email, 
 					current_user: current_user,  
 					params: params)
-				permissions = @deliverable.permissions.select(&:significant?)
+	  		permissions = @deliverable.permissions.responsible
+	  		users = (permissions.map(&:user) + [@deliverable.creator]).uniq
 				render json: { 
 					deliverable: DeliverableSerializer.new(@deliverable, root: false), 
 					permissions: permissions.map { |du| PermissionSerializer.new(du, root: false) },
-					users: permissions.map(&:user).uniq.map { |u| UserSerializer.new(u, root: false) },
+					users: users.map { |u| UserSerializer.new(u, root: false) },
 					deliverable_type: DeliverableTypeSerializer.new(@deliverable_type, root: false)
 				}
 			else

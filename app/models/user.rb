@@ -28,7 +28,7 @@ class User < ApplicationModel
   # :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
-  # validates_uniqueness_of :short_name
+
   belongs_to_active_hash :status, :class_name => 'UserStatus'
 
   # Setup accessible (or protected) attributes for your model
@@ -44,9 +44,11 @@ class User < ApplicationModel
   has_one :gmail_synchronization, :class_name => 'Htkoogle::GmailSynchronization'
 
   def self.email(email)
+    name, email = Plutolib::RegexUtils.extract_email_parts(email)
     where ['lower(users.email) = ?', email.downcase]
   end
   def self.emails(emails)
+    emails = emails.map { |e| Plutolib::RegexUtils.extract_email_parts(e).last }
     where ['lower(users.email) in (?)', emails.map(&:downcase)]
   end
   def self.user_group(group)
@@ -57,10 +59,14 @@ class User < ApplicationModel
     where(['users.email like ?', '%@' + user.email_domain ])
   end
   scope :active, where(status_id: UserStatus.active.id)
-  scope :surrogate, where(status_id: UserStatus.surrogate.id)
+  scope :inactive, where(status_id: UserStatus.inactive.id)
 
   def name
     "#{self.first_name} #{self.last_name}".strip
+  end
+
+  def name_and_email
+    "#{name} <#{self.email}>"
   end
 
   def name=(val)

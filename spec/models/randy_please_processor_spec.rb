@@ -47,7 +47,7 @@ RSpec.describe RandyPleaseProcessor, :type => :model do
 				results = RandyPleaseProcessor::Pleasm.parse(test_config[:first_names_to_users], test_config[:text])
 				if test_config[:expect_pleasm]
 					expect(results.size).to eq(1), "for #{test_config[:text]}"
-					expect pleasm = results[0]
+					expect(pleasm = results[0]).to be_truthy
 					expect(pleasm.assignee.name).to eq(test_config[:expect_name])
 					expect(pleasm.pleasm).to eq(test_config[:expect_pleasm])
 					expect(pleasm.task).to eq(test_config[:expect_task])
@@ -60,22 +60,24 @@ RSpec.describe RandyPleaseProcessor, :type => :model do
 
 	# rspec spec/models/randy_please_processor_spec.rb -e 'users and permissions'
 	context 'users and permissions' do
-		it 'creates a surrogate user for non group significants' do
-			current_user = UserFactory.create(email: 'testuser@htk.com', first_name: 'Test', last_name: 'User')
-			from_address = 'someone@company1.com'
-			assignee_email_address = 'someone@company2.com'
+		it 'creates a inactive user for non group significants' do
+			current_user = UserFactory.create(email: 'testuser1@htk.com', first_name: 'Current', last_name: 'User')
+			assignee_user = UserFactory.create(email: 'testuser2@htk.com', first_name: 'Assignee', last_name: 'User')
+			owner_address = 'Owner User <owneruser@company1.com>'
+			innocent_bystander_address = 'someone@company2.com'
 			email = EmailFactory.create(current_user: current_user, 
-				from_address: from_address, 
-				to_addresses: [current_user.email, "Some One <#{assignee_email_address}>"],
-				cc_addresses: ['someone@company3.com'],
-				snippet: 'Some, please do the thing')
+				from_address: owner_address, 
+				to_addresses: [current_user.name_and_email, innocent_bystander_address, assignee_user.name_and_email],
+				snippet: 'Assignee, would you please do the thing')
 			expect(DeliverableRelation.message(email.message).count).to eq(0)
-			expect(User.surrogate.email(from_address).count).to eq(0)
-			expect(User.email(assignee_email_address).surrogate.count).to eq(0)
+			expect(User.email(owner_address).count).to eq(0)
+			expect(User.email(innocent_bystander_address).count).to eq(0)
 			RandyPleaseProcessor.new(email).run
 			expect(DeliverableRelation.message(email.message).count).to eq(1)
-			expect(User.surrogate.email(from_address).user_group(current_user.user_group_id).count).to eq(1)
-			expect(User.surrogate.email(assignee_email_address).user_group(current_user.user_group_id).count).to eq(1)
+			owners = User.inactive.user_group(nil).email(owner_address)
+			expect(owners.count).to eq(1)
+			owner = owners.first
+			expect(User.email(innocent_bystander_address).count).to eq(0)
 		end
 	end
 
@@ -106,12 +108,10 @@ RSpec.describe RandyPleaseProcessor, :type => :model do
 	  	relation = relations.first
 	  	expect(relation.message_id).to eq(task_email.message_id)
 
-	  	# Owner
-	  	owners = relation.target_deliverable.permissions.owner.all
-	  	expect(owners.size).to eq(1)
-	  	owner = owners.first.user
-	  	expect(owner).to eq(task_email.from_user)
-			expect(owner.email).to eq('tim@126bps.com')
+	  	# Creator
+	  	expect(creator = relation.target_deliverable.creator).to be_truthy
+	  	expect(creator).to eq(task_email.from_user)
+			expect(creator.email).to eq('tim@126bps.com')
 
 	  	# Assignment
 	  	assigned = relation.target_deliverable.permissions.responsible(true).all

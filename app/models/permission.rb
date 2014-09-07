@@ -18,9 +18,6 @@ class Permission < ApplicationModel
 	belongs_to :group
   belongs_to_active_hash :access, :class_name => 'DeliverableAccess'
   attr_accessible :user_id, :access_id, :responsible, :group_id, :access, :deliverable_id
-  def significant?
-  	self.access.try(:owner?) || self.responsible
-  end
 
  	def self.user(user)
  		user_id = user.is_a?(User) ? user.id : user
@@ -47,7 +44,7 @@ class Permission < ApplicationModel
  		value = true if value.nil?
  		where responsible: value
  	end
- 	scope :owner, where(access_id: DeliverableAccess.owner.id)
+ 	scope :editable, where(access_id: DeliverableAccess.edit.id)
 
   protected
 
