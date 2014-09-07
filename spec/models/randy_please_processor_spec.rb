@@ -6,6 +6,7 @@ RSpec.describe RandyPleaseProcessor, :type => :model do
 	context 'regular expressions' do
 		it 'recognizes the hot phrases' do
 			john_doe = UserFactory.create(name: 'John Doe', email: 'john@doe.com')
+			some_user = UserFactory.create(name: 'Some User', email: 'doesnot@matter.com')
 			[ 
 				{ 
 					text:	'John, would you please send me your chocolate? Lorem ipsum dolor sit amet, consectetur adipiscing elit',
@@ -15,25 +16,44 @@ RSpec.describe RandyPleaseProcessor, :type => :model do
 					},
 					expect_name: 'John Doe',
 					expect_pleasm: 'would you',
-					expect_task: 'send me your chocolate'
+					expect_task: 'please send me your chocolate'
 				},
 
 				{
-					text: 'Some, please do the thing',
+					text: 'Some, could you do the thing',
 					first_names_to_users: {
-						'some' => UserFactory.create(name: 'Some User', email: 'doesnot@matter.com')
+						'some' => some_user
 					},
 					expect_name: 'Some User',
-					expect_pleasm: 'please',
+					expect_pleasm: 'could you',
 					expect_task: 'do the thing'
+				},
+
+				{
+					text: "Some, \n\ncan you please\n\n do the\n\n thing",
+					first_names_to_users: {
+						'some' => some_user
+					},
+					expect_name: 'Some User',
+					expect_pleasm: 'can you',
+					expect_task: "please\n\n do the\n\n thing"
+				},
+
+				{
+					text: "Hi Joe,\n\nPlease find attached specs for mating connector recommendation. Thanks a lot!\n\nBest regards,",
+					first_names_to_users: { 'joe' =>  john_doe }
 				}
 			].each do |test_config|
 				results = RandyPleaseProcessor::Pleasm.parse(test_config[:first_names_to_users], test_config[:text])
-				expect(results.size).to eq(1), "for #{test_config[:text]}"
-				expect pleasm = results[0]
-				expect(pleasm.assignee.name).to eq(test_config[:expect_name])
-				expect(pleasm.pleasm).to eq(test_config[:expect_pleasm])
-				expect(pleasm.task).to eq(test_config[:expect_task])
+				if test_config[:expect_pleasm]
+					expect(results.size).to eq(1), "for #{test_config[:text]}"
+					expect pleasm = results[0]
+					expect(pleasm.assignee.name).to eq(test_config[:expect_name])
+					expect(pleasm.pleasm).to eq(test_config[:expect_pleasm])
+					expect(pleasm.task).to eq(test_config[:expect_task])
+				else
+					expect(results.size).to eq(0), "for #{test_config[:text]}"
+				end
 			end
 		end
 	end

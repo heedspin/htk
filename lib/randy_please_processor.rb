@@ -22,9 +22,9 @@ class RandyPleaseProcessor
 			result = []
 			if text
 				first_names = first_name_to_users.keys.join('|')
-				hot_phrases = 'could you|please|would you|can you'
-				regex = "\\b(#{first_names}),? \\b(#{hot_phrases})(?: please)? \\b([^\?\.]+)[\?\.]?"
-				recognizer = Regexp.new regex, Regexp::IGNORECASE
+				hot_phrases = 'could you|would you|can you'
+				regex = "\\b(#{first_names})\\W*\\b(#{hot_phrases})\\W*\\b([^\?\.]+)[\?\.]?"
+				recognizer = Regexp.new regex, Regexp::IGNORECASE | Regexp::MULTILINE
 				text.split('.').each do |sentence|
 					# log "Running #{regex} against #{sentence}"
 					if matches = recognizer.match(sentence)
@@ -99,7 +99,7 @@ class RandyPleaseProcessor
 		end
 		def self.parse(text)
 			results = []
-			if text =~ /(complete|finished|done)/
+			if text =~ /(complete|finished|done)/i
 				results.push new($1)
 			end
 			results
@@ -108,7 +108,7 @@ class RandyPleaseProcessor
 
 	def process_completes
 		completes = Complete.parse(self.text)
-		if (completes.size > 0) and ((assignments = incomplete_assignments).size > 0)
+		if (completes.size > 0) and ((assignments = self.incomplete_assignments).size > 0)
 			if assignments.size == 1
 				assignment = assignments.first
 				complete = completes.first
