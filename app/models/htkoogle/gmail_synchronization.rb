@@ -128,8 +128,19 @@ module Htkoogle
 			message_ids = message_ids.map { |m| m['id'] }.uniq
 			log 'download_messages: ' + message_ids.inspect
 			if message_ids.size == 1
-	      response = @client.execute!(self.gmail_api.users.messages.get, userId: self.user.email, id: message_ids[0], format: 'full')
-				self.handle_message(JSON.parse(response.body))	      
+				message_id = message_ids[0]
+				begin
+		      response = @client.execute!(self.gmail_api.users.messages.get, userId: self.user.email, id: message_id, format: 'full')
+					self.handle_message(JSON.parse(response.body))	      
+				rescue Google::APIClient::ClientError => e
+					if e.result.status == 404
+						log_error "download_messages 404 for #{self.user.email} message id #{message_id}"
+						nil
+					else
+						log_error "download_messages unhandled exception for #{self.user.email} status #{e.result.status}"
+						raise e
+					end
+				end
 			else
 				message_ids.each_slice(20) do |batch_ids|
 					batch = Google::APIClient::BatchRequest.new { |r| self.handle_message(JSON.parse(r.body)) }
@@ -201,7 +212,7 @@ module Htkoogle
 			self.with_client do |client|
 				begin
 		      response = client.execute!(self.gmail_api.users.messages.get, userId: self.user.email, id: email.web_id, format: 'full')
-		      Htkoogle::MessageWrapper.new(JSON.parse(response.body))				
+		      Htkoogle::MessageWrapper.new(JSON.parse(response.body))
 				rescue Google::APIClient::ClientError => e
 					if e.result.status == 404
 						nil

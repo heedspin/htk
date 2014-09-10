@@ -13,6 +13,7 @@
 #  abbreviation    :string(255)
 #  status_id       :integer
 #  creator_id      :integer
+#  user_group_id   :integer
 #
 
 require 'rails_helper'
@@ -50,7 +51,7 @@ RSpec.describe Deliverables::Standard, :type => :model do
 			expect(Permission.user(creator).count).to eq(0)
 
 			# Group permissions
-			permissions = Permission.user_group(current_user.user_group_id).all
+			permissions = deliverable.permissions.for_user_group.all
 			expect(permissions.size).to eq(1)
 			expect(permission = permissions.first).to be_truthy
 			expect(permission.deliverable_id).to eq(deliverable.id)

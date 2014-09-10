@@ -17,7 +17,7 @@ class EmailFactory
 				web_id: args[:web_id] || "web-id-#{Email.count + 1}",
 				from_address: args[:from_address] || (from_email.try(:from_address) || user.email),
 				thread_id: for_thread.try(:thread_id) || "thread-id-#{EmailAccountThread.count + 1}",
-				snippet: args[:snippet]
+				snippet: args[:snippet] || (from_email.try(:snippet))
 			)
 			import_single_email(email)
   		if include_participants

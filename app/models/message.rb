@@ -9,6 +9,7 @@
 #  source_email_id     :integer
 #  created_at          :datetime
 #  data                :text
+#  user_group_id       :integer
 #
 
 require 'extract_email_reply'
@@ -20,6 +21,8 @@ class Message < ApplicationModel
 	belongs_to :source_email, :class_name => 'Email'
 	belongs_to :message_thread
 	has_many :emails
+	belongs_to :user_group
+	validates_presence_of :user_group_id
 
 	# def self.user(user, party_role=PartyRole.read_only)
 	# 	user_id = user.is_a?(User) ? user.id : user
@@ -57,12 +60,22 @@ class Message < ApplicationModel
 		self.extract_email_reply self.text_body
 	end
 
+	def self.build(args)
+		args = args.dup
+		user_group_id = args.delete(:user_group_id)
+		source_email_id = args.delete(:source_email_id)
+		message = new(args)
+		message.user_group_id = user_group_id
+		message.source_email_id = source_email_id
+		message
+	end
+
 	def self.find_or_build(email)
-		emails = Email.from_address(email.from_address).date(email.date).includes(:message).all
+		emails = Email.user_group(email.user).from_address(email.from_address).date(email.date).includes(:message).all
 		same_emails = emails.select { |e| (e.id != email.id) && e.same_email?(email) }
 		messages = same_emails.map(&:message).compact.uniq
 		if messages.size == 0
-			email.build_message(source_email_id: email.id, status: LifeStatus.active)
+			build(source_email_id: email.id, user_group_id: email.user.user_group_id, source_email_id: email.id, status: LifeStatus.active)
 		elsif messages.size == 1
 			messages.first
 		else

@@ -1,3 +1,19 @@
+# == Schema Information
+#
+# Table name: deliverable_relations
+#
+#  id                    :integer          not null, primary key
+#  status_id             :integer
+#  source_deliverable_id :integer
+#  target_deliverable_id :integer
+#  relation_type_id      :integer
+#  message_thread_id     :integer
+#  previous_sibling_id   :integer
+#  message_id            :integer
+#  created_at            :datetime         not null
+#  updated_at            :datetime         not null
+#
+
 require 'rails_helper'
 require 'support/test_gmails.rb'
 

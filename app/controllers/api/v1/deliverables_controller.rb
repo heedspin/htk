@@ -47,12 +47,12 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	  		raise Exceptions::AccessDenied unless (user.user_group_id == current_user.user_group_id)
 	  	end
 	  end
-	  @deliverables = Deliverable.not_deleted.user_group(user.user_group_id)
-  	if params.member?(:responsible)
-  		@deliverables = @deliverables.responsible_user(user)
+	  @deliverables = Deliverable.not_deleted.user_group(current_user.user_group_id)
+  	if responsible_user_id = params[:responsible_user_id]
+  		@deliverables = @deliverables.responsible_user(responsible_user_id)
   	end
   	if type = params[:type]
-  		@deliverables = @deliverables.type(type)
+  		@deliverables = @deliverables.deliverable_type(type)
   	end
 		json_response = get_deliverable_tree(deliverables: @deliverables, serialize: true)
 		render json: json_response

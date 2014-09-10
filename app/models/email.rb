@@ -23,6 +23,7 @@
 #
 
 require 'htk_imap/htk_imap'
+require 'plutolib/regex_utils'
 
 class Email < ApplicationModel
 	include HtkImap::MailUtils
@@ -45,6 +46,9 @@ class Email < ApplicationModel
 	def self.user(user)
 		user_id = user.is_a?(User) ? user.id : user
 		where user_id: user_id
+	end
+	def self.user_group(user_or_group)
+		includes(:user).merge(User.user_group(user_or_group))
 	end
 	def self.starting_uid(uid)
 		where(['emails.uid < ?', uid])

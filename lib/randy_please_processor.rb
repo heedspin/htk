@@ -22,14 +22,20 @@ class RandyPleaseProcessor
 			result = []
 			if text
 				first_names = first_name_to_users.keys.join('|')
-				hot_phrases = 'could you|would you|can you'
-				regex = "\\b(#{first_names})\\W*\\b(#{hot_phrases})\\W*\\b([^\?\.]+)[\?\.]?"
-				recognizer = Regexp.new regex, Regexp::IGNORECASE | Regexp::MULTILINE
-				text.split(/[\.!\?]/).each do |sentence|
-					# log "Running #{regex} against #{sentence}"
-					if matches = recognizer.match(sentence)
-						user = first_name_to_users[matches[1].downcase]
-						result.push Pleasm.new(user, matches[2], matches[3])
+				if first_names.size > 0
+					hot_phrases = 'could you|would you|can you'
+					regex = "\\b(#{first_names})\\W*\\b(#{hot_phrases})\\W*\\b([^\?\.]+)[\?\.]?"
+					recognizer = Regexp.new regex, Regexp::IGNORECASE | Regexp::MULTILINE
+					text.split(/[\.!\?]/).each do |sentence|
+						# log "Running #{regex} against #{sentence}"
+						if matches = recognizer.match(sentence)
+							first_name = matches[1].downcase
+							user = first_name_to_users[first_name]
+							if user.nil?
+								raise "No user matching #{first_name} for #{text}"
+							end
+							result.push Pleasm.new(user, matches[2], matches[3])
+						end
 					end
 				end
 			end
@@ -38,7 +44,7 @@ class RandyPleaseProcessor
 	end
 
 	def run
-		log "Processing: #{self.text}"
+		log "#{self.current_user.email} processing: #{self.text}"
 		process_pleasms
 		process_completes
 	end
@@ -47,31 +53,34 @@ class RandyPleaseProcessor
 		pleasms = Pleasm.parse(self.email.first_names_to_users, self.text)
 		if pleasms.size > 0
 			pleasms.each do |pleasm|
-				DeliverableRelation.message(self.email.message).includes(:target_deliverable).each do |relation|
-					if relation.target_deliverable.title == pleasm.task
-						log "Already created: #{pleasm.assignee.name}(#{pleasm.assignee.email}) => #{pleasm.pleasm} => #{pleasm.task}"
-						return
+				if (self.email.from_user.user_group_id == self.current_user.user_group_id) or (pleasm.assignee.user_group_id == self.current_user.user_group_id)
+					DeliverableRelation.message(self.email.message).includes(:target_deliverable).each do |relation|
+						if relation.target_deliverable.title == pleasm.task
+							log "#{self.current_user.email} already created: #{pleasm.assignee.name_and_email} => #{pleasm.pleasm} => #{pleasm.task}"
+							return
+						end
 					end
-				end
-
-				log "Creating #{pleasm.assignee.name}(#{pleasm.assignee.email}) => #{pleasm.pleasm} => #{pleasm.task}"
-				Deliverables::Standard.transaction do
-					deliverable = Deliverables::Standard.create_from_email(current_user: self.current_user,
-						email: self.email, 
-						params: { title: pleasm.task,	description: self.text })
-					# Create relations
-					DeliverableRelation.create!(target_deliverable_id: deliverable.id, 
-						status_id: LifeStatus.active.id, 
-						relation_type_id: DeliverableRelationType.parent.id,
-						message_thread_id: @email.message_thread.id,
-						message_id: @email.message.id)
-					# Create assignee user if one does not exist.
-					if pleasm.assignee.new_record?
-						pleasm.assignee.user_group_id = self.current_user.user_group_id
-						pleasm.assignee.save!
+					log "#{self.current_user.email} creating: #{pleasm.assignee.name_and_email} => #{pleasm.pleasm} => #{pleasm.task}"
+					Deliverables::Standard.transaction do
+						deliverable = Deliverables::Standard.create_from_email(current_user: self.current_user,
+							email: self.email, 
+							params: { title: pleasm.task,	description: self.text })
+						# Create relations
+						DeliverableRelation.create!(target_deliverable_id: deliverable.id, 
+							status_id: LifeStatus.active.id, 
+							relation_type_id: DeliverableRelationType.parent.id,
+							message_thread_id: @email.message_thread.id,
+							message_id: @email.message.id)
+						# Create assignee user if one does not exist.
+						if pleasm.assignee.new_record?
+							pleasm.assignee.user_group_id = self.current_user.user_group_id
+							pleasm.assignee.save!
+						end
+						# Create assignment permission.
+						Permission.create!(user_id: pleasm.assignee.id, deliverable_id: deliverable.id, access: DeliverableAccess.edit, responsible: true)
 					end
-					# Create assignment permission.
-					Permission.create!(user_id: pleasm.assignee.id, deliverable_id: deliverable.id, access: DeliverableAccess.edit, responsible: true)
+				else
+					log "#{self.current_user.email} ignoring not-my-pleasm: #{pleasm.assignee.name_and_email} => #{pleasm.pleasm} => #{pleasm.task}"
 				end
 			end
 		end
@@ -103,12 +112,12 @@ class RandyPleaseProcessor
 			if assignments.size == 1
 				assignment = assignments.first
 				complete = completes.first
-				log "Marking deliverable #{assignment.deliverable.title} as completed by #{self.email.from_user.email} from phrase #{complete.phrase} and email:\n#{self.text}"
+				log "#{self.current_user.email}: Marking deliverable #{assignment.deliverable.title} as completed by #{self.email.from_user.email} from phrase #{complete.phrase} and email:\n#{self.text}"
 				Deliverable.transaction do
 					assignment.deliverable.comments.create! comment_type: DeliverableCommentType.complete, note: self.email.snippet, user: self.email.from_user
 				end
 			else
-				log "There are #{assignments.size} incomplete assignments. Do not know which one to mark complete."
+				log "#{self.current_user.email}: There are #{assignments.size} incomplete assignments. Do not know which one to mark complete."
 			end
 		end
 	end

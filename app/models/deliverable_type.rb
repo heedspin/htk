@@ -11,7 +11,10 @@
 #  user_group_id              :integer
 #
 
+require 'belongs_to_user_group'
+
 class DeliverableType < ApplicationModel
+  include BelongsToUserGroup
 	attr_accessible :name, :description, :deliverable_type_config_id, :user_group_id
 	belongs_to_active_hash :deliverable_type_config
 

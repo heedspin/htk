@@ -1,3 +1,13 @@
+# == Schema Information
+#
+# Table name: message_threads
+#
+#  id         :integer          not null, primary key
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  status_id  :integer          default(2)
+#
+
 require 'rails_helper'
 require 'support/test_gmails.rb'
 

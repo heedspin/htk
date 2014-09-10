@@ -11,8 +11,10 @@ module Htkoogle
 			@undersubject = @subject.gsub(' ', '_').underscore
 		end
 
-		def export(filename=nil)
+		def export(destination_folder=nil, filename=nil)
 			filename ||= @undersubject
+			destination_folder ||= Rails.root.join('spec/support/test_gmails')
+			destination = File.join(destination_folder, "#{filename}.rb")
 			result = {}
 			self.email_addresses.each do |email|
 				result_messages = result[email] = []
@@ -35,7 +37,6 @@ module Htkoogle
 					end
 				end
 			end
-			destination = Rails.root.join('test/fixtures/test_gmails', "#{filename}.rb")
 
 			File.open(destination, 'w+') do |out| 
 				out.write "module TestGmails\n\tdef self.#{@undersubject}\n"

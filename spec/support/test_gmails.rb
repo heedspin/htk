@@ -16,3 +16,6 @@ module TestGmails
 		all_messages.sort_by { |email, message| message.date }
 	end
 end
+
+# require 'htkoogle/htkoogle' ; Htkoogle::ExportThreadBySubject.new("Subject Here", ['tim@126bps.com', 'lindsay@126bps.com']).export
+# require 'htkoogle/htkoogle' ; Htkoogle::ExportThreadBySubject.new("same email to two groups", ['tharrison@lxdinc.com', 'lindsay@126bps.com']).export

@@ -21,8 +21,10 @@
 #  short_name             :string(255)
 #  user_group_id          :integer
 #
+require 'belongs_to_user_group'
 
 class User < ApplicationModel
+  include BelongsToUserGroup
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable,
   # :lockable, :timeoutable and :omniauthable
@@ -39,7 +41,6 @@ class User < ApplicationModel
 	has_many :signed_request_users
 	accepts_nested_attributes_for :signed_request_users
 
-  belongs_to :user_group
   has_one :google_authorization
   has_one :gmail_synchronization, :class_name => 'Htkoogle::GmailSynchronization'
 
@@ -50,10 +51,6 @@ class User < ApplicationModel
   def self.emails(emails)
     emails = emails.map { |e| Plutolib::RegexUtils.extract_email_parts(e).last }
     where ['lower(users.email) in (?)', emails.map(&:downcase)]
-  end
-  def self.user_group(group)
-    group_id = group.is_a?(UserGroup) ? group.id : group
-    where user_group_id: group_id
   end
   def self.accessible_to(user)
     where(['users.email like ?', '%@' + user.email_domain ])

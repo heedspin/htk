@@ -13,12 +13,15 @@
 #  abbreviation    :string(255)
 #  status_id       :integer
 #  creator_id      :integer
+#  user_group_id   :integer
 #
 
 require 'plutolib/serialized_attributes'
 require 'exceptions/access_denied'
+require 'belongs_to_user_group'
 
 class Deliverable < ApplicationModel
+  include BelongsToUserGroup
   include Plutolib::SerializedAttributes
   has_many :permissions, dependent: :destroy
   has_many :users, through: :permissions
@@ -55,15 +58,15 @@ class Deliverable < ApplicationModel
   def self.excluding(deliverable_ids)
     where ['deliverables.id not in (?)', deliverable_ids]
   end
-  def self.user_group(group)
-    group_id = group.is_a?(UserGroup) ? group.id : group
-    includes(:permissions).where(permissions: { group_id: group_id })
-  end
   def self.responsible_user(user)
     user_id = user.is_a?(User) ? user.id : user
     includes(:permissions).where(permissions: { user_id: user_id, responsible: true})
   end
-  def self.type(type_config_id)
+  def self.deliverable_type(deliverable_type)
+    deliverable_type = deliverable_type.is_a?(DeliverableType) ? deliverable_type : DeliverableType.find(deliverable_type)
+    where type: DeliverableTypeConfig.find(deliverable_type.deliverable_type_config_id).ar_type
+  end
+  def self.deliverable_type_config(type_config_id)
     where type: DeliverableTypeConfig.find(type_config_id).ar_type
   end
   def self.editable_by(user)
@@ -100,10 +103,7 @@ class Deliverable < ApplicationModel
     (self.permissions.responsible.count > 0)
   end
 
-  # TODO: Move user_group_id from permissions to deliverable?
-  def user_group_id
-    self.permissions.first.group_id
-  end
+  serialized_attribute :source_email_id
 
   def has_behavior?(key)
     self.deliverable_type.has_behavior?(key)

@@ -13,6 +13,7 @@
 #  abbreviation    :string(255)
 #  status_id       :integer
 #  creator_id      :integer
+#  user_group_id   :integer
 #
 
 class Deliverables::Company < Deliverable

@@ -13,6 +13,7 @@
 #  abbreviation    :string(255)
 #  status_id       :integer
 #  creator_id      :integer
+#  user_group_id   :integer
 #
 
 class Deliverables::Standard < Deliverable
@@ -32,6 +33,8 @@ class Deliverables::Standard < Deliverable
       deliverable.id = params[:id]
     end
     deliverable.status_id = params[:status_id] || LifeStatus.active.id
+    deliverable.user_group_id = current_user.user_group_id
+    deliverable.source_email_id = email.id
     accessible_attributes = self.accessible_attributes.select(&:present?)
     deliverable.update_attributes(params.select { |k,v| accessible_attributes.include?(k.to_s) })
     # id = args[:id]
@@ -42,7 +45,7 @@ class Deliverables::Standard < Deliverable
       deliverable.creator_id = email.from_user.id
       deliverable.save!
       if current_user.user_group_id
-        permissions.push deliverable.permissions.create!(access: DeliverableAccess.edit, group_id: current_user.user_group_id)
+        permissions.push deliverable.permissions.create!(access: DeliverableAccess.edit, user_id: nil)
       end
   	end
   	deliverable
