@@ -30,8 +30,10 @@ function DashboardController(config) {
 DashboardController.prototype = Object.create(HtkController.prototype);
 
 DashboardController.prototype.handleCreateCompletionComment = function(event) {
-  var row = $(event.target).closest("tr");
+  var td = $(event.target).closest("td");
+  var row = td.closest("tr");
   var deliverable = Deliverable.prototype.find_cached(row.data("id"));
+  td.replaceWith(HandlebarsTemplates['deliverables/spinning_cell']());
   htkLog("Quick Complete for Deliverable", deliverable.id);
 
   var comment = new DeliverableComment({ deliverable_id: deliverable.id });
@@ -40,11 +42,14 @@ DashboardController.prototype.handleCreateCompletionComment = function(event) {
   } else {
     comment.comment_type_id = DeliverableCommentType.prototype.complete;
   }
+  var _this = this;
   comment.save({
     success : function() {
       htkLog("Saved comment", comment);
+      deliverable = Deliverable.prototype.find_cached(deliverable.id);
+      row.replaceWith(_this.renderRow(deliverable));
     }
-  })
+  });
 }
 
 DashboardController.prototype.loadController = function() {
@@ -71,18 +76,21 @@ DashboardController.prototype.loadController = function() {
         _this.deliverables = [];
         _.each(new_deliverables, function(d) {
           _this.deliverables.unshift(d);
-          var row = $(HandlebarsTemplates['deliverables/row']({ 
-            deliverable: d, 
-            project: d.getProject(), 
-            company: d.getCompany()
-          }));
-          table_body.prepend(row);
+          table_body.prepend(_this.renderRow(d));
         });
       }
       if (!_this.refreshTimer)
         _this.scheduleRefresh();  
     }
   });  
+}
+
+DashboardController.prototype.renderRow = function(deliverable) {
+  return $(HandlebarsTemplates['deliverables/row']({ 
+            deliverable: deliverable, 
+            project: deliverable.getProject(), 
+            company: deliverable.getCompany()
+          }));
 }
 
 DashboardController.prototype.scheduleRefresh = function() {

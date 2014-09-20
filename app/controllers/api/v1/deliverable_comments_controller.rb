@@ -20,9 +20,10 @@ class Api::V1::DeliverableCommentsController < Api::V1::ApiController
   	@comment = @deliverable.comments.build(comment_type_id: params[:comment_type_id], note: params[:note], comment_type_id: params[:comment_type_id])
   	@comment.creator = current_user 
   	if @comment.save
+	  	@deliverable.reload
 			render json: { 
 				comment: DeliverableCommentSerializer.new(@comment, root: false),
-				deliverable: DeliverableSerializer.new(@comment.deliverable, root: false)
+				deliverable: DeliverableSerializer.new(@deliverable, root: false)
 			}
 		else
 			render json: { errors: @comment.errors }, status: 422
