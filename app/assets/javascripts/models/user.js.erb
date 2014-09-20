@@ -27,7 +27,12 @@ User.prototype = Object.create(HtkModel.prototype, {
 	},
 	registry_hook : {
 		value : function() {
-			this.name = _.compact([this.first_name, this.last_name]).join(" ");			
+			this.name = _.compact([this.first_name, this.last_name]).join(" ");
+			if (this.name) {				
+				this.name_and_email = this.name + " <" + this.email + ">";
+			} else {
+				this.name_and_email = this.email;
+			}
 		}
-	}
+	},
 });

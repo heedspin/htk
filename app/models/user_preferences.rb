@@ -22,6 +22,6 @@ class UserPreferences
 	end
 
 	def home_page_url
-		Rails.application.routes.url_helpers.deliverables_url(host: AppConfig.hostname)
+		Rails.application.routes.url_helpers.dashboard_url(host: AppConfig.hostname)
 	end
 end

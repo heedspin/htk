@@ -28,6 +28,7 @@ Htk::Application.routes.draw do
   resources :messages, :only => [:index, :show, :update, :destroy]
 
   resources :deliverables
+  match 'dashboard' => 'deliverables#dashboard'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

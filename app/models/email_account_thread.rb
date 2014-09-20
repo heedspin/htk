@@ -31,6 +31,10 @@ class EmailAccountThread < ApplicationModel
 		joins(:email_account).where(email_accounts: { user_id: deliverable.user_ids})
 	end
   scope :not_deleted, where(['email_account_threads.status_id != ?', LifeStatus.deleted.id])
+  def self.user(user)
+  	user_id = user.is_a?(User) ? user.id : user
+  	where user_id: user_id
+  end
 
 	def resync!
 		self.user.gmail_synchronization.resync_thread(self)

@@ -1,0 +1,28 @@
+<div class="page-header">
+	<div id="my-deliverables">
+	</div>
+	<div id="delegated-deliverables">
+	</div>
+</div>
+
+<% content_for :javascripts do %>
+<script type="text/javascript">
+  var router = null;
+  $(function() {
+    router = new DashboardRouter();
+    router.addController({
+    	container : "#my-deliverables",
+    	query : {
+    		responsible_user_id : "me"
+    	}
+    });
+    router.addController({
+    	container : "#delegated-deliverables",
+    	query : {
+    		creator_id : "me"
+    	}
+    });
+    router.run();
+  });
+</script>
+<% end %>

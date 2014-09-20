@@ -20,7 +20,15 @@
 <div class="row">
 	<div class="col-md-12">
 <% @message_threads.each do |thread| %>
-		<strong><%= thread.messages.first.subject %></strong>
+		<% eac = eac = thread.email_account_threads.user(current_user).first %>
+		<strong>
+			<% if eac %>
+				<%= link_to thread.messages.first.subject, gmail_url(eac.thread_id) %>
+			<% else %>
+				<%= thread.messages.first.subject %>
+			<% end %>
+		</strong>
+		<% if eac %>
 		<div class="table-responsive">
 			<table class="table table-striped">
 				<thead>
@@ -32,16 +40,19 @@
 					</tr>
 				</thead>
 				<tbody>
-					<% thread.messages.each do |message| %>
+					<% eac.emails.by_date.each do |email| %>
 					<tr>
-						<td><%= message.from_address %></td>
-						<td><%= message.to_addresses.join(', ') %></td>
-						<td><%= message.snippet %></td>
-						<td><%= time_ago_in_words message.date %></td>
+						<td><%= email.from_address %></td>
+						<td><%= email.to_addresses.join(', ') %></td>
+						<td>
+							<%= link_to email.snippet, gmail_url(email.web_id) %>
+						</td>
+						<td><%= time_ago_in_words email.date %></td>
 					</tr>
 					<% end %>
 				</tbody>
 			</table>
+			<% end %>
 		</div>
 <% end %>
 	</div>

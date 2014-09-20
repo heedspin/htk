@@ -6,9 +6,9 @@ HtkObjectCache.prototype.get = function(key, id) {
 	var type_cache = this.types[key];
 	if (type_cache) {
 		var result = type_cache[id];
-		if (result) {
-			htkLog("HtkObjectCache(" + key + ") HIT");
-		}
+		// if (result) {
+		// 	htkLog("HtkObjectCache(" + key + ") HIT");
+		// }
 		return result;
 	} else {
 		return null;

@@ -6,3 +6,9 @@ DeliverableCommentType.prototype = Object.create(HtkModel.prototype, {
 	attribute_keys : { value : <%= DeliverableCommentType.columns.map(&:name).to_json %> }
 });
 
+<% DeliverableCommentType.all.each do |comment_type| %>
+DeliverableCommentType.prototype.<%= comment_type.cmethod %> = "<%= comment_type.id %>";
+DeliverableCommentType.prototype.is_<%= comment_type.cmethod %> = function() {
+	return this.comment_type_id == <%= comment_type.id %>;
+}
+<% end %>

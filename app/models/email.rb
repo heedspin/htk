@@ -40,6 +40,7 @@ class Email < ApplicationModel
 	scope :by_uid, order(:uid)
 	scope :uid_desc, order('emails.uid desc')
 	scope :date_desc, order('emails.date desc')
+	scope :by_date, order('emails.date')
   scope :not_deleted, where(['emails.status_id != ?', LifeStatus.deleted.id])
   scope :deleted, where(status_id: LifeStatus.deleted.id)
 

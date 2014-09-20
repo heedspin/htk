@@ -1,0 +1,33 @@
+function DashboardRouter() {
+	this.currentUser = null;
+  this.controllers = [];
+}
+
+DashboardRouter.prototype = Object.create(null);
+
+DashboardRouter.prototype.addController = function(config) {
+  this.controllers.push(new DashboardController(config));
+}
+
+DashboardRouter.prototype.run = function(callback) {
+  var _this = this;
+  this.loadCurrentUser({
+  	success : function() {
+      _.each(_this.controllers, function(c) { c.loadController(); });
+  	}
+  })
+}
+
+DashboardRouter.prototype.loadCurrentUser = function(callbacks) {
+	var _this = this;
+  htkRequest("GET", "/api/v1/users/current", null, function(obj) {
+    if (obj.rc && (obj.rc == "401")) {
+    	window.location.href = "<%= Rails.application.routes.url_helpers.new_user_session_url(host: AppConfig.hostname) %>";
+    } else if (obj.errors.length > 0) {
+      htkLog("Error response: " + JSON.stringify(obj));
+    } else {
+      _this.currentUser = new User(obj.data["user"]);
+      callbacks.success.call(_this.currentUser);
+    }    
+  });
+}

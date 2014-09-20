@@ -10,3 +10,4 @@
 //= require ./projects_controller.js
 //= require ./companies_controller.js
 //= require ./reliable_deliverables_controller.js
+//= require ./dashboard_controller.js

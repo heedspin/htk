@@ -49,7 +49,22 @@ class Api::V1::DeliverablesController < Api::V1::ApiController
 	  end
 	  @deliverables = Deliverable.not_deleted.user_group(current_user.user_group_id)
   	if responsible_user_id = params[:responsible_user_id]
+  		if responsible_user_id == 'me'
+  			responsible_user_id = current_user.id
+  		end
   		@deliverables = @deliverables.responsible_user(responsible_user_id)
+  	end
+  	if creator_id = params[:creator_id]
+  		if creator_id == 'me'
+  			creator_id = current_user.id
+  		end
+  		@deliverables = @deliverables.creator(creator_id)
+  	end
+  	if created_after = params[:created_after]
+  		begin
+	  		@deliverables = @deliverables.created_after(Deliverable.find(created_after).created_at)
+	  	rescue
+	  	end
   	end
   	if type = params[:type]
   		@deliverables = @deliverables.deliverable_type(type)

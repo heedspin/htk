@@ -1,5 +1,4 @@
-<tr>
-	<td>{{deliverable.deliverable_type.name}}</td>
+<tr data-id="{{deliverable.id}}">
 	<td><a href="/deliverables/{{deliverable.id}}">{{deliverable.title}}</a></td>
 	<td>
 		{{#if project}}
@@ -14,5 +13,13 @@
 		{{#each deliverable.responsible_users}}
 			{{user.name_and_email}}
 		{{/each}}
+	</td>
+	<td>{{fromNow deliverable.created_at}}</td>
+	<td class="htk-action completion">
+		{{#if deliverable.completed_by_id}}
+		<%= image_tag 'green-check.png' %>
+		{{else}}
+		<%= image_tag 'check.png' %>
+		{{/if}}		
 	</td>
 </tr>

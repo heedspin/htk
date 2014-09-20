@@ -62,6 +62,14 @@ class Deliverable < ApplicationModel
     user_id = user.is_a?(User) ? user.id : user
     includes(:permissions).where(permissions: { user_id: user_id, responsible: true})
   end
+  def self.creator(user)
+    user_id = user.is_a?(User) ? user.id : user
+    where(creator_id: user_id)
+  end
+  def self.created_after(time)
+    time = time.is_a?(String) ? DateTime.parse(time) : time
+    where ['deliverables.created_at > ?', time]
+  end
   def self.deliverable_type(deliverable_type)
     deliverable_type = deliverable_type.is_a?(DeliverableType) ? deliverable_type : DeliverableType.find(deliverable_type)
     where type: DeliverableTypeConfig.find(deliverable_type.deliverable_type_config_id).ar_type
@@ -109,23 +117,23 @@ class Deliverable < ApplicationModel
     self.deliverable_type.has_behavior?(key)
   end
 
-  before_update :update_folders
-  def update_folders
-    if self.abbreviation_changed? or (self.abbreviation.blank? and self.title_changed?)
-      self.target_relations.top_level.each do |relation| 
-        group_config = self.users.first.preferences # TODO: fix me?
-        from_deliverable_path = group_config.deliverable_folder_path(self, { folder_name: self.folder_name(true) })
-        relation.rename_folder_from(from_deliverable_path)
-      end
-    end
-    if self.is_assigned? and self.completed_by_id_changed?
-      if self.complete?
-        TodoFolder.new(self).delay.remove
-      else
-        TodoFolder.new(self).delay.create
-      end
-    end
-  end
+  # before_update :update_folders
+  # def update_folders
+  #   if self.abbreviation_changed? or (self.abbreviation.blank? and self.title_changed?)
+  #     self.target_relations.top_level.each do |relation| 
+  #       group_config = self.users.first.preferences # TODO: fix me?
+  #       from_deliverable_path = group_config.deliverable_folder_path(self, { folder_name: self.folder_name(true) })
+  #       relation.rename_folder_from(from_deliverable_path)
+  #     end
+  #   end
+  #   if self.is_assigned? and self.completed_by_id_changed?
+  #     if self.complete?
+  #       TodoFolder.new(self).delay.remove
+  #     else
+  #       TodoFolder.new(self).delay.create
+  #     end
+  #   end
+  # end
 
   def self.ensure_editable_by!(deliverable_ids, user)
     deliverable_ids = deliverable_ids.is_a?(Array) ? deliverable_ids : [deliverable_ids]

@@ -15,7 +15,7 @@ DeliverableTreeController.prototype.loadDeliverables = function() {
   this.setStatusMsg("Loading Deliverables...");
   adjust_window_height();
   var query_data = htkGetContentMatches(["date_sent", "sender_email", "message_id"]);
-  htkLog("Load Deliverables Matches: " + JSON.stringify(query_data));
+  htkLog("Load Deliverables Matches: ", query_data);
   Deliverable.prototype.all(query_data, {
     success : function(results) {
       htkLog("Load Deliverables: " + JSON.stringify(results.obj.data));
