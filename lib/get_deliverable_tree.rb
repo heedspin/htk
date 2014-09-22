@@ -14,8 +14,8 @@ module GetDeliverableTree
 			deliverables = deliverables.excluding(deliverables).all + deliverables
 		end
 		deliverable_types = DeliverableType.deliverable_types(deliverables.map(&:type)).all		
-		permissions = deliverables.map { |d| d.permissions.responsible }.flatten.uniq
-	  users = (permissions.map(&:user) + deliverables.map(&:creator)).uniq		
+		permissions = deliverables.map { |d| d.permissions.editable }.flatten.uniq
+	  users = permissions.map(&:user).uniq.compact
 		if args[:serialize]
 			{ 
 				deliverables: deliverables.map { |d| DeliverableSerializer.new(d, root: false) }, 

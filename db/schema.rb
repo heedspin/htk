@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140908235711) do
+ActiveRecord::Schema.define(:version => 20140920221536) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.string   "resource_id",   :null => false
@@ -70,6 +70,14 @@ ActiveRecord::Schema.define(:version => 20140908235711) do
     t.integer  "creator_id"
   end
 
+  create_table "deliverable_messages", :force => true do |t|
+    t.integer  "deliverable_id"
+    t.integer  "message_id"
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
+    t.boolean  "is_related",     :default => true
+  end
+
   create_table "deliverable_relations", :force => true do |t|
     t.integer  "status_id"
     t.integer  "source_deliverable_id"
@@ -115,6 +123,17 @@ ActiveRecord::Schema.define(:version => 20140908235711) do
     t.datetime "updated_at",                       :null => false
     t.integer  "user_id"
     t.integer  "status_id",         :default => 2
+  end
+
+  create_table "email_accounts", :force => true do |t|
+    t.integer  "status_id"
+    t.integer  "user_id"
+    t.string   "username"
+    t.string   "authentication_string"
+    t.string   "server"
+    t.integer  "port"
+    t.datetime "created_at",            :null => false
+    t.datetime "updated_at",            :null => false
   end
 
   create_table "email_comment_users", :force => true do |t|
@@ -193,10 +212,13 @@ ActiveRecord::Schema.define(:version => 20140908235711) do
   create_table "permissions", :force => true do |t|
     t.integer  "deliverable_id"
     t.integer  "user_id"
+    t.integer  "user_group_id"
     t.boolean  "responsible"
     t.integer  "access_id"
     t.datetime "created_at",     :null => false
     t.datetime "updated_at",     :null => false
+    t.integer  "visibility_id"
+    t.integer  "priority_id"
   end
 
   create_table "signed_request_users", :force => true do |t|

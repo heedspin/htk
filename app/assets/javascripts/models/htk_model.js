@@ -113,6 +113,9 @@ HtkModel.prototype = Object.create(Object.prototype, {
 	},
 	receive_object : {
 		value : function(model_constructor, data) {
+			if (!data) {
+				throw "Received null object for " + model_constructor.prototype.type_key;
+			}
 			var object = HtkModel.prototype.cache.get(model_constructor.prototype.type_key, data.id);
 			if (object) {
 				object.set_attributes(data);

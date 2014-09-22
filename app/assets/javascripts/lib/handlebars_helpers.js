@@ -61,4 +61,12 @@ Handlebars.registerHelper('ifTopLevel', function(deliverable, options) {
 	} else {
 		return options.inverse(this);
 	}	
-})
+});
+
+Handlebars.registerHelper('ifTruthy', function(object, method, options) {
+	if (object[method]()) {
+		return options.fn(this);
+	} else {
+		return options.inverse(this);
+	}	
+});

@@ -45,7 +45,15 @@ class Deliverables::Standard < Deliverable
       deliverable.creator_id = email.from_user.id
       deliverable.save!
       if current_user.user_group_id
+        # Create group permission.
         permissions.push deliverable.permissions.create!(access: DeliverableAccess.edit, user_id: nil)
+        # If creator is in current group, give edit access.
+        if email.from_user.user_group_id == current_user.user_group_id
+          permissions.push deliverable.permissions.create!(access: DeliverableAccess.edit, 
+            user_id: email.from_user.id,
+            visibility_id: DeliverableVisibility.shown.id,
+            priority_id: DeliverablePriority.medium.id)
+        end
       end
   	end
   	deliverable

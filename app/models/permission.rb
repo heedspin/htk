@@ -9,13 +9,17 @@
 #  access_id      :integer
 #  created_at     :datetime         not null
 #  updated_at     :datetime         not null
+#  visibility_id  :integer
+#  priority_id    :integer
 #
 
 class Permission < ApplicationModel
 	belongs_to :deliverable
 	belongs_to :user
   belongs_to_active_hash :access, :class_name => 'DeliverableAccess'
-  attr_accessible :user_id, :access_id, :responsible, :access, :deliverable_id
+  attr_accessible :user_id, :access_id, :responsible, :access, :deliverable_id, :visibility_id, :priority_id
+  belongs_to_active_hash :visibility, :class_name => 'DeliverableVisibility'
+  belongs_to_active_hash :priority, :class_name => 'DeliverablePriority'
 
  	def self.user(user)
  		user_id = user.is_a?(User) ? user.id : user

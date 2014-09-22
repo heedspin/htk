@@ -22,6 +22,7 @@
 #  user_group_id          :integer
 #
 require 'belongs_to_user_group'
+require 'plutolib/regex_utils'
 
 class User < ApplicationModel
   include BelongsToUserGroup

@@ -6,7 +6,7 @@ function DashboardRouter() {
 DashboardRouter.prototype = Object.create(null);
 
 DashboardRouter.prototype.addController = function(config) {
-  this.controllers.push(new DashboardController(config));
+  this.controllers.push(new DashboardController(this, config));
 }
 
 DashboardRouter.prototype.run = function(callback) {

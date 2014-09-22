@@ -5,8 +5,8 @@ DashboardQuery.prototype = Object.create(HtkModel.prototype, {
   attribute_keys : { value : ["creator_id", "responsible_user_id"] }
 });
 
-function DashboardController(config) {
-  HtkController.call(this, DashboardController.prototype.instance);
+function DashboardController(router, config) {
+  HtkController.call(this, router);
   this.container_id = config.container;
   this.container = $(config.container);
   this.query = new DashboardQuery(config.query);
@@ -86,10 +86,12 @@ DashboardController.prototype.loadController = function() {
 }
 
 DashboardController.prototype.renderRow = function(deliverable) {
+  var permission = Permission.prototype.first_cached({ deliverable_id : deliverable.id, user_id : this.getCurrentUser().id });
   return $(HandlebarsTemplates['deliverables/row']({ 
             deliverable: deliverable, 
             project: deliverable.getProject(), 
-            company: deliverable.getCompany()
+            company: deliverable.getCompany(),
+            permission: permission
           }));
 }
 

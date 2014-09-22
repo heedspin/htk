@@ -22,4 +22,13 @@
 		<%= image_tag 'check.png' %>
 		{{/if}}		
 	</td>
+	{{#if permission}}
+	<td class="htk-action visibility">
+		{{#ifTruthy permission "isShown"}}
+		<%= image_tag 'cross.png' %>
+		{{else}}
+		<%= image_tag 'plus.png' %>
+		{{/ifTruthy}}		
+	</td>
+	{{/if}}		
 </tr>

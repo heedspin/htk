@@ -27,3 +27,7 @@ Permission.prototype.has_<%= access_type.cmethod %>_access = function() {
 	return this.access_id == <%= access_type.id %>;
 }
 <% end %>
+
+Permission.prototype.isShown = function() {
+	return this.visibility_id == <%= DeliverableVisibility.shown.id %>;	
+}
