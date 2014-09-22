@@ -31,3 +31,11 @@ Permission.prototype.has_<%= access_type.cmethod %>_access = function() {
 Permission.prototype.isShown = function() {
 	return this.visibility_id == <%= DeliverableVisibility.shown.id %>;	
 }
+
+Permission.prototype.toggleVisibility = function() {
+	if (this.visibility_id == <%= DeliverableVisibility.shown.id %>) {
+		this.set("visibility_id", <%= DeliverableVisibility.hidden.id %>);
+	} else {
+		this.set("visibility_id", <%= DeliverableVisibility.shown.id %>);
+	}
+}

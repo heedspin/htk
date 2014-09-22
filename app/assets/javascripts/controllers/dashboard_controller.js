@@ -25,6 +25,7 @@ function DashboardController(router, config) {
   };
   this.container.mousemove(delay_refresh); //.keydown(function() { htkLog("keydown"); delay_refresh() });
   this.container.on("click", ".completion", $.proxy(this.handleCreateCompletionComment, this));
+  this.container.on("click", ".visibility", $.proxy(this.handleSetVisibility, this));
 }
 
 DashboardController.prototype = Object.create(HtkController.prototype);
@@ -34,7 +35,6 @@ DashboardController.prototype.handleCreateCompletionComment = function(event) {
   var row = td.closest("tr");
   var deliverable = Deliverable.prototype.find_cached(row.data("id"));
   td.replaceWith(HandlebarsTemplates['deliverables/spinning_cell']());
-  htkLog("Quick Complete for Deliverable", deliverable.id);
 
   var comment = new DeliverableComment({ deliverable_id: deliverable.id });
   if (deliverable.isCompleted()) {
@@ -45,11 +45,29 @@ DashboardController.prototype.handleCreateCompletionComment = function(event) {
   var _this = this;
   comment.save({
     success : function() {
-      htkLog("Saved comment", comment);
       deliverable = Deliverable.prototype.find_cached(deliverable.id);
       row.replaceWith(_this.renderRow(deliverable));
     }
   });
+}
+
+DashboardController.prototype.handleSetVisibility = function(event) {
+  var td = $(event.target).closest("td");
+  var row = td.closest("tr");
+  var deliverable = Deliverable.prototype.find_cached(row.data("id"));
+  td.replaceWith(HandlebarsTemplates['deliverables/spinning_cell']());
+
+  var permission = this.getPermission(deliverable);
+  if (permission) {
+    permission.toggleVisibility();
+    var _this = this;
+    permission.save({
+      success : function() {
+        htkLog("Saved permission", permission);
+        row.replaceWith(_this.renderRow(deliverable));
+      }
+    });    
+  }
 }
 
 DashboardController.prototype.loadController = function() {
@@ -86,16 +104,19 @@ DashboardController.prototype.loadController = function() {
 }
 
 DashboardController.prototype.renderRow = function(deliverable) {
-  var permission = Permission.prototype.first_cached({ deliverable_id : deliverable.id, user_id : this.getCurrentUser().id });
   return $(HandlebarsTemplates['deliverables/row']({ 
             deliverable: deliverable, 
             project: deliverable.getProject(), 
             company: deliverable.getCompany(),
-            permission: permission
+            permission: this.getPermission(deliverable)
           }));
 }
 
 DashboardController.prototype.scheduleRefresh = function() {
   var _this = this;
   this.refreshTimer = setInterval($.proxy(_this.loadController, _this), 5000);
+}
+
+DashboardController.prototype.getPermission = function(deliverable) {
+  return Permission.prototype.first_cached({ deliverable_id : deliverable.id, user_id : this.getCurrentUser().id });
 }

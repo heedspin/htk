@@ -41,7 +41,7 @@ class Api::V1::Deliverables::PermissionsController < Api::V1::ApiController
 	protected
 
 		def assign_params(du)
- 			%w(responsible access_id).each do |key|
+ 			%w(responsible access_id visibility_id priority_id).each do |key|
 	  		@permission.send("#{key}=", params[key]) if params.member?(key)
 	  	end
 		end
